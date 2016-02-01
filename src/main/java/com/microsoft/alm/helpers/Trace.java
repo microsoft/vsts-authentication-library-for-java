@@ -11,27 +11,21 @@ import java.util.List;
  * Equivalent to System.Diagnostics.Trace
  */
 // TODO: 449522: Wire this up to some logging framework?
-public class Trace
-{
+public class Trace {
     private static final List<PrintStream> listeners = new ArrayList<PrintStream>();
 
-    public static void flush()
-    {
-        for (final PrintStream listener : listeners)
-        {
+    public static void flush() {
+        for (final PrintStream listener : listeners) {
             listener.flush();
         }
     }
 
-    public static List<PrintStream> getListeners()
-    {
+    public static List<PrintStream> getListeners() {
         return listeners;
     }
 
-    public static void writeLine(final String message)
-    {
-        for (final PrintStream listener : listeners)
-        {
+    public static void writeLine(final String message) {
+        for (final PrintStream listener : listeners) {
             listener.println(message);
         }
     }

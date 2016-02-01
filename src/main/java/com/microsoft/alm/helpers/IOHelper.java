@@ -11,56 +11,41 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class IOHelper
-{
-    public static void closeQuietly(final Closeable closeable)
-    {
-        if (closeable != null)
-        {
-            try
-            {
+public class IOHelper {
+    public static void closeQuietly(final Closeable closeable) {
+        if (closeable != null) {
+            try {
                 closeable.close();
-            }
-            catch (final IOException ignored)
-            {
+            } catch (final IOException ignored) {
             }
         }
     }
 
-    public static String readFileToString(final File file) throws IOException
-    {
+    public static String readFileToString(final File file) throws IOException {
         FileInputStream fis = null;
-        try
-        {
+        try {
             fis = new FileInputStream(file);
             return readToString(fis);
-        }
-        finally
-        {
+        } finally {
             IOHelper.closeQuietly(fis);
         }
     }
 
-    public static String readToString(final InputStream stream) throws IOException
-    {
+    public static String readToString(final InputStream stream) throws IOException {
         InputStreamReader isr = null;
         BufferedReader reader = null;
-        try
-        {
+        try {
             isr = new InputStreamReader(stream);
             reader = new BufferedReader(isr);
 
             final StringBuilder sb = new StringBuilder();
             String line;
-            while ((line = reader.readLine()) != null)
-            {
+            while ((line = reader.readLine()) != null) {
                 sb.append(line);
                 sb.append(Environment.NewLine);
             }
             return sb.toString();
-        }
-        finally
-        {
+        } finally {
             IOHelper.closeQuietly(reader);
             IOHelper.closeQuietly(isr);
         }

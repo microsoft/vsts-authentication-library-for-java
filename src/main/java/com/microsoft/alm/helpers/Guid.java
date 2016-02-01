@@ -8,13 +8,11 @@ import java.nio.ByteOrder;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class Guid
-{
+public class Guid {
     public static final UUID Empty = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     // http://stackoverflow.com/a/28628209/
-    public static UUID fromBytes(final byte[] b)
-    {
+    public static UUID fromBytes(final byte[] b) {
         ByteBuffer source = ByteBuffer.wrap(b);
         ByteBuffer target = ByteBuffer.allocate(16).
                 order(ByteOrder.LITTLE_ENDIAN).
@@ -28,8 +26,7 @@ public class Guid
     }
 
     // Inspired by: http://stackoverflow.com/a/1055668/
-    public static byte[] toBytes(final UUID value)
-    {
+    public static byte[] toBytes(final UUID value) {
         final ByteBuffer bytes = ByteBuffer.allocate(16);
 
         final long mostSignificantBits = value.getMostSignificantBits();
@@ -48,19 +45,14 @@ public class Guid
         return bytes.array();
     }
 
-    public static boolean tryParse(final String input, final AtomicReference<UUID> result)
-    {
-        if (input == null)
-        {
+    public static boolean tryParse(final String input, final AtomicReference<UUID> result) {
+        if (input == null) {
             return false;
         }
-        try
-        {
+        try {
             result.set(UUID.fromString(input));
             return true;
-        }
-        catch (final IllegalArgumentException ignored)
-        {
+        } catch (final IllegalArgumentException ignored) {
             return false;
         }
     }

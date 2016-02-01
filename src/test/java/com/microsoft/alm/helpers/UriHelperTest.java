@@ -9,12 +9,10 @@ import org.junit.Test;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class UriHelperTest
-{
+public class UriHelperTest {
 
     @Test
-    public void serializeParameters_firstHasNameOnly() throws Exception
-    {
+    public void serializeParameters_firstHasNameOnly() throws Exception {
         final Map<String, String> input = new LinkedHashMap<String, String>();
         input.put("nameOnly", null);
 
@@ -24,8 +22,7 @@ public class UriHelperTest
     }
 
     @Test
-    public void serializeParameters_secondHasNameOnly() throws Exception
-    {
+    public void serializeParameters_secondHasNameOnly() throws Exception {
         final Map<String, String> input = new LinkedHashMap<String, String>();
         input.put("name", "value");
         input.put("nameOnly", null);
@@ -36,8 +33,7 @@ public class UriHelperTest
     }
 
     @Test
-    public void serializeParameters_typical() throws Exception
-    {
+    public void serializeParameters_typical() throws Exception {
         final Map<String, String> input = new LinkedHashMap<String, String>();
         input.put("resource", "a8860e8f-ca7d-4efe-b80d-4affab13d4ba");
         input.put("client_id", "f7e11bcd-b50b-4869-ad88-8bdd6cbc8473");

@@ -13,8 +13,7 @@ import java.util.Map;
 /**
  * Inspired by System.Net.Http.StringContent.
  */
-public class StringContent
-{
+public class StringContent {
     private static final String UTF8 = Charset.forName("UTF-8").name();
     private static final String CONTENT_TYPE_TEMPLATE = "%1$s; charset=%2$s";
 
@@ -23,8 +22,7 @@ public class StringContent
     private final String content;
     private final byte[] bytes;
 
-    private StringContent(final String content, final String mediaType)
-    {
+    private StringContent(final String content, final String mediaType) {
         this.content = content;
         this.bytes = StringHelper.UTF8GetBytes(content);
         final String contentType = String.format(CONTENT_TYPE_TEMPLATE, mediaType, UTF8);
@@ -33,37 +31,29 @@ public class StringContent
         Headers.put("Content-Length", contentLength);
     }
 
-    public String getContent()
-    {
+    public String getContent() {
         return this.content;
     }
 
-    public static StringContent createUrlEncoded(final QueryString parameters)
-    {
+    public static StringContent createUrlEncoded(final QueryString parameters) {
         return new StringContent(parameters.toString(), "application/x-www-form-urlencoded");
     }
 
-    public static StringContent createJson(final String json)
-    {
+    public static StringContent createJson(final String json) {
         return new StringContent(json, "application/json");
     }
 
-    public void write(final HttpURLConnection connection) throws IOException
-    {
-        for (final Map.Entry<String, String> entry : Headers.entrySet())
-        {
+    public void write(final HttpURLConnection connection) throws IOException {
+        for (final Map.Entry<String, String> entry : Headers.entrySet()) {
             final String key = entry.getKey();
             final String value = entry.getValue();
             connection.setRequestProperty(key, value);
         }
         OutputStream outputStream = null;
-        try
-        {
+        try {
             outputStream = connection.getOutputStream();
             outputStream.write(bytes);
-        }
-        finally
-        {
+        } finally {
             IOHelper.closeQuietly(outputStream);
         }
     }

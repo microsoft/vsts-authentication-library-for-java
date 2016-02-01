@@ -8,8 +8,7 @@ package com.microsoft.alm.helpers;
  *
  * @param <T> the type of the input to the method
  */
-public interface Action<T>
-{
+public interface Action<T> {
     /**
      * Calls the method with the given argument
      *

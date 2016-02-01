@@ -1,0 +1,54 @@
+// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See License.txt in the project root.
+
+package com.microsoft.alm.auth.secret;
+
+import com.microsoft.alm.helpers.Debug;
+import com.microsoft.alm.helpers.StringHelper;
+import com.microsoft.alm.helpers.Trace;
+
+import java.net.URI;
+
+public abstract class Secret {
+    public static String uriToName(final URI targetUri, final String namespace) {
+        final String TokenNameBaseFormat = "%1$s:%2$s://%3$s";
+        final String TokenNamePortFormat = TokenNameBaseFormat + ":%4$s";
+
+        Debug.Assert(targetUri != null, "The targetUri parameter is null");
+
+        Trace.writeLine("Secret::uriToName");
+
+        String targetName = null;
+        // trim any trailing slashes and/or whitespace for compat with git-credential-winstore
+        final String trimmedHostUrl = StringHelper.trimEnd(StringHelper.trimEnd(targetUri.getHost(), '/', '\\'));
+
+
+        if (targetUri.getPort() == -1 /* isDefaultPort */) {
+            targetName = String.format(TokenNameBaseFormat, namespace, targetUri.getScheme(), trimmedHostUrl);
+        } else {
+            targetName = String.format(TokenNamePortFormat, namespace, targetUri.getScheme(), trimmedHostUrl, targetUri.getPort());
+        }
+
+        Trace.writeLine("   target name = " + targetName);
+
+        return targetName;
+    }
+
+    public interface IUriNameConversion {
+        String DEFAULT_NAMESPACE = "java-auth";
+        String convert(final URI targetUri);
+        String convert(final URI targetUri, final String namespace);
+    }
+
+    public static IUriNameConversion DefaultUriNameConversion = new IUriNameConversion() {
+        @Override
+        public String convert(final URI targetUri) {
+            return Secret.uriToName(targetUri, DEFAULT_NAMESPACE);
+        }
+
+        @Override
+        public String convert(final URI targetUri, final String namespace) {
+            return Secret.uriToName(targetUri, namespace);
+        }
+    };
+}

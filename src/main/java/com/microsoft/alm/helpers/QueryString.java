@@ -5,11 +5,9 @@ package com.microsoft.alm.helpers;
 
 import java.util.LinkedHashMap;
 
-public class QueryString extends LinkedHashMap<String, String>
-{
+public class QueryString extends LinkedHashMap<String, String> {
     @Override
-    public String toString()
-    {
+    public String toString() {
         return UriHelper.serializeParameters(this);
     }
 }

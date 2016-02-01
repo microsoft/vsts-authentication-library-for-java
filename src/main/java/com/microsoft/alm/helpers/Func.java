@@ -8,10 +8,8 @@ package com.microsoft.alm.helpers;
  *
  * @param <T> the type of the input to the function
  * @param <R> the type of the result of the function
- *
  */
-public interface Func<T, R>
-{
+public interface Func<T, R> {
     /**
      * Calls the function with the given argument.
      *

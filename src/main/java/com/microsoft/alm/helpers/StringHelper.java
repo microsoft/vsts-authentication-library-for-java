@@ -5,14 +5,12 @@ package com.microsoft.alm.helpers;
 
 import java.nio.charset.Charset;
 
-public class StringHelper
-{
+public class StringHelper {
     private static final Charset UTF8 = Charset.forName("UTF-8");
 
     public static final String Empty = "";
 
-    public static boolean endsWithIgnoreCase(final String haystack, final String needle)
-    {
+    public static boolean endsWithIgnoreCase(final String haystack, final String needle) {
         if (haystack == null)
             throw new IllegalArgumentException("Parameter 'haystack' is null.");
         if (needle == null)
@@ -20,13 +18,11 @@ public class StringHelper
 
         final int nl = needle.length();
         final int hl = haystack.length();
-        if (nl == hl)
-        {
+        if (nl == hl) {
             return haystack.equalsIgnoreCase(needle);
         }
 
-        if (nl > hl)
-        {
+        if (nl > hl) {
             return false;
         }
 
@@ -41,29 +37,24 @@ public class StringHelper
      *
      * @param s     The string to search.
      * @param anyOf A Unicode character array containing one or more characters to seek.
-     * @return      The zero-based index position of the first occurrence in s
-     *              where any character in anyOf was found; -1 if no character in anyOf was found.
+     * @return The zero-based index position of the first occurrence in s
+     * where any character in anyOf was found; -1 if no character in anyOf was found.
      */
-    public static int indexOfAny(final String s, final char[] anyOf)
-    {
-        for (final char c : anyOf)
-        {
+    public static int indexOfAny(final String s, final char[] anyOf) {
+        for (final char c : anyOf) {
             final int i = s.indexOf(c);
-            if (i != -1)
-            {
+            if (i != -1) {
                 return i;
             }
         }
         return -1;
     }
 
-    public static boolean isNullOrEmpty(final String s)
-    {
+    public static boolean isNullOrEmpty(final String s) {
         return null == s || (s.length() == 0);
     }
 
-    public static boolean isNullOrWhiteSpace(final String s)
-    {
+    public static boolean isNullOrWhiteSpace(final String s) {
         return null == s || (s.trim().length() == 0);
     }
 
@@ -71,14 +62,13 @@ public class StringHelper
      * Concatenates the specified elements of a string array,
      * using the specified separator between each element.
      *
-     * @param separator  The string to use as a separator.
-     *                   separator is included in the returned string only if value has more than one element.
-     * @param value      An array that contains the elements to concatenate.
-     * @return           A string that consists of the strings in value delimited by the separator string.
-     *                   If value is an empty array, the method returns {@link StringHelper#Empty}.
+     * @param separator The string to use as a separator.
+     *                  separator is included in the returned string only if value has more than one element.
+     * @param value     An array that contains the elements to concatenate.
+     * @return A string that consists of the strings in value delimited by the separator string.
+     * If value is an empty array, the method returns {@link StringHelper#Empty}.
      */
-    public static String join(final String separator, final String[] value)
-    {
+    public static String join(final String separator, final String[] value) {
         return join(separator, value, 0, value.length);
     }
 
@@ -91,13 +81,12 @@ public class StringHelper
      * @param value      An array that contains the elements to concatenate.
      * @param startIndex The first element in value to use.
      * @param count      The number of elements of value to use.
-     * @return           A string that consists of the strings in value delimited by the separator string.
-     *                   -or-
-     *                   {@link StringHelper#Empty} if count is zero, value has no elements,
-     *                   or separator and all the elements of value are {@link StringHelper#Empty}.
+     * @return A string that consists of the strings in value delimited by the separator string.
+     * -or-
+     * {@link StringHelper#Empty} if count is zero, value has no elements,
+     * or separator and all the elements of value are {@link StringHelper#Empty}.
      */
-    public static String join(final String separator, final String[] value, final int startIndex, final int count)
-    {
+    public static String join(final String separator, final String[] value, final int startIndex, final int count) {
         if (value == null)
             throw new IllegalArgumentException("value is null");
         if (startIndex < 0)
@@ -112,11 +101,9 @@ public class StringHelper
 
         final StringBuilder result = new StringBuilder();
 
-        if (value.length > 0 && count > 0)
-        {
+        if (value.length > 0 && count > 0) {
             result.append(ObjectExtensions.coalesce(value[startIndex], StringHelper.Empty));
-            for (int i = startIndex + 1; i < startIndex + count; i++)
-            {
+            for (int i = startIndex + 1; i < startIndex + count; i++) {
                 result.append(sep);
                 result.append(ObjectExtensions.coalesce(value[i], StringHelper.Empty));
             }
@@ -130,25 +117,21 @@ public class StringHelper
      *
      * @param s         The string to trim from.
      * @param trimChars An array of Unicode characters to remove, or null.
-     * @return          The string that remains after all occurrences of the characters in the
-     *                  trimChars parameter are removed from the end of s.
-     *                  If trimChars is null or an empty array,
-     *                  Unicode white-space characters are removed instead.
-     *                  If no characters can be trimmed from s, the method returns s.
+     * @return The string that remains after all occurrences of the characters in the
+     * trimChars parameter are removed from the end of s.
+     * If trimChars is null or an empty array,
+     * Unicode white-space characters are removed instead.
+     * If no characters can be trimmed from s, the method returns s.
      */
-    public static String trimEnd(final String s, final char... trimChars)
-    {
+    public static String trimEnd(final String s, final char... trimChars) {
         int len = s.length();
         if (trimChars == null || trimChars.length == 0)
             return trimEnd(s);
-        while (len > 0)
-        {
+        while (len > 0) {
             final char current = s.charAt(len - 1);
             boolean found = false;
-            for (final char c : trimChars)
-            {
-                if (current == c)
-                {
+            for (final char c : trimChars) {
+                if (current == c) {
                     found = true;
                     break;
                 }
@@ -160,11 +143,9 @@ public class StringHelper
         return (len < s.length()) ? s.substring(0, len) : s;
     }
 
-    public static String trimEnd(final String s)
-    {
+    public static String trimEnd(final String s) {
         int len = s.length();
-        while (len > 0)
-        {
+        while (len > 0) {
             final char current = s.charAt(len - 1);
             if (!Character.isWhitespace(current))
                 break;
@@ -175,11 +156,11 @@ public class StringHelper
 
     /**
      * Encodes all the characters in the specified string into a sequence of UTF-8 bytes.
+     *
      * @param value The string containing the characters to encode.
-     * @return      A byte array containing the results of encoding the specified set of characters.
+     * @return A byte array containing the results of encoding the specified set of characters.
      */
-    public static byte[] UTF8GetBytes(final String value)
-    {
+    public static byte[] UTF8GetBytes(final String value) {
         final byte[] result = value.getBytes(UTF8);
         return result;
     }
@@ -188,10 +169,9 @@ public class StringHelper
      * Decodes all the bytes in the specified byte array into a string.
      *
      * @param bytes The byte array containing the sequence of bytes to decode.
-     * @return      A string that contains the results of decoding the specified sequence of bytes.
+     * @return A string that contains the results of decoding the specified sequence of bytes.
      */
-    public static String UTF8GetString(final byte[] bytes)
-    {
+    public static String UTF8GetString(final byte[] bytes) {
         final String result = new String(bytes, UTF8);
         return result;
     }
@@ -202,10 +182,9 @@ public class StringHelper
      * @param bytes The byte array containing the sequence of bytes to decode.
      * @param index The index of the first byte to decode.
      * @param count The number of bytes to decode.
-     * @return      A string that contains the results of decoding the specified sequence of bytes.
+     * @return A string that contains the results of decoding the specified sequence of bytes.
      */
-    public static String UTF8GetString(final byte[] bytes, final int index, final int count)
-    {
+    public static String UTF8GetString(final byte[] bytes, final int index, final int count) {
         final String result = new String(bytes, index, count, UTF8);
         return result;
     }

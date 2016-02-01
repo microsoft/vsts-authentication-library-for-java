@@ -10,20 +10,16 @@ import java.net.UnknownHostException;
 /**
  * Equivalent to the .NET class with the same name.
  */
-public class Environment
-{
-    public static String getCurrentDirectory()
-    {
+public class Environment {
+    public static String getCurrentDirectory() {
         // http://stackoverflow.com/a/16802976/
         final File currentDir = new File("");
         final String result = currentDir.getAbsolutePath();
         return result;
     }
 
-    public static String getFolderPath(final SpecialFolder folder)
-    {
-        switch (folder)
-        {
+    public static String getFolderPath(final SpecialFolder folder) {
+        switch (folder) {
             case ApplicationData:
                 return System.getenv("APPDATA");
             case LocalApplicationData:
@@ -35,26 +31,19 @@ public class Environment
         }
     }
 
-    public static String getMachineName()
-    {
+    public static String getMachineName() {
         String machineName = null;
-        if (machineName == null)
-        {
+        if (machineName == null) {
             machineName = System.getenv("COMPUTERNAME");
         }
-        if (machineName == null)
-        {
+        if (machineName == null) {
             machineName = System.getenv("HOSTNAME");
         }
-        if (machineName == null)
-        {
-            try
-            {
+        if (machineName == null) {
+            try {
                 final InetAddress address = InetAddress.getLocalHost();
                 machineName = address.getHostName();
-            }
-            catch (final UnknownHostException e)
-            {
+            } catch (final UnknownHostException e) {
                 machineName = "unknown";
             }
         }
@@ -63,8 +52,7 @@ public class Environment
 
     public static final String NewLine = System.getProperty("line.separator");
 
-    public enum SpecialFolder
-    {
+    public enum SpecialFolder {
         Desktop,
         Programs,
         MyDocuments,
@@ -88,7 +76,7 @@ public class Environment
         /**
          * The directory that serves as a common repository for application-specific data
          * for the current roaming user.
-         *
+         * <p/>
          * A roaming user works on more than one computer on a network.
          * A roaming user's profile is kept on a server on the network and
          * is loaded onto a system when the user logs on.
