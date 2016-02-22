@@ -15,5 +15,5 @@ public interface CredentialPrompt {
      * @return credential
      * @param target
      */
-    Credential prompt(URI target);
+    Credential prompt(final URI target);
 }
