@@ -52,10 +52,10 @@ public class VstsPatAuthenticatorTest {
         when(mockVstsOauthAuthenticator.getOAuth2TokenPair(uri, PromptBehavior.NEVER)).thenReturn(null);
         when(mockVstsOauthAuthenticator.getVstsGlobalOAuth2TokenPair(PromptBehavior.AUTO)).thenReturn(tokenPair);
 
-        when(mockVsoAzureAuthority.generatePersonalAccessToken(uri, tokenPair.AccessToken, VsoTokenScope.All, true,
+        when(mockVsoAzureAuthority.generatePersonalAccessToken(uri, tokenPair.AccessToken, VsoTokenScope.AllScopes, true,
                 false, "PAT")).thenReturn(new Token("token", TokenType.Personal));
 
-        Token token = underTest.getPersonalAccessToken(uri, VsoTokenScope.All, "PAT", PromptBehavior.AUTO);
+        Token token = underTest.getPersonalAccessToken(uri, VsoTokenScope.AllScopes, "PAT", PromptBehavior.AUTO);
 
         assertEquals("token", token.Value);
     }

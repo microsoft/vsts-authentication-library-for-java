@@ -21,7 +21,7 @@ public class Options {
     }
 
     public static Options getDefaultOptions() {
-        final Options options = new Options("Personal Access Token", VsoTokenScope.All);
+        final Options options = new Options("Personal Access Token", VsoTokenScope.AllScopes);
 
         return options;
     }
