@@ -50,7 +50,8 @@ public class OAuth2AuthenticatorTest {
 
         when(mockAzureAuthority.getTenantId(uri)).thenReturn(Guid.Empty);
         when(mockAzureAuthority.acquireToken(uri, clientId.toString(), "test_resource",
-                        new URI("https://testredirect.com"), underTest.MSA_QUERY_PARAMS))
+                        new URI("https://testredirect.com"), underTest.POPUP_QUERY_PARAM + "&" + underTest
+                        .MSA_QUERY_PARAMS))
                 .thenReturn(new TokenPair("access", "refresh"));
 
         TokenPair token = underTest.getOAuth2TokenPair(uri);

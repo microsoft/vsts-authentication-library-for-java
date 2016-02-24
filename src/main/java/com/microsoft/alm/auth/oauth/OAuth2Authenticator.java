@@ -15,11 +15,12 @@ import java.util.UUID;
 
 public class OAuth2Authenticator extends BaseAuthenticator {
 
+    public final static String POPUP_QUERY_PARAM = "display=popup";
     public final static String MANAGEMENT_CORE_RESOURCE = "https://management.core.windows.net/";
     public final static String VSTS_RESOURCE = "499b84ac-1321-427f-aa17-267ca6975798";
 
     public final static URI APP_VSSPS_VISUALSTUDIO = URI.create("https://app.vssps.visualstudio.com");
-    public final static String MSA_QUERY_PARAMS = "domain_hint=live.com&display=popup&site_id=501454&nux=1";
+    public final static String MSA_QUERY_PARAMS = "domain_hint=live.com&site_id=501454&nux=1";
 
     private final static String TYPE = "OAuth2";
 
@@ -123,14 +124,14 @@ public class OAuth2Authenticator extends BaseAuthenticator {
 
                 if (isManageCoreWindowsNetResource()) {
                     // skip all tenant detection, use common tenant
-                    queryParam = null;
+                    queryParam = POPUP_QUERY_PARAM;
                 } else {
                     final UUID tenantId = authority.getTenantId(uri);
                     if (tenantId != null && isMSA(tenantId)) {
-                        queryParam = MSA_QUERY_PARAMS;
+                        queryParam = POPUP_QUERY_PARAM + "&" + MSA_QUERY_PARAMS;
                         authority.setAuthorityHostUrl(azureAuthority.MSAAuthorityHostUrl);
                     } else {
-                        queryParam = null;
+                        queryParam = POPUP_QUERY_PARAM;
                     }
                 }
 

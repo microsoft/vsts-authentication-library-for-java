@@ -13,6 +13,11 @@ import java.util.List;
 public class VsoTokenScope extends TokenScope {
     public static final VsoTokenScope None = new VsoTokenScope(StringHelper.Empty);
     /**
+     * Grants permissions to all resources. This scope is required for making SOAP calls.
+     */
+    public static final VsoTokenScope AllScopes = new VsoTokenScope("app_token");
+
+    /**
      * Grants the ability to access build artifacts, including build results, definitions, and
      * requests, and the ability to receive notifications about build events via service hooks.
      */
@@ -141,8 +146,6 @@ public class VsoTokenScope extends TokenScope {
     private static final List<VsoTokenScope> values = Arrays.asList(scopeArray);
 
     public static final VsoTokenScope CodeAll = or(CodeManage, CodeRead, CodeWrite);
-
-    public static final VsoTokenScope All = or(scopeArray);
 
     public static Iterator<VsoTokenScope> enumerateValues() {
         return values.iterator();
