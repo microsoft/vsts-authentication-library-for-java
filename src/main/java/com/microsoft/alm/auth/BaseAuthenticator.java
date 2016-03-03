@@ -89,6 +89,8 @@ public abstract class BaseAuthenticator implements Authenticator {
      * So a PAT key will be different from an OAuth2 Key even for the same URI
      *
      * @param targetUri
+     *      the URL we are trying to authenticate
+     *
      * @return key used to retrieve and store secrets in a secret store
      */
     public String getKey(final URI targetUri) {
@@ -108,7 +110,11 @@ public abstract class BaseAuthenticator implements Authenticator {
          * can be overridden
          *
          * @param key
+         *      key for that credentials are saved under
          * @param store
+         *      a secret store that holds credentials
+         * @param <E> a secret type
+         *
          * @return stored secret based on key, nullable
          */
         protected <E extends Secret> E readFromStore(final String key, final SecretStore<E> store) {
@@ -119,6 +125,8 @@ public abstract class BaseAuthenticator implements Authenticator {
 
         /**
          * How the secret is generated / retrieved.  This is the real work
+         * @param <E> a secret type
+         *
          * @return secret
          */
         protected abstract <E extends Secret> E doRetrieve();
@@ -126,8 +134,16 @@ public abstract class BaseAuthenticator implements Authenticator {
         /**
          * Standard storing the secret based on the key
          *
-         * This is an extensibility point
+         * This is an extensibility point.
+         *
+         * @param key
+         *      key for that credentials are saved under
+         * @param store
+         *      a secret store that holds credentials
+         * @param <E> a secret type
+         *
          * @param secret
+         *      secret to be saved in the store
          */
         protected <E extends Secret> void store(final String key, final SecretStore<E> store, E secret) {
             if (secret != null) {
@@ -137,6 +153,23 @@ public abstract class BaseAuthenticator implements Authenticator {
             }
         }
 
+        /**
+         * The main logic for retrieving a key.
+         *
+         * Depending on the {@code PromptBehavior} passed in, we should either prompt the user or
+         * return null when we couldn't retrieve credential based on the key from the specified store
+         *
+         * @param key
+         *      key for that credentials are saved under
+         * @param store
+         *      a secret store that holds credentials
+         * @param promptBehavior
+         *      determines whether we should prompt or not if we don't have a credential for the specified key
+         * @param <E> a secret type
+         *
+         * @return secret
+         *      secret to be saved in the store
+         */
         public <E extends Secret> E retrieve(final String key, final SecretStore<E> store,
                                                 final PromptBehavior promptBehavior) {
             E secret = null;

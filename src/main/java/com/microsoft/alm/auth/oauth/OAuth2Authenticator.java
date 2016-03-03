@@ -67,7 +67,12 @@ public class OAuth2Authenticator extends BaseAuthenticator {
      * token won't work for any subsequent calls.
      *
      * @param clientId
+     *      Registered OAuth2 client id
+     * @param redirectUrl
+     *      Callback url for the registered client
      * @param store
+     *      SecretStore to read and save access token to
+     *
      * @return an OAuth2Authenticator that works only in specific situation.  Use this only when you are sure you will
      * always target a specific uri.
      */

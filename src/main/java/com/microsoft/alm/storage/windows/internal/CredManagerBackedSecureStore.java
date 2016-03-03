@@ -22,17 +22,34 @@ public abstract class CredManagerBackedSecureStore<E extends Secret> implements 
     private final CredAdvapi32 INSTANCE = getCredAdvapi32Instance();
 
     /**
-     * Create a secret from the string reprsentation
+     * Create a {@code Secret} from the string representation
+     *
+     * @param username
+     *      username for the secret
+     * @param secret
+     *      password, oauth2 access token, or Personal Access Token
+     *
+     * @return a {@code Secret} from the input
      */
     protected abstract E create(String username, String secret);
 
     /**
-     * Get String representation of the UserName field from the secret
+     * Get String representation of the UserName field from the {@code Secret}
+     *
+     * @param secret
+     *      A {@code Credential}, {@code Token} or {@code TokenPair}
+     *
+     * @return username from this secret
      */
     protected abstract String getUsername(E secret);
 
     /**
      * Get String representation of the CredentialBlob field from the secret
+     *
+     * @param secret
+     *      A {@code Credential}, {@code Token} or {@code TokenPair}
+     *
+     * @return credential from this secre
      */
     protected abstract String getCredentialBlob(E secret);
 

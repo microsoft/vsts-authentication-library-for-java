@@ -156,6 +156,8 @@ public class AzureAuthority {
 
     /**
      * The URL used to interact with the Azure identity service.
+     *
+     * @return authority host url
      */
     public String getAuthorityHostUrl() {
         return this.authorityHostUrl;
@@ -163,6 +165,9 @@ public class AzureAuthority {
 
     /**
      * Set the URL used to interact with the Azure identity service.
+     *
+     * @param authorityHostUrl
+     *      Where we should send the authenticate request to
      */
     public void setAuthorityHostUrl(final String authorityHostUrl) {
         this.authorityHostUrl = authorityHostUrl;

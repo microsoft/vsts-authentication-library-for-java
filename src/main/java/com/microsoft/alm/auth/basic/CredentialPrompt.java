@@ -12,8 +12,10 @@ public interface CredentialPrompt {
     /**
      * Retrieve a credential object
      *
-     * @return credential
      * @param target
+     *      the resource we are trying to manage
+     *
+     * @return user entered credential
      */
     Credential prompt(final URI target);
 }
