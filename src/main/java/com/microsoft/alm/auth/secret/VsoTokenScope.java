@@ -11,11 +11,10 @@ import java.util.Iterator;
 import java.util.List;
 
 public class VsoTokenScope extends TokenScope {
-    public static final VsoTokenScope None = new VsoTokenScope(StringHelper.Empty);
     /**
      * Grants permissions to all resources. This scope is required for making SOAP calls.
      */
-    public static final VsoTokenScope AllScopes = new VsoTokenScope("app_token");
+    public static final VsoTokenScope AllScopes = new VsoTokenScope(StringHelper.Empty);
 
     /**
      * Grants the ability to access build artifacts, including build results, definitions, and
