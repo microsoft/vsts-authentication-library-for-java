@@ -5,7 +5,7 @@ Licensed under the MIT license. See License.txt in the project root. -->
 
   <groupId>com.microsoft.alm</groupId>
   <artifactId>java-auth-core</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Java Authentication Library for Visual Studio Team Services and Team Foundation Server</name>
