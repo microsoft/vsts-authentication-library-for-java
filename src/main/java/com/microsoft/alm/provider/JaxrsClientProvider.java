@@ -51,7 +51,7 @@ public class JaxrsClientProvider {
 
         }
         // Get a client backed by a global PAT
-        else if (authenticator.isPatSupported()) {
+        else if (authenticator.isPersonalAccessTokenSupported()) {
             final Token token = authenticator.getPersonalAccessToken(
                     options.patGenerationOptions.tokenScope,
                     options.patGenerationOptions.displayName,
@@ -87,7 +87,7 @@ public class JaxrsClientProvider {
             client = getClientWithOAuth2RequestFilter(tokenPair);
         }
 
-        else if (authenticator.isPatSupported()) {
+        else if (authenticator.isPersonalAccessTokenSupported()) {
             final Token token = authenticator.getPersonalAccessToken(
                     uri,
                     options.patGenerationOptions.tokenScope,

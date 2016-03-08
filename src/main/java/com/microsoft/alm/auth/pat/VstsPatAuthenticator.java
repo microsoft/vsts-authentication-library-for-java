@@ -9,6 +9,7 @@ import com.microsoft.alm.auth.oauth.OAuth2Authenticator;
 import com.microsoft.alm.auth.secret.Token;
 import com.microsoft.alm.auth.secret.TokenPair;
 import com.microsoft.alm.auth.secret.VsoTokenScope;
+import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.helpers.StringHelper;
 import com.microsoft.alm.storage.SecretStore;
 
@@ -18,38 +19,67 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
 
     private final static String TYPE = "PersonalAccessToken";
 
-    private VsoAzureAuthority vsoAzureAuthority;
+    private final VsoAzureAuthority vsoAzureAuthority;
 
-    private OAuth2Authenticator vstsOauthAuthenticator;
+    private final OAuth2Authenticator vstsOauthAuthenticator;
 
-    private SecretStore<Token> store;
+    private final SecretStore<Token> store;
 
+    /**
+     * Create a Personal Access Token Authenticator backed by the OAuth2 app with {@code oauthClientId} and
+     * {@code oauthClientRedirectUri}.
+     *
+     * The oauthTokenStore will be utilized to check if there is valid OAuth2 {@link TokenPair} available first
+     *
+     * @param oauthClientId
+     *      registered OAuth2 client id
+     * @param oauthClientRedirectUrl
+     *      registered OAuth2 client redirect URI
+     * @param oauthTokenStore
+     *      A secret store that will be used to check for available OAuth2 TokenPair
+     * @param store
+     *      Store for personal access tokens
+     */
     public VstsPatAuthenticator(final String oauthClientId, final String oauthClientRedirectUrl,
                                 final SecretStore<TokenPair> oauthTokenStore,
                                 final SecretStore<Token> store) {
-        this.store = store;
+        Debug.Assert(oauthClientId!= null, "oauthClientId cannot be null");
+        Debug.Assert(oauthClientRedirectUrl!= null, "oauthClientRedirectUrl cannot be null");
+        Debug.Assert(store != null, "store cannot be null");
+
         this.vstsOauthAuthenticator = OAuth2Authenticator.getAuthenticator(oauthClientId,
                 oauthClientRedirectUrl, oauthTokenStore);
         this.vsoAzureAuthority = new VsoAzureAuthority();
+        this.store = store;
     }
 
-    public void setVstsOauthAuthenticator(final OAuth2Authenticator vstsOauthAuthenticator) {
-        this.vstsOauthAuthenticator = vstsOauthAuthenticator;
-    }
-
-    public void setVsoAzureAuthority(final VsoAzureAuthority vsoAzureAuthority) {
+    /* default */ VstsPatAuthenticator(final VsoAzureAuthority vsoAzureAuthority,
+                                       final OAuth2Authenticator oauth2Authenticator,
+                                        final SecretStore<Token> store) {
         this.vsoAzureAuthority = vsoAzureAuthority;
+        this.vstsOauthAuthenticator = oauth2Authenticator;
+        this.store = store;
     }
 
     @Override
-    public boolean isPatSupported() {
+    protected SecretStore<Token> getStore() {
+        return this.store;
+    }
+
+    @Override
+    public String getAuthType() {
+        return TYPE;
+    }
+
+    @Override
+    public boolean isPersonalAccessTokenSupported() {
         return true;
     }
 
     @Override
     public Token getPersonalAccessToken(final VsoTokenScope tokenScope, final String patDisplayName,
                                         final PromptBehavior promptBehavior) {
-
+        // Global PAT will be stored with URI key APP_VSSPS_VISUALSTUDIO as this key doesn't identify any account
         return getToken(vstsOauthAuthenticator.APP_VSSPS_VISUALSTUDIO, true, tokenScope, patDisplayName, promptBehavior);
     }
 
@@ -62,11 +92,16 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
     private Token getToken(final URI uri, final boolean isCreatingGlobalPat,
                            final VsoTokenScope tokenScope, final String patDisplayName,
                            final PromptBehavior promptBehavior) {
+        Debug.Assert(uri != null, "uri cannot be null");
+        Debug.Assert(promptBehavior != null, "promptBehavior cannot be null");
+
         if (!isHosted(uri)) {
             throw new RuntimeException("Only works against VisualStudio Team Services");
         }
 
         final String key = getKey(uri);
+
+        Debug.Assert(key != null, "Failed to convert uri to key");
 
         SecretRetriever secretRetriever = new SecretRetriever() {
             @Override
@@ -104,11 +139,27 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
 
     @Override
     public boolean signOut(final URI uri) {
+        Debug.Assert(uri != null, "uri cannot be null");
+
         return super.signOut(uri)
                 && vstsOauthAuthenticator.signOut();
     }
 
+    /**
+     * @deprecated Global PAT is going away soon
+     *
+     * Since global PAT suppose to work across accounts, we can associate the global PAT to a particular account
+     * and everything should still work.
+     *
+     * @param uri
+     *      Target account uri
+     *
+     * @return {@code true} if there is a global PAT and we successfully associated it with the target uri
+     *         {@code false} otherwise
+     */
     public boolean assignGlobalPatTo(final URI uri) {
+        Debug.Assert(uri != null, "uri cannot be null");
+
         final String globalKey = getKey(vstsOauthAuthenticator.APP_VSSPS_VISUALSTUDIO);
         final Token token = getStore().get(globalKey);
         if (token != null) {
@@ -119,24 +170,13 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
         return false;
     }
 
-    public void assign(final URI uri, final Token token) {
-        final String key = getKey(uri);
-        getStore().add(key, token);
-    }
-
-    @Override
-    protected SecretStore<Token> getStore() {
-        return this.store;
-    }
-
-    @Override
-    public String getAuthType() {
-        return TYPE;
-    }
-
     private boolean isHosted(final URI targetUri) {
         final String VsoBaseUrlHost = "visualstudio.com";
         return StringHelper.endsWithIgnoreCase(targetUri.getHost(), VsoBaseUrlHost);
     }
 
+    private void assign(final URI uri, final Token token) {
+        final String key = getKey(uri);
+        getStore().add(key, token);
+    }
 }

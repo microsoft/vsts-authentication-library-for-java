@@ -9,7 +9,7 @@ import com.microsoft.alm.storage.windows.internal.CredManagerBackedSecureStore;
 
 public class CredManagerBackedTokenStore extends CredManagerBackedSecureStore<Token> {
 
-    public static final String TOKEN_USERNAME = "PAT";
+    public static final String TOKEN_USERNAME = "PersonalAccessToken";
 
     @Override
     protected Token create(final String username, final String secret) {

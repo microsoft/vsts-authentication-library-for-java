@@ -35,7 +35,7 @@ public class UserPasswordCredentialProvider {
                 password = tokenPair.AccessToken.Value;
             }
 
-        } else if (authenticator.isPatSupported()) {
+        } else if (authenticator.isPersonalAccessTokenSupported()) {
             final Token token = authenticator.getPersonalAccessToken(
                     options.patGenerationOptions.tokenScope,
                     options.patGenerationOptions.displayName,
@@ -73,7 +73,7 @@ public class UserPasswordCredentialProvider {
                 password = tokenPair.AccessToken.Value;
             }
 
-        } else if (authenticator.isPatSupported()) {
+        } else if (authenticator.isPersonalAccessTokenSupported()) {
             final Token token = authenticator.getPersonalAccessToken(uri,
                     options.patGenerationOptions.tokenScope,
                     options.patGenerationOptions.displayName,

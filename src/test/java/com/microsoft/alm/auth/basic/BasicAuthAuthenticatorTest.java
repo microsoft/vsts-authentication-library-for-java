@@ -92,6 +92,6 @@ public class BasicAuthAuthenticatorTest {
         assertTrue(underTest.isCredentialSupported());
 
         assertFalse(underTest.isOAuth2TokenSupported());
-        assertFalse(underTest.isPatSupported());
+        assertFalse(underTest.isPersonalAccessTokenSupported());
     }
 }

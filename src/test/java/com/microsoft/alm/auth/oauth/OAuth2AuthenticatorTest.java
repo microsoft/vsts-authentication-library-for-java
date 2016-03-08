@@ -33,14 +33,11 @@ public class OAuth2AuthenticatorTest {
         mockStore = mock(SecretStore.class);
         mockAzureAuthority = mock(AzureAuthority.class);
 
-        underTest = new OAuth2Authenticator.OAuth2AuthenticatorBuilder()
-                .manage("test_resource")
-                .redirectTo("https://testredirect.com")
-                .withClientId(clientId)
-                .backedBy(mockStore)
-                .build();
-
-        underTest.setAzureAuthority(mockAzureAuthority);
+        underTest = new OAuth2Authenticator("test_resource",
+                clientId.toString(),
+                URI.create("https://testredirect.com"),
+                mockStore,
+                mockAzureAuthority);
     }
 
     @Test
@@ -66,7 +63,7 @@ public class OAuth2AuthenticatorTest {
         assertTrue(underTest.isOAuth2TokenSupported());
 
         assertFalse(underTest.isCredentialSupported());
-        assertFalse(underTest.isPatSupported());
+        assertFalse(underTest.isPersonalAccessTokenSupported());
     }
 
 }

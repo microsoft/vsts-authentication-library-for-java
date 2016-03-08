@@ -6,6 +6,7 @@ package com.microsoft.alm.auth.oauth;
 import com.microsoft.alm.auth.BaseAuthenticator;
 import com.microsoft.alm.auth.PromptBehavior;
 import com.microsoft.alm.auth.secret.TokenPair;
+import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.storage.InsecureInMemoryStore;
 import com.microsoft.alm.storage.SecretStore;
 
@@ -27,17 +28,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
 
     private final SecretStore<TokenPair> store;
 
-    private AzureAuthority azureAuthority;
-
-    private OAuth2Authenticator(final String resource, final String clientId, final URI redirectUri,
-                               final SecretStore<TokenPair> store) {
-        this.resource = resource;
-        this.clientId = clientId;
-        this.redirectUri = redirectUri;
-        this.store = store == null ? new InsecureInMemoryStore<TokenPair>() : store;
-
-        this.azureAuthority = new AzureAuthority();
-    }
+    private final AzureAuthority azureAuthority;
 
     /**
      * Get an OAuth2 authenticator
@@ -61,16 +52,44 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                 .build();
     }
 
+    /**
+     * Private constructor so we are guaranteed resource is https://management.core.windows.net.
+     *
+     * If user wish to construct an authenticator that can work with other protected resource, use
+     * {@link com.microsoft.alm.auth.oauth.OAuth2Authenticator.OAuth2AuthenticatorBuilder}
+     *
+     */
+    private OAuth2Authenticator(final String resource, final String clientId, final URI redirectUri,
+                               final SecretStore<TokenPair> store) {
+        this(resource, clientId, redirectUri, store, new AzureAuthority());
+    }
+
+    /*default*/ OAuth2Authenticator(final String resource, final String clientId, final URI redirectUri,
+                        final SecretStore<TokenPair> store, final AzureAuthority azureAuthority) {
+        Debug.Assert(resource != null, "resource cannot be null");
+        Debug.Assert(clientId != null, "clientId cannot be null");
+        Debug.Assert(redirectUri != null, "redirectUri cannot be null");
+
+        this.resource = resource;
+        this.clientId = clientId;
+        this.redirectUri = redirectUri;
+        this.azureAuthority = azureAuthority;
+
+        this.store = store == null ? new InsecureInMemoryStore<TokenPair>() : store;
+    }
+
     private AzureAuthority getAzureAuthority() {
         return azureAuthority;
     }
 
-    public void setAzureAuthority(final AzureAuthority azureAuthority) {
-        this.azureAuthority = azureAuthority;
-    }
-
+    @Override
     public String getAuthType() {
         return this.TYPE;
+    }
+
+    @Override
+    protected SecretStore<TokenPair> getStore() {
+        return this.store;
     }
 
     @Override
@@ -83,28 +102,24 @@ public class OAuth2Authenticator extends BaseAuthenticator {
         return getOAuth2TokenPair(PromptBehavior.AUTO);
     }
 
-    public boolean signOut() {
-        return super.signOut(APP_VSSPS_VISUALSTUDIO);
-    }
-
     @Override
     public TokenPair getOAuth2TokenPair(final PromptBehavior promptBehavior) {
+        Debug.Assert(promptBehavior != null, "getOAuth2TokenPair promptBehavior cannot be null");
+
         final String key = getKey(APP_VSSPS_VISUALSTUDIO);
 
         SecretRetriever secretRetriever = new SecretRetriever() {
             @Override
             protected TokenPair doRetrieve() {
-                final AzureAuthority authority = getAzureAuthority();
-                return authority.acquireToken(clientId, resource, redirectUri, POPUP_QUERY_PARAM);
+                return getAzureAuthority().acquireToken(clientId, resource, redirectUri, POPUP_QUERY_PARAM);
             }
         };
 
         return secretRetriever.retrieve(key, getStore(), promptBehavior);
     }
 
-    @Override
-    protected SecretStore<TokenPair> getStore() {
-        return this.store;
+    public boolean signOut() {
+        return super.signOut(APP_VSSPS_VISUALSTUDIO);
     }
 
     public static class OAuth2AuthenticatorBuilder {
@@ -114,6 +129,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
         private SecretStore store;
 
         public OAuth2AuthenticatorBuilder manage(final String resource) {
+            Debug.Assert(resource != null, "resource cannot be null");
             this.resource = resource;
             return this;
         }
@@ -123,11 +139,13 @@ public class OAuth2Authenticator extends BaseAuthenticator {
         }
 
         public OAuth2AuthenticatorBuilder withClientId(final String clientId) {
+            Debug.Assert(clientId != null, "clientId cannot be null");
             this.clientId = clientId;
             return this;
         }
 
         public OAuth2AuthenticatorBuilder redirectTo(final URI redirectUri) {
+            Debug.Assert(redirectUri != null, "redirectUri cannot be null");
             this.redirectUri = redirectUri;
             return this;
         }
@@ -137,6 +155,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
         }
 
         public OAuth2AuthenticatorBuilder backedBy(final SecretStore store) {
+            Debug.Assert(store != null, "store cannot be null");
             this.store = store;
             return this;
         }
