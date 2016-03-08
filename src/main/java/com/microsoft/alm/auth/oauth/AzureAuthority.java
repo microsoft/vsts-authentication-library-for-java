@@ -41,12 +41,8 @@ public class AzureAuthority {
      */
     public static final String DefaultAuthorityHostUrl = AuthorityHostUrlBase + "/common";
 
-    /**
-     * The live.com tenant for logon services in Azure
-     */
-    public static final String MSAAuthorityHostUrl = AuthorityHostUrlBase + "/live.com";
-
     private final UserAgent userAgent;
+
     private String authorityHostUrl;
 
     /**
@@ -150,87 +146,10 @@ public class AzureAuthority {
         return result;
     }
 
-    public static String getAuthorityUrl(final UUID tenantId) {
-        return String.format("%1$s/%2$s", AuthorityHostUrlBase, tenantId.toString());
-    }
-
-    /**
-     * The URL used to interact with the Azure identity service.
-     *
-     * @return authority host url
-     */
-    public String getAuthorityHostUrl() {
-        return this.authorityHostUrl;
-    }
-
-    /**
-     * Set the URL used to interact with the Azure identity service.
-     *
-     * @param authorityHostUrl
-     *      Where we should send the authenticate request to
-     */
-    public void setAuthorityHostUrl(final String authorityHostUrl) {
-        this.authorityHostUrl = authorityHostUrl;
-    }
-
-    /**
-     * Detects the backing authority of the end-point.
-     *
-     * @param targetUri The resource which the authority protects.
-     * @return tenantId The identity of the authority tenant; null otherwise.
-     */
-    public UUID getTenantId(final URI targetUri) {
-        final String VsoBaseUrlHost = "visualstudio.com";
-        final String VsoResourceTenantHeader = "X-VSS-ResourceTenant";
-
-        Trace.writeLine("BaseVsoAuthentication::detectAuthority");
-        UUID tenantId = Guid.Empty;
-
-        if (StringHelper.endsWithIgnoreCase(targetUri.getHost(), VsoBaseUrlHost)) {
-            Trace.writeLine("   detected visualstudio.com, checking AAD vs MSA");
-
-            String tenant = null;
-
-            HttpURLConnection connection = null;
-            final HttpClient client = new HttpClient(Global.getUserAgent());
-            try {
-                connection = client.head(targetUri, new Action<HttpURLConnection>() {
-                    @Override
-                    public void call(final HttpURLConnection conn) {
-                        conn.setInstanceFollowRedirects(false);
-                    }
-                });
-
-                tenant = connection.getHeaderField(VsoResourceTenantHeader);
-                Trace.writeLine("   server has responded");
-
-                if (!StringHelper.isNullOrWhiteSpace(tenant))  {
-                    Trace.writeLine("   tenant is not null");
-                    try {
-                        tenantId = UUID.fromString(tenant);
-                        Trace.writeLine("   tenantId: " + tenantId);
-
-                        return tenantId;
-                    } catch (final IllegalArgumentException ignored) {
-                        Trace.writeLine("   failed to parse server response");
-                        return null;
-                    }
-                }
-            } catch (final IOException ignored) {
-            }
-        }
-
-        Trace.writeLine("   failed detection");
-
-        // if all else fails, fallback to basic authentication
-        return null;
-    }
-
     /**
      * Acquires a {@link TokenPair} from the authority via an interactive user logon
      * prompt.
      *
-     * @param targetUri       The uniform resource indicator of the resource access tokens are being requested for.
      * @param clientId        Identifier of the client requesting the token.
      * @param resource        Identifier of the target resource that is the recipient of the requested token.
      * @param redirectUri     Address to return to upon receiving a response from the authority.
@@ -238,9 +157,8 @@ public class AzureAuthority {
      *                        authority.
      * @return If successful, a {@link TokenPair}; otherwise null.
      */
-    public TokenPair acquireToken(final URI targetUri, final String clientId, final String resource,
+    public TokenPair acquireToken(final String clientId, final String resource,
                                   final URI redirectUri, String queryParameters) {
-        Debug.Assert(targetUri != null && targetUri.isAbsolute(), "The targetUri parameter is null or invalid");
         Debug.Assert(!StringHelper.isNullOrWhiteSpace(clientId), "The clientId parameter is null or empty");
         Debug.Assert(!StringHelper.isNullOrWhiteSpace(resource), "The resource parameter is null or empty");
         Debug.Assert(redirectUri != null, "The redirectUri parameter is null");

@@ -33,16 +33,17 @@ public interface Authenticator {
     Credential getCredential(final URI key, final PromptBehavior promptBehavior);
 
     boolean isOAuth2TokenSupported();
-    TokenPair getVstsGlobalOAuth2TokenPair(final PromptBehavior promptBehavior);
-    TokenPair getOAuth2TokenPair(final URI key);
-    TokenPair getOAuth2TokenPair(final URI key, final PromptBehavior promptBehavior);
+
+    TokenPair getOAuth2TokenPair();
+    TokenPair getOAuth2TokenPair(final PromptBehavior promptBehavior);
 
     boolean isPatSupported();
-    Token getVstsGlobalPat(final VsoTokenScope vsoTokenScope, final String patDisplayName,
-                           final PromptBehavior promptBehavior);
+    Token getPersonalAccessToken(final VsoTokenScope vsoTokenScope, final String patDisplayName,
+                                 final PromptBehavior promptBehavior);
 
     Token getPersonalAccessToken(final URI key, final VsoTokenScope tokenScope,
                                  final String patDisplayName, final PromptBehavior promptBehavior);
 
+    boolean signOut();
     boolean signOut(final URI key);
 }

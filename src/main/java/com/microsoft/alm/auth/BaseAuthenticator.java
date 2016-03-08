@@ -43,17 +43,12 @@ public abstract class BaseAuthenticator implements Authenticator {
     }
 
     @Override
-    public TokenPair getVstsGlobalOAuth2TokenPair(final PromptBehavior promptBehavior) {
+    public TokenPair getOAuth2TokenPair() {
         return null;
     }
 
     @Override
-    public TokenPair getOAuth2TokenPair(final URI key) {
-        return null;
-    }
-
-    @Override
-    public TokenPair getOAuth2TokenPair(final URI key, final PromptBehavior promptBehavior) {
+    public TokenPair getOAuth2TokenPair(final PromptBehavior promptBehavior) {
         return null;
     }
 
@@ -63,8 +58,8 @@ public abstract class BaseAuthenticator implements Authenticator {
     }
 
     @Override
-    public Token getVstsGlobalPat(final VsoTokenScope tokenScope, final String patDisplayName,
-                                  final PromptBehavior promptBehavior) {
+    public Token getPersonalAccessToken(final VsoTokenScope tokenScope, final String patDisplayName,
+                                        final PromptBehavior promptBehavior) {
         return null;
     }
 
@@ -72,6 +67,11 @@ public abstract class BaseAuthenticator implements Authenticator {
     public Token getPersonalAccessToken(final URI key, final VsoTokenScope tokenScope,
                                         final String patDisplayName, final PromptBehavior promptBehavior) {
         return null;
+    }
+
+    @Override
+    public boolean signOut() {
+        return false;
     }
 
     @Override

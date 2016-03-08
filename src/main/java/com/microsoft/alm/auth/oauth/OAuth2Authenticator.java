@@ -6,7 +6,6 @@ package com.microsoft.alm.auth.oauth;
 import com.microsoft.alm.auth.BaseAuthenticator;
 import com.microsoft.alm.auth.PromptBehavior;
 import com.microsoft.alm.auth.secret.TokenPair;
-import com.microsoft.alm.helpers.Guid;
 import com.microsoft.alm.storage.InsecureInMemoryStore;
 import com.microsoft.alm.storage.SecretStore;
 
@@ -16,27 +15,21 @@ import java.util.UUID;
 public class OAuth2Authenticator extends BaseAuthenticator {
 
     public final static String POPUP_QUERY_PARAM = "display=popup";
-    public final static String MANAGEMENT_CORE_RESOURCE = "https://management.core.windows.net/";
-    public final static String VSTS_RESOURCE = "499b84ac-1321-427f-aa17-267ca6975798";
 
     public final static URI APP_VSSPS_VISUALSTUDIO = URI.create("https://app.vssps.visualstudio.com");
-    public final static String MSA_QUERY_PARAMS = "domain_hint=live.com&site_id=501454&nux=1";
+    public final static String MANAGEMENT_CORE_RESOURCE = "https://management.core.windows.net/";
 
     private final static String TYPE = "OAuth2";
 
-    private String resource;
-    private String clientId;
-    private URI redirectUri;
+    private final String resource;
+    private final String clientId;
+    private final URI redirectUri;
 
-    private SecretStore<TokenPair> store;
+    private final SecretStore<TokenPair> store;
 
     private AzureAuthority azureAuthority;
 
-    public OAuth2Authenticator(final String resource, final String clientId, final URI redirectUri) {
-        this(resource, clientId, redirectUri, new InsecureInMemoryStore<TokenPair>());
-    }
-
-    public OAuth2Authenticator(final String resource, final String clientId, final URI redirectUri,
+    private OAuth2Authenticator(final String resource, final String clientId, final URI redirectUri,
                                final SecretStore<TokenPair> store) {
         this.resource = resource;
         this.clientId = clientId;
@@ -46,25 +39,8 @@ public class OAuth2Authenticator extends BaseAuthenticator {
         this.azureAuthority = new AzureAuthority();
     }
 
-    public static OAuth2Authenticator getGlobalAuthenticator(final String clientId, final String redirectUrl,
-                                                                 final SecretStore<TokenPair> store) {
-        return new OAuth2AuthenticatorBuilder()
-                .manage(MANAGEMENT_CORE_RESOURCE)
-                .withClientId(clientId)
-                .redirectTo(redirectUrl)
-                .backedBy(store)
-                .build();
-    }
-
     /**
-     * WARNING: Please be careful when using this authenticator
-     *
-     * This may save you one redirect from the web so it takes you directly to either live login page or
-     * AAD tenant login page provided you specified a specific URI so we can figure the information out.
-     *
-     * If you use this and target URI where we can't figure out the tenant info, the returned OAuth token won't work.
-     * For example, if you use this and target "https://app.vssps.visualstudio.com", you will get a token, but that
-     * token won't work for any subsequent calls.
+     * Get an OAuth2 authenticator
      *
      * @param clientId
      *      Registered OAuth2 client id
@@ -73,20 +49,19 @@ public class OAuth2Authenticator extends BaseAuthenticator {
      * @param store
      *      SecretStore to read and save access token to
      *
-     * @return an OAuth2Authenticator that works only in specific situation.  Use this only when you are sure you will
-     * always target a specific uri.
+     * @return an OAuth2Authenticator
      */
-    public static OAuth2Authenticator getAccountLevelAuthenticator(final String clientId, final String redirectUrl,
-                                                                 final SecretStore<TokenPair> store) {
+    public static OAuth2Authenticator getAuthenticator(final String clientId, final String redirectUrl,
+                                                       final SecretStore<TokenPair> store) {
         return new OAuth2AuthenticatorBuilder()
-                .manage(VSTS_RESOURCE)
+                .manage(MANAGEMENT_CORE_RESOURCE)
                 .withClientId(clientId)
                 .redirectTo(redirectUrl)
                 .backedBy(store)
                 .build();
     }
 
-    public AzureAuthority getAzureAuthority() {
+    private AzureAuthority getAzureAuthority() {
         return azureAuthority;
     }
 
@@ -104,43 +79,23 @@ public class OAuth2Authenticator extends BaseAuthenticator {
     }
 
     @Override
-    public TokenPair getVstsGlobalOAuth2TokenPair(final PromptBehavior promptBehavior) {
-        return getOAuth2TokenPair(APP_VSSPS_VISUALSTUDIO, promptBehavior);
+    public TokenPair getOAuth2TokenPair() {
+        return getOAuth2TokenPair(PromptBehavior.AUTO);
     }
 
-    public boolean signOutGlobally() {
-        return signOut(APP_VSSPS_VISUALSTUDIO);
-    }
-
-    @Override
-    public TokenPair getOAuth2TokenPair(final URI uri) {
-        return getOAuth2TokenPair(uri, PromptBehavior.AUTO);
+    public boolean signOut() {
+        return super.signOut(APP_VSSPS_VISUALSTUDIO);
     }
 
     @Override
-    public TokenPair getOAuth2TokenPair(final URI uri, final PromptBehavior promptBehavior) {
-        final String key = getKey(uri);
+    public TokenPair getOAuth2TokenPair(final PromptBehavior promptBehavior) {
+        final String key = getKey(APP_VSSPS_VISUALSTUDIO);
 
         SecretRetriever secretRetriever = new SecretRetriever() {
             @Override
             protected TokenPair doRetrieve() {
-                final String queryParam;
                 final AzureAuthority authority = getAzureAuthority();
-
-                if (isManageCoreWindowsNetResource()) {
-                    // skip all tenant detection, use common tenant
-                    queryParam = POPUP_QUERY_PARAM;
-                } else {
-                    final UUID tenantId = authority.getTenantId(uri);
-                    if (tenantId != null && isMSA(tenantId)) {
-                        queryParam = POPUP_QUERY_PARAM + "&" + MSA_QUERY_PARAMS;
-                        authority.setAuthorityHostUrl(azureAuthority.MSAAuthorityHostUrl);
-                    } else {
-                        queryParam = POPUP_QUERY_PARAM;
-                    }
-                }
-
-                return authority.acquireToken(uri, clientId, resource, redirectUri, queryParam);
+                return authority.acquireToken(clientId, resource, redirectUri, POPUP_QUERY_PARAM);
             }
         };
 
@@ -150,14 +105,6 @@ public class OAuth2Authenticator extends BaseAuthenticator {
     @Override
     protected SecretStore<TokenPair> getStore() {
         return this.store;
-    }
-
-    private boolean isManageCoreWindowsNetResource() {
-        return this.resource.equals(MANAGEMENT_CORE_RESOURCE);
-    }
-
-    private boolean isMSA(final UUID tenantId) {
-        return Guid.Empty.equals(tenantId);
     }
 
     public static class OAuth2AuthenticatorBuilder {
@@ -210,5 +157,4 @@ public class OAuth2Authenticator extends BaseAuthenticator {
             return new OAuth2Authenticator(this.resource, this.clientId, this.redirectUri, this.store);
         }
     }
-
 }

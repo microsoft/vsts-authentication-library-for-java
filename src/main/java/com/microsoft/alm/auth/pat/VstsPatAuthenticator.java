@@ -28,21 +28,13 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
                                 final SecretStore<TokenPair> oauthTokenStore,
                                 final SecretStore<Token> store) {
         this.store = store;
-        this.vstsOauthAuthenticator = OAuth2Authenticator.getGlobalAuthenticator(oauthClientId,
+        this.vstsOauthAuthenticator = OAuth2Authenticator.getAuthenticator(oauthClientId,
                 oauthClientRedirectUrl, oauthTokenStore);
         this.vsoAzureAuthority = new VsoAzureAuthority();
     }
 
-    public OAuth2Authenticator getVstsOauthAuthenticator() {
-        return vstsOauthAuthenticator;
-    }
-
     public void setVstsOauthAuthenticator(final OAuth2Authenticator vstsOauthAuthenticator) {
         this.vstsOauthAuthenticator = vstsOauthAuthenticator;
-    }
-
-    public VsoAzureAuthority getVsoAzureAuthority() {
-        return vsoAzureAuthority;
     }
 
     public void setVsoAzureAuthority(final VsoAzureAuthority vsoAzureAuthority) {
@@ -55,8 +47,8 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
     }
 
     @Override
-    public Token getVstsGlobalPat(final VsoTokenScope tokenScope, final String patDisplayName,
-                                  final PromptBehavior promptBehavior) {
+    public Token getPersonalAccessToken(final VsoTokenScope tokenScope, final String patDisplayName,
+                                        final PromptBehavior promptBehavior) {
 
         return getToken(vstsOauthAuthenticator.APP_VSSPS_VISUALSTUDIO, true, tokenScope, patDisplayName, promptBehavior);
     }
@@ -79,7 +71,7 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
         SecretRetriever secretRetriever = new SecretRetriever() {
             @Override
             protected Token doRetrieve() {
-                TokenPair oauthToken = vstsOauthAuthenticator.getVstsGlobalOAuth2TokenPair(promptBehavior.AUTO);
+                TokenPair oauthToken = vstsOauthAuthenticator.getOAuth2TokenPair(promptBehavior.AUTO);
 
                 if (oauthToken == null) {
                     // authentication failed, return null
@@ -101,19 +93,19 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
     }
 
     /**
-     * Sign out globally, also remove the oauth token to force sign in again
+     * "Forget" the global PAT, also remove the oauth token to force sign in again
      *
-     * @return true if signed out completely -- including any oauth token generated from login
+     * @return {@code true} if global PAT and the OAuth2 token used to generate this PAT are both forgotten
      */
-    public boolean signOutGlobally() {
-        return signOut(vstsOauthAuthenticator.APP_VSSPS_VISUALSTUDIO)
-                && vstsOauthAuthenticator.signOutGlobally();
+    @Override
+    public boolean signOut() {
+        return this.signOut(vstsOauthAuthenticator.APP_VSSPS_VISUALSTUDIO);
     }
 
     @Override
     public boolean signOut(final URI uri) {
         return super.signOut(uri)
-                && vstsOauthAuthenticator.signOutGlobally();
+                && vstsOauthAuthenticator.signOut();
     }
 
     public boolean assignGlobalPatTo(final URI uri) {

@@ -52,7 +52,7 @@ public class App {
         options.patGenerationOptions.tokenScope = VsoTokenScope.AllScopes; // leave it to ALL if we want to manage wit
 
         // Get a client with global privilege to look up all accounts
-        final Client client = clientProvider.getVstsGlobalClient(PromptBehavior.AUTO, options);
+        final Client client = clientProvider.getClient(PromptBehavior.AUTO, options);
 
         // Get list of accounts
         final AccountHttpClient accountHttpClient
@@ -70,7 +70,7 @@ public class App {
 
         // Now after awhile we come back to do more with the git url, such as pull request.
         // Should not prompt for credentials since we have transferred the global PAT to this account before
-        final Client specificClient = clientProvider.getSpecificClientFor(targetAcct);
+        final Client specificClient = clientProvider.getClientFor(targetAcct);
 
         GitHttpClient gitHttpClient = new GitHttpClient(specificClient, targetAcct);
         List<GitRepository> repos = gitHttpClient.getRepositories();
@@ -85,15 +85,15 @@ public class App {
         final UserPasswordCredentialProvider passwordCredentialProvider
                 = new UserPasswordCredentialProvider(newPatAuthenticator);
 
-        Credential credential = passwordCredentialProvider.getSpecificCredentialFor(targetAcct);
+        Credential credential = passwordCredentialProvider.getCredentialFor(targetAcct);
 
         System.out.println(credential.Username + ":" + credential.Password);
 
         // switch to another user account
-        patAuthenticator.signOutGlobally();
+        patAuthenticator.signOut();
 
         // Now this should prompt again
         // if no option passed in, we will just generate a PAT with default name
-        final Client anotherClient = clientProvider.getVstsGlobalClient();
+        final Client anotherClient = clientProvider.getClient();
     }
 }

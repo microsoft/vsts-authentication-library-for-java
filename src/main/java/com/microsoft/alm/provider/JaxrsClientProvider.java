@@ -38,87 +38,98 @@ public class JaxrsClientProvider {
         this.authenticator = authenticator;
     }
 
-    public Client getSpecificClientFor(final URI uri) {
-        return getSpecificClientFor(uri, PromptBehavior.AUTO, Options.getDefaultOptions());
+    public Client getClient() {
+        return getClient(PromptBehavior.AUTO, Options.getDefaultOptions());
     }
 
-    public Client getSpecificClientFor(final URI uri, final PromptBehavior promptBehavior, final Options options) {
-        // default Jersey client with HttpURLConnection as the connector
+    public Client getClient(final PromptBehavior promptBehavior, final Options options) {
+        Client client = null;
+
+        if (authenticator.isOAuth2TokenSupported()) {
+            final TokenPair tokenPair = authenticator.getOAuth2TokenPair(promptBehavior);
+            client = getClientWithOAuth2RequestFilter(tokenPair);
+
+        }
+        // Get a client backed by a global PAT
+        else if (authenticator.isPatSupported()) {
+            final Token token = authenticator.getPersonalAccessToken(
+                    options.patGenerationOptions.tokenScope,
+                    options.patGenerationOptions.displayName,
+                    promptBehavior);
+
+            if (token != null) {
+                client = getClientWithUsernamePassword(authenticator.getAuthType(), token.Value);
+            }
+        }
+
+        return client;
+    }
+
+    public Client getClientFor(final URI uri) {
+        return getClientFor(uri, PromptBehavior.AUTO, Options.getDefaultOptions());
+    }
+
+    public Client getClientFor(final URI uri, final PromptBehavior promptBehavior, final Options options) {
+        Client client = null;
 
         if (authenticator.isCredentialSupported()) {
             final Credential credential = authenticator.getCredential(uri, promptBehavior);
             if (credential != null) {
-                final ClientConfig clientConfig
-                        = getClientConfig(new Credential(credential.Username, credential.Password));
-
-                return ClientBuilder.newClient(clientConfig);
+                client = getClientWithUsernamePassword(credential.Username, credential.Password);
             }
-        } else if (authenticator.isOAuth2TokenSupported()) {
-            final TokenPair tokenPair = authenticator.getOAuth2TokenPair(uri, promptBehavior);
-            if (tokenPair != null && tokenPair.AccessToken != null) {
-                final Client client = ClientBuilder.newClient();
-                client.register(new ClientRequestFilter() {
-                    @Override
-                    public void filter(final ClientRequestContext requestContext) throws IOException {
-                        requestContext.getHeaders().putSingle("Authorization", "Bearer " + tokenPair.AccessToken.Value);
-                    }
-                });
+        }
+        /*
+         * Although this function calls for a URI specific client, the client returned by the OAuth2 provider is still
+         * global as OAuth2 token is not scoped to one account
+         */
+        else if (authenticator.isOAuth2TokenSupported()) {
+            final TokenPair tokenPair = authenticator.getOAuth2TokenPair(promptBehavior);
+            client = getClientWithOAuth2RequestFilter(tokenPair);
+        }
 
-                return client;
-            }
-        } else if (authenticator.isPatSupported()) {
-            final Token token = authenticator.getPersonalAccessToken(uri,
+        else if (authenticator.isPatSupported()) {
+            final Token token = authenticator.getPersonalAccessToken(
+                    uri,
                     options.patGenerationOptions.tokenScope,
                     options.patGenerationOptions.displayName,
                     promptBehavior);
 
             if (token != null) {
-                final ClientConfig clientConfig = getClientConfig(new Credential("pat", token.Value));
-                return ClientBuilder.newClient(clientConfig);
+                client = getClientWithUsernamePassword(authenticator.getAuthType(), token.Value);
             }
         }
 
-        return null;
+        return client;
     }
 
-    public Client getVstsGlobalClient() {
-        return getVstsGlobalClient(PromptBehavior.AUTO, Options.getDefaultOptions());
-    }
+    private Client getClientWithOAuth2RequestFilter(final TokenPair tokenPair) {
+        // default Jersey client with HttpURLConnection as the connector
+        final Client client;
 
-    public Client getVstsGlobalClient(final PromptBehavior promptBehavior, final Options options) {
-        if (authenticator.isOAuth2TokenSupported()) {
-            final TokenPair tokenPair = authenticator.getVstsGlobalOAuth2TokenPair(promptBehavior);
-
-            if (tokenPair != null && tokenPair.AccessToken != null) {
-                final Client client = ClientBuilder.newClient();
-                client.register(new ClientRequestFilter() {
-                    @Override
-                    public void filter(final ClientRequestContext requestContext) throws IOException {
-                        requestContext.getHeaders().putSingle("Authorization", "Bearer " + tokenPair.AccessToken.Value);
-                    }
-                });
-
-                return client;
-            }
-
-        } else if (authenticator.isPatSupported()) {
-            final Token token = authenticator.getVstsGlobalPat(
-                    options.patGenerationOptions.tokenScope,
-                    options.patGenerationOptions.displayName,
-                    promptBehavior);
-            if (token != null) {
-                final ClientConfig clientConfig = getClientConfig(new Credential("pat", token.Value));
-
-                return ClientBuilder.newClient(clientConfig);
-            }
+        if (tokenPair != null && tokenPair.AccessToken != null) {
+            client = ClientBuilder.newClient();
+            client.register(new ClientRequestFilter() {
+                @Override
+                public void filter(final ClientRequestContext requestContext) throws IOException {
+                    requestContext.getHeaders().putSingle("Authorization", "Bearer " + tokenPair.AccessToken.Value);
+                }
+            });
+        } else {
+            client = null;
         }
 
-        return null;
+        return client;
     }
 
-    private static ClientConfig getClientConfig(final Credential patCredential) {
+    private Client getClientWithUsernamePassword(final String username, final String password) {
+        final ClientConfig clientConfig = getClientConfig(username, password);
+
+        return ClientBuilder.newClient(clientConfig);
+    }
+
+    private ClientConfig getClientConfig(final String username, final String password) {
         final Credentials credentials
-                = new UsernamePasswordCredentials(patCredential.Username, patCredential .Password);
+                = new UsernamePasswordCredentials(username, password);
 
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(AuthScope.ANY, credentials);

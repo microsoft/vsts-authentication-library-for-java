@@ -49,8 +49,8 @@ public class VstsPatAuthenticatorTest {
     public void testGetPersonalAccessToken() throws Exception {
         URI uri = URI.create("https://testuri.visualstudio.com");
         TokenPair tokenPair = new TokenPair("access", "refresh");
-        when(mockVstsOauthAuthenticator.getOAuth2TokenPair(uri, PromptBehavior.NEVER)).thenReturn(null);
-        when(mockVstsOauthAuthenticator.getVstsGlobalOAuth2TokenPair(PromptBehavior.AUTO)).thenReturn(tokenPair);
+        when(mockVstsOauthAuthenticator.getOAuth2TokenPair(PromptBehavior.NEVER)).thenReturn(null);
+        when(mockVstsOauthAuthenticator.getOAuth2TokenPair(PromptBehavior.AUTO)).thenReturn(tokenPair);
 
         when(mockVsoAzureAuthority.generatePersonalAccessToken(uri, tokenPair.AccessToken, VsoTokenScope.AllScopes, true,
                 false, "PAT")).thenReturn(new Token("token", TokenType.Personal));

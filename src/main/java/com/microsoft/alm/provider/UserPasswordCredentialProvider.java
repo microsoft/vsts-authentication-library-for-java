@@ -19,24 +19,58 @@ public class UserPasswordCredentialProvider {
         this.authenticator = authenticator;
     }
 
-    public Credential getSpecificCredentialFor(final URI uri) {
-        return getSpecificCredentialFor(uri, PromptBehavior.AUTO, Options.getDefaultOptions());
+    public Credential getCredential() {
+        return getCredentials(PromptBehavior.AUTO, Options.getDefaultOptions());
     }
 
-    public Credential getSpecificCredentialFor(final URI uri, final PromptBehavior promptBehavior,
-                                               final Options options) {
+    public Credential getCredentials(final PromptBehavior promptBehavior, final Options options) {
+
+        final String username = authenticator.getAuthType();
+
+        String password = null;
+        if (authenticator.isOAuth2TokenSupported()) {
+            final TokenPair tokenPair = authenticator.getOAuth2TokenPair(promptBehavior);
+
+            if (tokenPair != null && tokenPair.AccessToken != null) {
+                password = tokenPair.AccessToken.Value;
+            }
+
+        } else if (authenticator.isPatSupported()) {
+            final Token token = authenticator.getPersonalAccessToken(
+                    options.patGenerationOptions.tokenScope,
+                    options.patGenerationOptions.displayName,
+                    promptBehavior);
+
+            if (token != null) {
+                password = token.Value;
+            }
+        }
+
+        return createCreds(username, password);
+    }
+
+    public Credential getCredentialFor(final URI uri) {
+        return getCredentialFor(uri, PromptBehavior.AUTO, Options.getDefaultOptions());
+    }
+
+    public Credential getCredentialFor(final URI uri, final PromptBehavior promptBehavior,
+                                       final Options options) {
+        String username = null;
+        String password = null;
+
         if (authenticator.isCredentialSupported()) {
             final Credential credential = authenticator.getCredential(uri, promptBehavior);
             if (credential != null) {
-                // defensive copy, so we never return the reference out
-                return new Credential(credential.Username, credential.Password);
+                username = credential.Username;
+                password = credential.Password;
             }
 
         } else if (authenticator.isOAuth2TokenSupported()) {
-            final TokenPair tokenPair = authenticator.getOAuth2TokenPair(uri, promptBehavior);
+            final TokenPair tokenPair = authenticator.getOAuth2TokenPair(promptBehavior);
 
             if (tokenPair != null && tokenPair.AccessToken != null) {
-                return new Credential("oauth2", tokenPair.AccessToken.Value);
+                username = authenticator.getAuthType();
+                password = tokenPair.AccessToken.Value;
             }
 
         } else if (authenticator.isPatSupported()) {
@@ -46,37 +80,15 @@ public class UserPasswordCredentialProvider {
                     promptBehavior);
 
             if (token != null) {
-                return new Credential("pat", token.Value);
+                username = authenticator.getAuthType();
+                password = token.Value;
             }
         }
 
-        return null;
+        return createCreds(username, password);
     }
 
-    public Credential getVstsGlobalCredentials() {
-        return getVstsGlobalCredentials(PromptBehavior.AUTO, Options.getDefaultOptions());
+    private Credential createCreds(final String username, final String password) {
+        return (username != null && password != null) ? new Credential(username, password) : null;
     }
-
-    public Credential getVstsGlobalCredentials(final PromptBehavior promptBehavior, final Options options) {
-        if (authenticator.isOAuth2TokenSupported()) {
-            final TokenPair tokenPair = authenticator.getVstsGlobalOAuth2TokenPair(promptBehavior);
-
-            if (tokenPair != null && tokenPair.AccessToken != null) {
-                return new Credential("oauth2", tokenPair.AccessToken.Value);
-            }
-
-        } else if (authenticator.isPatSupported()) {
-            final Token token = authenticator.getVstsGlobalPat(
-                    options.patGenerationOptions.tokenScope,
-                    options.patGenerationOptions.displayName,
-                    promptBehavior);
-
-            if (token != null) {
-                return new Credential("pat", token.Value);
-            }
-        }
-
-        return null;
-    }
-
 }
