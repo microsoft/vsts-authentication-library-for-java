@@ -1,0 +1,114 @@
+<!-- Copyright (c) Microsoft. All rights reserved.
+Licensed under the MIT license. See License.txt in the project root. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.microsoft.alm</groupId>
+  <version>0.1.1-SNAPSHOT</version>
+  <artifactId>java-auth-sample</artifactId>
+  <packaging>jar</packaging>
+
+  <name>Sample App that utilize the java auth library</name>
+  <url>https://java.visualstudio.com/</url>
+
+  <repositories>
+    <repository>
+      <id>teamNexus</id>
+      <url>http://artifacts.cloudapp.net:8081/nexus/content/repositories/releases</url>
+    </repository>
+    <repository>
+      <id>teamNexus.snapshots</id>
+      <url>http://artifacts.cloudapp.net:8081/nexus/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.3</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.15</version>
+        <executions>
+          <execution>
+            <id>verify-style</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <checkstyleRules>
+            <module name="Checker">
+              <module name="Header">
+                <property name="headerFile" value="../config/checkstyle/java.header" />
+                <property name="fileExtensions" value="java" />
+              </module>
+            </module>
+          </checkstyleRules>
+          <includeTestSourceDirectory>true</includeTestSourceDirectory>
+          <logViolationsToConsole>true</logViolationsToConsole>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.microsoft.alm</groupId>
+      <artifactId>java-auth-core</artifactId>
+      <version>0.1.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.alm</groupId>
+      <artifactId>com.microsoft.alm.client</artifactId>
+      <version>0.4.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.alm</groupId>
+      <artifactId>com.microsoft.alm.client.sourcecontrol</artifactId>
+      <version>0.4.2-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-client</artifactId>
+      <version>2.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.connectors</groupId>
+      <artifactId>jersey-apache-connector</artifactId>
+      <version>2.6</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>1.7</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+</project>

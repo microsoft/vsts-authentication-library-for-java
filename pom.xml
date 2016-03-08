@@ -238,16 +238,6 @@ Licensed under the MIT license. See License.txt in the project root. -->
       <version>0.6.0</version>
     </dependency>
     <dependency>
-      <groupId>com.microsoft.alm</groupId>
-      <artifactId>com.microsoft.alm.client</artifactId>
-      <version>0.4.2-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>com.microsoft.alm</groupId>
-      <artifactId>com.microsoft.alm.client.sourcecontrol</artifactId>
-      <version>0.4.2-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>org.glassfish.jersey.core</groupId>
       <artifactId>jersey-client</artifactId>
       <version>2.6</version>

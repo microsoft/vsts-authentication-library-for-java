@@ -18,8 +18,6 @@ import com.microsoft.alm.storage.InsecureInMemoryStore;
 import com.microsoft.alm.storage.SecretStore;
 import com.microsoft.visualstudio.services.account.Account;
 import com.microsoft.visualstudio.services.account.AccountHttpClient;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import javax.ws.rs.client.Client;
 import java.net.URI;
@@ -31,9 +29,7 @@ public class App {
     private static final String CLIENT_ID = "YOUR_CLIENT_ID_HERE";
     private static final String REDIRECT_URL = "YOUR_REDIRECT_URL_HERE";
 
-    @Ignore("Manual e2e test")
-    @Test
-    public void e2eManualFlow() {
+    public static void main(String args[]) {
         // Create the storage for OAuth token and token, if you already have an OAuth store that contains
         // valid OAuth AccessTokens, this is the place to reuse them
         final SecretStore<TokenPair> accessTokenStore = new InsecureInMemoryStore<TokenPair>();
