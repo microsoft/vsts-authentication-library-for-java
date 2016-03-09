@@ -9,11 +9,13 @@ import com.microsoft.alm.auth.secret.Credential;
 import com.microsoft.alm.auth.secret.Token;
 import com.microsoft.alm.auth.secret.TokenPair;
 import com.microsoft.alm.helpers.Debug;
+import com.microsoft.alm.helpers.ObjectExtensions;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.glassfish.jersey.SslConfigurator;
 import org.glassfish.jersey.apache.connector.ApacheClientProperties;
 import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
@@ -29,7 +31,12 @@ import java.io.IOException;
 import java.net.URI;
 
 /**
- * TODO: we need to add proxy setting and such
+ * Provides authenticated JAXRS client based on different authenticators
+ *
+ * In case of Credential and Personal Access Token type of authentication data, basic auth is used.  For PAT, the user
+ * name is hardcoded to identify Personal Access Token authentication type instead of the user.
+ *
+ * In case of OAuth2 token, we embedded the token as a "Bearer" token in the Authorization header.
  */
 public class JaxrsClientProvider {
 
@@ -180,8 +187,13 @@ public class JaxrsClientProvider {
         // default Jersey client with HttpURLConnection as the connector
         final Client client;
 
+        // add proxy information
+        final ClientConfig clientConfig = new ClientConfig();
+        addProxySettings(clientConfig);
+
         if (tokenPair != null && tokenPair.AccessToken != null) {
-            client = ClientBuilder.newClient();
+            client = ClientBuilder.newClient(clientConfig);
+
             client.register(new ClientRequestFilter() {
                 @Override
                 public void filter(final ClientRequestContext requestContext) throws IOException {
@@ -219,7 +231,45 @@ public class JaxrsClientProvider {
         clientConfig.property(ApacheClientProperties.PREEMPTIVE_BASIC_AUTHENTICATION, true);
         clientConfig.property(ClientProperties.REQUEST_ENTITY_PROCESSING, RequestEntityProcessing.BUFFERED);
 
+        addProxySettings(clientConfig);
+
         return clientConfig;
     }
 
+    private void addProxySettings(final ClientConfig clientConfig) {
+        // favor http proxyHost
+        final String proxyHost = System.getProperty("http.proxyHost");
+        final String proxyPort = ObjectExtensions.<String>coalesce(System.getProperty("http.proxyPort"), "8080");
+
+        if (proxyHost != null) {
+            final String proxyUrl = String.format("http://%s:%s", proxyHost, proxyPort);
+
+            clientConfig.property(ClientProperties.PROXY_URI, proxyUrl);
+
+            final SslConfigurator sslConfigurator = getSslConfigurator();
+            if (sslConfigurator != null) {
+                clientConfig.property(ApacheClientProperties.SSL_CONFIG, sslConfigurator);
+            }
+        }
+    }
+
+    private SslConfigurator getSslConfigurator() {
+        final String trustStore = System.getProperty("javax.net.ssl.trustStore");
+        final String trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
+
+        final SslConfigurator sslConfigurator;
+        if (trustStore != null && trustStorePassword != null) {
+            sslConfigurator = SslConfigurator.newInstance()
+                    .trustStoreFile(trustStore)
+                    .trustStorePassword(trustStorePassword)
+                    .trustStoreType("JKS")
+                    .trustManagerFactoryAlgorithm("PKIX")
+                    .securityProtocol("SSL");
+
+        } else {
+            sslConfigurator = null;
+        }
+
+        return sslConfigurator;
+    }
 }
