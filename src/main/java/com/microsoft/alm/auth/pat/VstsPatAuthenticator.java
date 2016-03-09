@@ -15,6 +15,14 @@ import com.microsoft.alm.storage.SecretStore;
 
 import java.net.URI;
 
+/**
+ * Authenticator based on Personal Access Token
+ *
+ * This authenticator will attempt to reuse PATs found in store without regard to the scopes of the PAT.
+ *
+ * If the PAT does not have the correct scope, the only way is to reauth by either {@link #signOut(URI)} or {@link
+ * PromptBehavior} ALWAYS.
+ */
 public class VstsPatAuthenticator extends BaseAuthenticator {
 
     private final static String TYPE = "PersonalAccessToken";

@@ -8,6 +8,7 @@ import com.microsoft.alm.auth.PromptBehavior;
 import com.microsoft.alm.auth.secret.Credential;
 import com.microsoft.alm.auth.secret.Token;
 import com.microsoft.alm.auth.secret.TokenPair;
+import com.microsoft.alm.helpers.Debug;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -34,15 +35,55 @@ public class JaxrsClientProvider {
 
     private Authenticator authenticator;
 
+    /**
+     * Provides authenticated JAX RS clients based on {@link Authenticator} provided
+     *
+     * @param authenticator
+     *      an authenticator that handles generates authentication data
+     */
     public JaxrsClientProvider(final Authenticator authenticator) {
         this.authenticator = authenticator;
     }
 
+    /**
+     * Get a globally authenticated JAXRS client - a client that can potentially access all accounts the user owns with
+     * ${@link PromptBehavior} AUTO.
+     *
+     * Be aware that a globally authenticated client DOES NOT mean the client can represent the principal and has
+     * permission to everything the user owns.  If backed by {@link com.microsoft.alm.auth.pat.VstsPatAuthenticator}
+     * the client is limited to the scopes defined in the Personal Access Token.  If no Personal Access {@link Token}
+     * exists, it will generate one with the default {@link Options}.
+     *
+     * @return client
+     *      authenticated JAXRS client.  {@code null} if authentication failed.
+     */
     public Client getClient() {
         return getClient(PromptBehavior.AUTO, Options.getDefaultOptions());
     }
 
+    /**
+     * Get a globally authenticated JAXRS client - a client that can potentially access all accounts the user owns with
+     * the specified {@link PromptBehavior} behavior.
+     *
+     * Be aware that a globally authenticated client DOES NOT mean the client can represent the principal and has
+     * permission to everything the user owns.  If backed by {@link com.microsoft.alm.auth.pat.VstsPatAuthenticator}
+     * the client is limited to the scopes defined in the Personal Access Token. If no Personal Access {@link Token}
+     * exists, it will generate one with the specified {@link Options} if we allow PAT generation with the specified
+     * prompt behavior.
+     *
+     * @param promptBehavior
+     *      dictates we allow prompting the user or not.  In case of VstsPatAuthenticator, prompting also means generate
+     *      a new PAT.
+     * @param options
+     *      options specified by users.
+     *
+     * @return client
+     *      authenticated JAXRS client.  {@code null} if authentication failed.
+     */
     public Client getClient(final PromptBehavior promptBehavior, final Options options) {
+        Debug.Assert(promptBehavior != null, "promptBehavior cannot be null");
+        Debug.Assert(options != null, "options cannot be null");
+
         Client client = null;
 
         if (authenticator.isOAuth2TokenSupported()) {
@@ -65,11 +106,44 @@ public class JaxrsClientProvider {
         return client;
     }
 
+    /**
+     * Get an authenticated JAXRS client for the specific account URI with {@link PromptBehavior} AUTO.
+     *
+     * If backed by {@link com.microsoft.alm.auth.pat.VstsPatAuthenticator} and no PAT exists,  will generate one
+     * with default {@link Options}.
+     *
+     * @param uri
+     *      target uri we want to send request against
+     *
+     * @return client
+     *      authenticated JAXRS client.  {@code null} if authentication failed.
+     */
     public Client getClientFor(final URI uri) {
         return getClientFor(uri, PromptBehavior.AUTO, Options.getDefaultOptions());
     }
 
+    /**
+     * Get an authenticated JAXRS client for the specified account with the specified {@link PromptBehavior} behavior.
+     *
+     * If backed by {@link com.microsoft.alm.auth.pat.VstsPatAuthenticator} and no PAT exists, will generate one with
+     * the specified {@link Options} if we allow PAT generation with the specified prompt behavior.
+     *
+     * @param uri
+     *      target uri we want to send request against
+     * @param promptBehavior
+     *      dictates we allow prompting the user or not.  In case of VstsPatAuthenticator, prompting also means generate
+     *      a new PAT.
+     * @param options
+     *      options specified by users.
+     *
+     * @return client
+     *      authenticated JAXRS client.  {@code null} if authentication failed.
+     */
     public Client getClientFor(final URI uri, final PromptBehavior promptBehavior, final Options options) {
+        Debug.Assert(uri != null, "uri cannot be null");
+        Debug.Assert(promptBehavior != null, "promptBehavior cannot be null");
+        Debug.Assert(options != null, "options cannot be null");
+
         Client client = null;
 
         if (authenticator.isCredentialSupported()) {
@@ -128,6 +202,9 @@ public class JaxrsClientProvider {
     }
 
     private ClientConfig getClientConfig(final String username, final String password) {
+        Debug.Assert(username != null, "username cannot be null");
+        Debug.Assert(password != null, "password cannot be null");
+
         final Credentials credentials
                 = new UsernamePasswordCredentials(username, password);
 
