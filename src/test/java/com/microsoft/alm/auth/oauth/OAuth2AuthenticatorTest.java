@@ -4,7 +4,6 @@
 package com.microsoft.alm.auth.oauth;
 
 import com.microsoft.alm.auth.secret.TokenPair;
-import com.microsoft.alm.helpers.Guid;
 import com.microsoft.alm.storage.SecretStore;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,27 +33,20 @@ public class OAuth2AuthenticatorTest {
         mockStore = mock(SecretStore.class);
         mockAzureAuthority = mock(AzureAuthority.class);
 
-        underTest = new OAuth2Authenticator.OAuth2AuthenticatorBuilder()
-                .manage("test_resource")
-                .redirectTo("https://testredirect.com")
-                .withClientId(clientId)
-                .backedBy(mockStore)
-                .build();
-
-        underTest.setAzureAuthority(mockAzureAuthority);
+        underTest = new OAuth2Authenticator("test_resource",
+                clientId.toString(),
+                URI.create("https://testredirect.com"),
+                mockStore,
+                mockAzureAuthority);
     }
 
     @Test
     public void retrieveToken() throws URISyntaxException {
-        URI uri = URI.create("http://test.com");
-
-        when(mockAzureAuthority.getTenantId(uri)).thenReturn(Guid.Empty);
-        when(mockAzureAuthority.acquireToken(uri, clientId.toString(), "test_resource",
-                        new URI("https://testredirect.com"), underTest.POPUP_QUERY_PARAM + "&" + underTest
-                        .MSA_QUERY_PARAMS))
+        when(mockAzureAuthority.acquireToken(clientId.toString(), "test_resource",
+                        new URI("https://testredirect.com"), underTest.POPUP_QUERY_PARAM))
                 .thenReturn(new TokenPair("access", "refresh"));
 
-        TokenPair token = underTest.getOAuth2TokenPair(uri);
+        TokenPair token = underTest.getOAuth2TokenPair();
 
         assertEquals("access", token.AccessToken.Value);
         assertEquals("refresh", token.RefreshToken.Value);
@@ -71,7 +63,7 @@ public class OAuth2AuthenticatorTest {
         assertTrue(underTest.isOAuth2TokenSupported());
 
         assertFalse(underTest.isCredentialSupported());
-        assertFalse(underTest.isPatSupported());
+        assertFalse(underTest.isPersonalAccessTokenSupported());
     }
 
 }

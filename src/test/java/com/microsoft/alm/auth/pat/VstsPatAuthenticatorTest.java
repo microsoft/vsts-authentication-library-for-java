@@ -30,27 +30,22 @@ public class VstsPatAuthenticatorTest {
     private OAuth2Authenticator mockVstsOauthAuthenticator;
 
     private SecretStore<Token> tokenStore;
-    private SecretStore<TokenPair> oauthTokenStore;
 
     @Before
     public void setUp() throws Exception {
         tokenStore = mock(SecretStore.class);
-        oauthTokenStore = mock(SecretStore.class);
         mockVsoAzureAuthority = mock(VsoAzureAuthority.class);
         mockVstsOauthAuthenticator = mock(OAuth2Authenticator.class);
 
-        underTest = new VstsPatAuthenticator("testclient", "testredirect", oauthTokenStore, tokenStore);
-
-        underTest.setVsoAzureAuthority(mockVsoAzureAuthority);
-        underTest.setVstsOauthAuthenticator(mockVstsOauthAuthenticator);
+        underTest = new VstsPatAuthenticator(mockVsoAzureAuthority, mockVstsOauthAuthenticator, tokenStore);
     }
 
     @Test
     public void testGetPersonalAccessToken() throws Exception {
         URI uri = URI.create("https://testuri.visualstudio.com");
         TokenPair tokenPair = new TokenPair("access", "refresh");
-        when(mockVstsOauthAuthenticator.getOAuth2TokenPair(uri, PromptBehavior.NEVER)).thenReturn(null);
-        when(mockVstsOauthAuthenticator.getVstsGlobalOAuth2TokenPair(PromptBehavior.AUTO)).thenReturn(tokenPair);
+        when(mockVstsOauthAuthenticator.getOAuth2TokenPair(PromptBehavior.NEVER)).thenReturn(null);
+        when(mockVstsOauthAuthenticator.getOAuth2TokenPair(PromptBehavior.AUTO)).thenReturn(tokenPair);
 
         when(mockVsoAzureAuthority.generatePersonalAccessToken(uri, tokenPair.AccessToken, VsoTokenScope.AllScopes, true,
                 false, "PAT")).thenReturn(new Token("token", TokenType.Personal));
@@ -67,7 +62,7 @@ public class VstsPatAuthenticatorTest {
 
     @Test
     public void patIsSupported() {
-        assertTrue(underTest.isPatSupported());
+        assertTrue(underTest.isPersonalAccessTokenSupported());
 
         assertFalse(underTest.isOAuth2TokenSupported());
         assertFalse(underTest.isCredentialSupported());

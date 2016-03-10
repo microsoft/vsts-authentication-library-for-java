@@ -8,14 +8,15 @@ import com.microsoft.alm.auth.secret.Secret;
 import com.microsoft.alm.auth.secret.Token;
 import com.microsoft.alm.auth.secret.TokenPair;
 import com.microsoft.alm.auth.secret.VsoTokenScope;
+import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.storage.SecretStore;
 
 import java.net.URI;
 
 /**
- * No op authenticator with default implementations
+ * Abstract authenticator with default implementations
  *
- * Real authenticator should extend this No Op authenticator and do not have to implement
+ * Real authenticator should extend this no op authenticator, and they do not have to implement
  * methods that don't make sense to them
  */
 public abstract class BaseAuthenticator implements Authenticator {
@@ -43,28 +44,23 @@ public abstract class BaseAuthenticator implements Authenticator {
     }
 
     @Override
-    public TokenPair getVstsGlobalOAuth2TokenPair(final PromptBehavior promptBehavior) {
+    public TokenPair getOAuth2TokenPair() {
         return null;
     }
 
     @Override
-    public TokenPair getOAuth2TokenPair(final URI key) {
+    public TokenPair getOAuth2TokenPair(final PromptBehavior promptBehavior) {
         return null;
     }
 
     @Override
-    public TokenPair getOAuth2TokenPair(final URI key, final PromptBehavior promptBehavior) {
-        return null;
-    }
-
-    @Override
-    public boolean isPatSupported() {
+    public boolean isPersonalAccessTokenSupported() {
         return false;
     }
 
     @Override
-    public Token getVstsGlobalPat(final VsoTokenScope tokenScope, final String patDisplayName,
-                                  final PromptBehavior promptBehavior) {
+    public Token getPersonalAccessToken(final VsoTokenScope tokenScope, final String patDisplayName,
+                                        final PromptBehavior promptBehavior) {
         return null;
     }
 
@@ -75,8 +71,16 @@ public abstract class BaseAuthenticator implements Authenticator {
     }
 
     @Override
+    public boolean signOut() {
+        return false;
+    }
+
+    @Override
     public boolean signOut(final URI uri) {
+        Debug.Assert(uri != null, "uri cannot be null");
+
         final String key = getKey(uri);
+        Debug.Assert(key != null, "key conversion failed");
 
         synchronized (getStore()) {
             return getStore().delete(key);
