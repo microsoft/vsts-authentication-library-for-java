@@ -52,6 +52,12 @@ public class UserPasswordCredentialProvider {
      * {@link PromptBehavior} allows it.  In case of PAT, it  will generate one according to the specified
      * {@link Options} too.
      *
+     * @param promptBehavior
+     *      dictates we allow prompting the user or not.  In case of VstsPatAuthenticator, prompting also means generate
+     *      a new PAT.
+     * @param options
+     *      options specified by users.
+     *
      * @return credential object that works across all accounts (but maybe scoped in case of PATs).
      *         {@code null} when authentication failed.
      */
