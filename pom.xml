@@ -68,6 +68,7 @@ Licensed under the MIT license. See License.txt in the project root. -->
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <slf4j.version>1.7.19</slf4j.version>
     <jna.version>4.2.1</jna.version>
     <oauth2.useragent.version>0.6.0</oauth2.useragent.version>
     <jersey.version>2.6</jersey.version>
@@ -225,6 +226,16 @@ Licensed under the MIT license. See License.txt in the project root. -->
   </profiles>
 
   <dependencies>
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>${slf4j.version}</version>
+    </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>

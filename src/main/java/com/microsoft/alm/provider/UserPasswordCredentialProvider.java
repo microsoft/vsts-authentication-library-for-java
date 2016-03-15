@@ -9,6 +9,8 @@ import com.microsoft.alm.auth.secret.Credential;
 import com.microsoft.alm.auth.secret.Token;
 import com.microsoft.alm.auth.secret.TokenPair;
 import com.microsoft.alm.helpers.Debug;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 
@@ -19,6 +21,8 @@ import java.net.URI;
  * that identifies the type of authentication instead of a name that identifies the user.
  */
 public class UserPasswordCredentialProvider {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserPasswordCredentialProvider.class);
 
     private Authenticator authenticator;
 

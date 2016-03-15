@@ -19,6 +19,8 @@ import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.oauth2.useragent.AuthorizationResponse;
 import com.microsoft.alm.oauth2.useragent.UserAgent;
 import com.microsoft.alm.oauth2.useragent.UserAgentImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -30,6 +32,8 @@ import java.util.UUID;
  * Interfaces with Azure to perform authentication and identity services.
  */
 public class AzureAuthority {
+
+    private static final Logger logger = LoggerFactory.getLogger(AzureAuthority.class);
 
     /**
      * The base URL for logon services in Azure.

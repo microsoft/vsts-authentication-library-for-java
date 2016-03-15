@@ -12,6 +12,8 @@ import com.microsoft.alm.auth.secret.VsoTokenScope;
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.helpers.StringHelper;
 import com.microsoft.alm.storage.SecretStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 
@@ -24,6 +26,8 @@ import java.net.URI;
  * PromptBehavior} ALWAYS.
  */
 public class VstsPatAuthenticator extends BaseAuthenticator {
+
+    private static final Logger logger = LoggerFactory.getLogger(VstsPatAuthenticator.class);
 
     private final static String TYPE = "PersonalAccessToken";
 

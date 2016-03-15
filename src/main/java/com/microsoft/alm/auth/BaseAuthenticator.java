@@ -10,6 +10,8 @@ import com.microsoft.alm.auth.secret.TokenPair;
 import com.microsoft.alm.auth.secret.VsoTokenScope;
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.storage.SecretStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 
@@ -20,6 +22,8 @@ import java.net.URI;
  * methods that don't make sense to them
  */
 public abstract class BaseAuthenticator implements Authenticator {
+
+    private static final Logger logger = LoggerFactory.getLogger(BaseAuthenticator.class);
 
     protected Secret.IUriNameConversion uriToKeyConversion = Secret.DefaultUriNameConversion;
 

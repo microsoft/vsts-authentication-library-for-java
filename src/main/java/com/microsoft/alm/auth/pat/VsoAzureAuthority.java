@@ -15,6 +15,8 @@ import com.microsoft.alm.helpers.HttpClient;
 import com.microsoft.alm.helpers.StringContent;
 import com.microsoft.alm.helpers.StringHelper;
 import com.microsoft.alm.helpers.Trace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -25,6 +27,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 class VsoAzureAuthority extends AzureAuthority {
+
+    private static final Logger logger = LoggerFactory.getLogger(VsoAzureAuthority.class);
+
     /**
      * The maximum wait time for a network request before timing out
      */

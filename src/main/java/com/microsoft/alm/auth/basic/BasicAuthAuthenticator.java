@@ -9,6 +9,8 @@ import com.microsoft.alm.auth.secret.Credential;
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.storage.InsecureInMemoryStore;
 import com.microsoft.alm.storage.SecretStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 
@@ -16,6 +18,8 @@ import java.net.URI;
  * This authenticator returns username and password combos.
  */
 public class BasicAuthAuthenticator extends BaseAuthenticator {
+
+    private static final Logger logger = LoggerFactory.getLogger(BasicAuthAuthenticator.class);
 
     private final static String TYPE = "BasicAuth";
 

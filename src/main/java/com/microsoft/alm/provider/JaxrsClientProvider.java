@@ -22,6 +22,8 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.RequestEntityProcessing;
 import org.glassfish.jersey.client.spi.ConnectorProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -39,6 +41,8 @@ import java.net.URI;
  * In case of OAuth2 token, we embedded the token as a "Bearer" token in the Authorization header.
  */
 public class JaxrsClientProvider {
+
+    private static final Logger logger = LoggerFactory.getLogger(JaxrsClientProvider.class);
 
     private Authenticator authenticator;
 

@@ -9,11 +9,15 @@ import com.microsoft.alm.auth.secret.TokenPair;
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.storage.InsecureInMemoryStore;
 import com.microsoft.alm.storage.SecretStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.util.UUID;
 
 public class OAuth2Authenticator extends BaseAuthenticator {
+
+    private static final Logger logger = LoggerFactory.getLogger(OAuth2Authenticator.class);
 
     public final static String POPUP_QUERY_PARAM = "display=popup";
 
