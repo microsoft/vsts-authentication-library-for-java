@@ -68,6 +68,7 @@ public class BasicAuthAuthenticator extends BaseAuthenticator {
 
     @Override
     public Credential getCredential(final URI uri) {
+        logger.debug("Retrieving credential for uri: {}", uri);
         return getCredential(uri, PromptBehavior.AUTO);
     }
 
@@ -76,11 +77,14 @@ public class BasicAuthAuthenticator extends BaseAuthenticator {
         Debug.Assert(uri != null, "getCrednetial uri key cannot be null");
         Debug.Assert(promptBehavior != null, "getCrednetial promptBehavior cannot be null");
 
+        logger.debug("Retrieving credential for uri: {} with prompt behavior: {}.", uri, promptBehavior.name());
+
         final String key = getKey(uri);
 
         SecretRetriever secretRetriever = new SecretRetriever() {
             @Override
             protected Credential doRetrieve() {
+                logger.debug("Prompt user for credential for uri: {}", uri);
                 return prompter.prompt(uri);
             }
         };
