@@ -4,11 +4,12 @@
 package com.microsoft.alm.auth.sample;
 
 import com.microsoft.alm.auth.PromptBehavior;
+import com.microsoft.alm.auth.oauth.OAuth2Authenticator;
 import com.microsoft.alm.auth.pat.VstsPatAuthenticator;
-import com.microsoft.alm.auth.secret.Credential;
-import com.microsoft.alm.auth.secret.Token;
-import com.microsoft.alm.auth.secret.TokenPair;
-import com.microsoft.alm.auth.secret.VsoTokenScope;
+import com.microsoft.alm.secret.Credential;
+import com.microsoft.alm.secret.Token;
+import com.microsoft.alm.secret.TokenPair;
+import com.microsoft.alm.secret.VsoTokenScope;
 import com.microsoft.alm.provider.JaxrsClientProvider;
 import com.microsoft.alm.provider.Options;
 import com.microsoft.alm.provider.UserPasswordCredentialProvider;
@@ -18,6 +19,7 @@ import com.microsoft.alm.storage.InsecureInMemoryStore;
 import com.microsoft.alm.storage.SecretStore;
 import com.microsoft.visualstudio.services.account.Account;
 import com.microsoft.visualstudio.services.account.AccountHttpClient;
+import org.apache.log4j.BasicConfigurator;
 
 import javax.ws.rs.client.Client;
 import java.net.URI;
@@ -39,6 +41,8 @@ public class App {
         final VstsPatAuthenticator patAuthenticator = new VstsPatAuthenticator(CLIENT_ID, REDIRECT_URL,
                 accessTokenStore, tokenStore);
 
+        final OAuth2Authenticator oAuth2Authenticator = OAuth2Authenticator.getAuthenticator(CLIENT_ID, REDIRECT_URL,
+                accessTokenStore);
         //Create a jaxrs client provider with this authenticator
         final JaxrsClientProvider clientProvider = new JaxrsClientProvider(patAuthenticator);
 

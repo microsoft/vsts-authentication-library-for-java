@@ -2,75 +2,19 @@
 Licensed under the MIT license. See License.txt in the project root. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.microsoft.alm</groupId>
+    <artifactId>java-auth-lib-parent</artifactId>
+    <version>0.1.1-SNAPSHOT</version>
+  </parent>
+  <artifactId>java-auth-common</artifactId>
+  <packaging>jar</packaging>
 
-  <groupId>com.microsoft.alm</groupId>
-  <artifactId>java-auth-lib-parent</artifactId>
-  <version>0.1.1-SNAPSHOT</version>
-  <packaging>pom</packaging>
-
-  <name>Parent for Java Authentication Library for Visual Studio Team Services and Team Foundation Server</name>
-  <description>POM for supporting multi-module Java Authentication library against VSTS and TFS</description>
+  <name>Common interfaces, helpers and data models classes for Java Authentication Library</name>
+  <description>Collection of data models and helpers for authenticating against VSTS and TFS</description>
   <url>https://java.visualstudio.com/</url>
 
-  <modules> 
-    <module>common</module>
-    <module>storages</module>
-    <module>core</module>
-    <module>providers</module>
-    <module>sample</module>
-  </modules>
-
-  <developers>
-    <developer>
-      <name>Oli Dagenais</name>
-      <email>olivida@microsoft.com</email>
-      <organization>Microsoft</organization>
-      <organizationUrl>http://www.microsoft.com/</organizationUrl>
-    </developer>
-    <developer>
-      <name>Yang Cao</name>
-      <email>yacao@microsoft.com</email>
-      <organization>Microsoft</organization>
-      <organizationUrl>http://www.microsoft.com/</organizationUrl>
-    </developer>
-  </developers>
-
-  <scm>
-    <connection>scm:git:https://mseng.visualstudio.com/DefaultCollection/VSOnline/_git/Java.Auth</connection>
-    <developerConnection>scm:git:https://mseng.visualstudio.com/DefaultCollection/VSOnline/_git/Java.Auth</developerConnection>
-  </scm>
-
-  <repositories>
-    <repository>
-      <id>teamNexus</id>
-      <url>http://artifacts.cloudapp.net:8081/nexus/content/repositories/releases</url>
-    </repository>
-    <repository>
-      <id>teamNexus.snapshots</id>
-      <url>http://artifacts.cloudapp.net:8081/nexus/content/repositories/snapshots</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
-  <distributionManagement>
-    <snapshotRepository>
-      <id>teamNexus</id>
-      <url>http://artifacts.cloudapp.net:8081/nexus/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>teamNexus</id>
-      <url>http://artifacts.cloudapp.net:8081/nexus/content/repositories/releases</url>
-    </repository>
-  </distributionManagement>
-
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <slf4j.version>1.7.19</slf4j.version>
     <oauth2.useragent.version>0.6.0</oauth2.useragent.version>
   </properties>
 
@@ -225,58 +169,31 @@ Licensed under the MIT license. See License.txt in the project root. -->
     </profile>
   </profiles>
 
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>com.microsoft.alm</groupId>
-        <artifactId>java-auth-common</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.microsoft.alm</groupId>
-        <artifactId>java-auth-core</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.microsoft.alm</groupId>
-        <artifactId>java-auth-storages</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.microsoft.alm</groupId>
-        <artifactId>java-auth-providers</artifactId>
-        <version>${project.version}</version>
-      </dependency>
+  <dependencies>
+    <dependency>
+      <groupId>com.microsoft.alm</groupId>
+      <artifactId>oauth2-useragent</artifactId>
+    </dependency>
 
-      <dependency>
-        <groupId>com.microsoft.alm</groupId>
-        <artifactId>oauth2-useragent</artifactId>
-        <version>${oauth2.useragent.version}</version>
-      </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+    </dependency>
 
-      <dependency>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-          <version>${slf4j.version}</version>
-      </dependency>
-      <dependency>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-          <version>${slf4j.version}</version>
-      </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
 
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.11</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-core</artifactId>
-        <version>1.7</version>
-        <scope>test</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+  </dependencies>
 </project>
