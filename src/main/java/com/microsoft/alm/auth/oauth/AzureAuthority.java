@@ -13,7 +13,6 @@ import com.microsoft.alm.helpers.ObjectExtensions;
 import com.microsoft.alm.helpers.QueryString;
 import com.microsoft.alm.helpers.StringContent;
 import com.microsoft.alm.helpers.StringHelper;
-import com.microsoft.alm.helpers.Trace;
 import com.microsoft.alm.helpers.UriHelper;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.oauth2.useragent.AuthorizationResponse;
@@ -168,7 +167,7 @@ public class AzureAuthority {
         Debug.Assert(redirectUri != null, "The redirectUri parameter is null");
         Debug.Assert(redirectUri.isAbsolute(), "The redirectUri parameter is not an absolute Uri");
 
-        Trace.writeLine("AzureAuthority::acquireToken");
+        logger.debug("AzureAuthority::acquireToken");
 
         final UUID correlationId = null;
         TokenPair tokens = null;
@@ -176,7 +175,7 @@ public class AzureAuthority {
 
         final String authorizationCode = acquireAuthorizationCode(resource, clientId, redirectUri, queryParameters);
         if (authorizationCode == null) {
-            Trace.writeLine("   token acquisition failed.");
+            logger.debug("   token acquisition failed.");
             return tokens;
         }
 
@@ -194,10 +193,11 @@ public class AzureAuthority {
             final String responseContent = HttpClient.readToString(connection);
             tokens = new TokenPair(responseContent);
 
-            Trace.writeLine("   token acquisition succeeded.");
+            logger.debug("   token acquisition succeeded.");
         } catch (final IOException e) {
             // TODO: 449248: silently catching the exception here seems horribly wrong
-            Trace.writeLine("   token acquisition failed.");
+            logger.debug("   token acquisition failed.");
+            logger.debug("   IOException: {}", e);
         }
         return tokens;
     }

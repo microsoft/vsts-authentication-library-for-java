@@ -48,6 +48,8 @@ public class OAuth2Authenticator extends BaseAuthenticator {
      */
     public static OAuth2Authenticator getAuthenticator(final String clientId, final String redirectUrl,
                                                        final SecretStore<TokenPair> store) {
+        logger.debug("Authenticator manages resource: {}", MANAGEMENT_CORE_RESOURCE);
+
         return new OAuth2AuthenticatorBuilder()
                 .manage(MANAGEMENT_CORE_RESOURCE)
                 .withClientId(clientId)
@@ -79,6 +81,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
         this.redirectUri = redirectUri;
         this.azureAuthority = azureAuthority;
 
+        logger.debug("Using default SecretStore? {}", store == null);
         this.store = store == null ? new InsecureInMemoryStore<TokenPair>() : store;
     }
 
@@ -110,11 +113,14 @@ public class OAuth2Authenticator extends BaseAuthenticator {
     public TokenPair getOAuth2TokenPair(final PromptBehavior promptBehavior) {
         Debug.Assert(promptBehavior != null, "getOAuth2TokenPair promptBehavior cannot be null");
 
+        logger.debug("Retrieving OAuth2 TokenPair with prompt behavior: {}", promptBehavior.name());
+
         final String key = getKey(APP_VSSPS_VISUALSTUDIO);
 
         SecretRetriever secretRetriever = new SecretRetriever() {
             @Override
             protected TokenPair doRetrieve() {
+                logger.debug("Ready to launch browser flow to retrieve oauth2 token.");
                 return getAzureAuthority().acquireToken(clientId, resource, redirectUri, POPUP_QUERY_PARAM);
             }
         };

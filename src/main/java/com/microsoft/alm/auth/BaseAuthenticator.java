@@ -83,10 +83,12 @@ public abstract class BaseAuthenticator implements Authenticator {
     public boolean signOut(final URI uri) {
         Debug.Assert(uri != null, "uri cannot be null");
 
+        logger.debug("Signing out from uri: {}", uri);
         final String key = getKey(uri);
         Debug.Assert(key != null, "key conversion failed");
 
         synchronized (getStore()) {
+            logger.debug("Deleting secret for {}", key);
             return getStore().delete(key);
         }
     }
@@ -102,6 +104,7 @@ public abstract class BaseAuthenticator implements Authenticator {
      * @return key used to retrieve and store secrets in a secret store
      */
     public String getKey(final URI targetUri) {
+        logger.debug("Getting secret for uri: {}", targetUri);
         return this.uriToKeyConversion.convert(targetUri, getAuthType());
     }
 
@@ -155,6 +158,7 @@ public abstract class BaseAuthenticator implements Authenticator {
          */
         protected <E extends Secret> void store(final String key, final SecretStore<E> store, E secret) {
             if (secret != null) {
+                logger.debug("Storing secret for key: {}.", key);
                 synchronized (store) {
                     store.add(key, secret);
                 }
@@ -180,14 +184,18 @@ public abstract class BaseAuthenticator implements Authenticator {
          */
         public <E extends Secret> E retrieve(final String key, final SecretStore<E> store,
                                                 final PromptBehavior promptBehavior) {
+            logger.debug("Retrieving secret with key: {}, and prompt behavior: {}.", key, promptBehavior.name());
+
             E secret = null;
             if (promptBehavior != PromptBehavior.ALWAYS) {
                 // Not ALWAYS prompt, so let's read from the store for any cached secret
+                logger.debug("Reading secret from store for key: {}", key);
                 secret = readFromStore(key, store);
             }
 
             if (promptBehavior == PromptBehavior.NEVER) {
                 // NEVER prompt, return what we got from the store and call it done
+                logger.debug("Returning whatever we retrieved from the store, do not prompt.");
                 return secret;
             }
 
@@ -195,6 +203,7 @@ public abstract class BaseAuthenticator implements Authenticator {
                     || (secret == null && promptBehavior == PromptBehavior.AUTO)) {
                 // Either ALWAYS prompt, or we don't have any secret cached for this key
                 // AUTO-retrieves when necessary
+                logger.debug("Retrieving secret.");
                 secret = doRetrieve();
 
                 // Store it so we don't have to retrieve again

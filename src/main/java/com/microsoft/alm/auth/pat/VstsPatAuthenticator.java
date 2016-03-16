@@ -92,12 +92,14 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
     public Token getPersonalAccessToken(final VsoTokenScope tokenScope, final String patDisplayName,
                                         final PromptBehavior promptBehavior) {
         // Global PAT will be stored with URI key APP_VSSPS_VISUALSTUDIO as this key doesn't identify any account
+        logger.debug("Retrieving global Personal Access Token.");
         return getToken(vstsOauthAuthenticator.APP_VSSPS_VISUALSTUDIO, true, tokenScope, patDisplayName, promptBehavior);
     }
 
     @Override
     public Token getPersonalAccessToken(final URI uri, final VsoTokenScope tokenScope, final String patDisplayName,
                                         final PromptBehavior promptBehavior) {
+        logger.debug("Retrieving Personal Access Token for uri: {}", uri);
         return getToken(uri, false, tokenScope, patDisplayName, promptBehavior);
     }
 
@@ -107,12 +109,14 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
         Debug.Assert(uri != null, "uri cannot be null");
         Debug.Assert(promptBehavior != null, "promptBehavior cannot be null");
 
+        logger.info("Retrieving PersonalAccessToken for uri:{} with name:{}, and with scope:{}, prompt behavior: {}",
+                uri, patDisplayName, tokenScope, promptBehavior.name());
+
         if (!isHosted(uri)) {
             throw new RuntimeException("Only works against VisualStudio Team Services");
         }
 
         final String key = getKey(uri);
-
         Debug.Assert(key != null, "Failed to convert uri to key");
 
         SecretRetriever secretRetriever = new SecretRetriever() {
@@ -122,17 +126,15 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
 
                 if (oauthToken == null) {
                     // authentication failed, return null
+                    logger.debug("Failed to get an OAuth2 token, cannot generate PersonalAccessToken.");
                     return null;
                 }
 
-                if (oauthToken != null) {
-                    final Token token = vsoAzureAuthority.generatePersonalAccessToken(uri, oauthToken.AccessToken,
-                            tokenScope, true, isCreatingGlobalPat, patDisplayName);
+                logger.debug("Got OAuth2 token, retrieving Personal Access Token with it.");
+                final Token token = vsoAzureAuthority.generatePersonalAccessToken(uri, oauthToken.AccessToken,
+                        tokenScope, true, isCreatingGlobalPat, patDisplayName);
 
-                    return token;
-                }
-
-                return null;
+                return token;
             }
         };
 
@@ -151,6 +153,7 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
 
     @Override
     public boolean signOut(final URI uri) {
+        logger.info("Signing out from uri: {}", uri);
         Debug.Assert(uri != null, "uri cannot be null");
 
         return super.signOut(uri)
@@ -171,12 +174,16 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
      */
     public boolean assignGlobalPatTo(final URI uri) {
         Debug.Assert(uri != null, "uri cannot be null");
+        logger.debug("Assigning the global PAT to uri: {}", uri);
 
         final String globalKey = getKey(vstsOauthAuthenticator.APP_VSSPS_VISUALSTUDIO);
         final Token token = getStore().get(globalKey);
         if (token != null) {
             assign(uri, token);
+            logger.debug("Global PAT transferred to uri: {}", uri);
             return true;
+        } else {
+            logger.debug("Could not find global PAT.");
         }
 
         return false;

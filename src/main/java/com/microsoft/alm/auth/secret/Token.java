@@ -7,7 +7,8 @@ import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.helpers.Guid;
 import com.microsoft.alm.helpers.NotImplementedException;
 import com.microsoft.alm.helpers.StringHelper;
-import com.microsoft.alm.helpers.Trace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
@@ -19,6 +20,9 @@ import java.util.concurrent.atomic.AtomicReference;
  * A security token, usually acquired by some authentication and identity services.
  */
 public class Token extends Secret {
+
+    private static final Logger logger = LoggerFactory.getLogger(Token.class);
+
     private static final int sizeofTokenType = 4;
     private static final int sizeofGuid = 16;
 
@@ -192,7 +196,7 @@ public class Token extends Secret {
                 }
             }
         } catch (final Throwable throwable) {
-            Trace.writeLine("   token deserialization error");
+            logger.debug("   token deserialization error");
         }
 
         return tokenReference.get() != null;
@@ -217,7 +221,7 @@ public class Token extends Secret {
             bytes.put(utf8bytes);
             byteReference.set(bytes.array());
         } catch (final Throwable t) {
-            Trace.writeLine("   token serialization error");
+            logger.debug("   token serialization error");
         }
 
         return byteReference.get() != null;

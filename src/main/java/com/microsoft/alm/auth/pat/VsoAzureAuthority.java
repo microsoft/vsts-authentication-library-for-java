@@ -14,7 +14,6 @@ import com.microsoft.alm.helpers.Guid;
 import com.microsoft.alm.helpers.HttpClient;
 import com.microsoft.alm.helpers.StringContent;
 import com.microsoft.alm.helpers.StringHelper;
-import com.microsoft.alm.helpers.Trace;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,12 +56,12 @@ class VsoAzureAuthority extends AzureAuthority {
         Debug.Assert(accessToken != null && !StringHelper.isNullOrWhiteSpace(accessToken.Value) && (accessToken.Type == TokenType.Access || accessToken.Type == TokenType.Federated), "The accessToken parameter is null or invalid");
         Debug.Assert(tokenScope != null, "The tokenScope parameter is invalid");
 
-        Trace.writeLine("VsoAzureAuthority::generatePersonalAccessToken");
+        logger.debug("VsoAzureAuthority::generatePersonalAccessToken");
 
         try {
             // TODO: 449524: create a `HttpClient` with a minimum number of redirects, default creds, and a reasonable timeout (access token generation seems to hang occasionally)
             final HttpClient client = new HttpClient(Global.getUserAgent());
-            Trace.writeLine("   using token to acquire personal access token");
+            logger.debug("   using token to acquire personal access token");
             accessToken.contributeHeader(client.Headers);
 
             if (shouldCreateGlobalToken || populateTokenTargetId(targetUri, accessToken)) {
@@ -77,7 +76,7 @@ class VsoAzureAuthority extends AzureAuthority {
 
                     final Token token = parsePersonalAccessTokenFromJson(responseText);
                     if (token != null) {
-                        Trace.writeLine("   personal access token acquisition succeeded.");
+                        logger.debug("   personal access token acquisition succeeded.");
                     }
                     return token;
                 }
@@ -94,7 +93,7 @@ class VsoAzureAuthority extends AzureAuthority {
                 && (accessToken.Type == TokenType.Access || accessToken.Type == TokenType.Federated),
                 "The accessToken parameter is null or invalid");
 
-        Trace.writeLine("VsoAzureAuthority::populateTokenTargetId");
+        logger.debug("VsoAzureAuthority::populateTokenTargetId");
 
         String resultId = null;
         try {
@@ -106,12 +105,12 @@ class VsoAzureAuthority extends AzureAuthority {
 
             resultId = parseInstanceIdFromJson(content);
         } catch (final IOException e) {
-            Trace.writeLine("   server returned " + e.getMessage());
+            logger.debug("   server returned " + e.getMessage());
         }
 
         final AtomicReference<UUID> instanceId = new AtomicReference<UUID>();
         if (Guid.tryParse(resultId, instanceId)) {
-            Trace.writeLine("   target identity is " + resultId);
+            logger.debug("   target identity is " + resultId);
             accessToken.setTargetIdentity(instanceId.get());
 
             return true;
@@ -162,7 +161,7 @@ class VsoAzureAuthority extends AzureAuthority {
         Debug.Assert(tokenScope != null, "The tokenScope parameter is null");
 
         final String targetIdentity = shouldCreateGlobalToken ? ALL_ACCOUNTS : accessToken.getTargetIdentity().toString();
-        Trace.writeLine("   creating access token scoped to '" + tokenScope + "' for '" + targetIdentity + "'");
+        logger.debug("   creating access token scoped to '" + tokenScope + "' for '" + targetIdentity + "'");
 
         final String jsonContent = String.format(ContentJsonFormat, tokenScope, targetIdentity, displayName);
         final StringContent content = StringContent.createJson(jsonContent);
@@ -174,14 +173,14 @@ class VsoAzureAuthority extends AzureAuthority {
         Debug.Assert(targetUri != null && targetUri.isAbsolute(), "The targetUri parameter is null or invalid");
         Debug.Assert(token != null && (token.Type == TokenType.Access || token.Type == TokenType.Federated), "The token parameter is null or invalid");
 
-        Trace.writeLine("VsoAzureAuthority::createConnectionDataRequest");
+        logger.debug("VsoAzureAuthority::createConnectionDataRequest");
 
         final HttpClient client = new HttpClient(Global.getUserAgent());
 
         // create an request to the VSO deployment data end-point
         final URI requestUri = createConnectionDataUri(targetUri);
 
-        Trace.writeLine("   validating token");
+        logger.debug("   validating token");
         token.contributeHeader(client.Headers);
 
         final HttpURLConnection result = client.get(requestUri, new Action<HttpURLConnection>() {

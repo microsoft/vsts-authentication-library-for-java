@@ -71,8 +71,11 @@ public class UserPasswordCredentialProvider {
 
         final String username = authenticator.getAuthType();
 
+        logger.info("Getting credential that works across multiple accounts. (OAuth2 token or PersonalAccessToken)");
+
         String password = null;
         if (authenticator.isOAuth2TokenSupported()) {
+            logger.info("Getting credential from OAuth2 token.");
             final TokenPair tokenPair = authenticator.getOAuth2TokenPair(promptBehavior);
 
             if (tokenPair != null && tokenPair.AccessToken != null) {
@@ -80,6 +83,7 @@ public class UserPasswordCredentialProvider {
             }
 
         } else if (authenticator.isPersonalAccessTokenSupported()) {
+            logger.info("Getting credential from PersonalAccessToken.");
             final Token token = authenticator.getPersonalAccessToken(
                     options.patGenerationOptions.tokenScope,
                     options.patGenerationOptions.displayName,
@@ -136,7 +140,9 @@ public class UserPasswordCredentialProvider {
         String username = null;
         String password = null;
 
+        logger.info("Getting credential that works for uri: {}", uri);
         if (authenticator.isCredentialSupported()) {
+            logger.info("Getting credential based on Basic Auth");
             final Credential credential = authenticator.getCredential(uri, promptBehavior);
             if (credential != null) {
                 username = credential.Username;
@@ -144,6 +150,7 @@ public class UserPasswordCredentialProvider {
             }
 
         } else if (authenticator.isOAuth2TokenSupported()) {
+            logger.info("Getting credential based on OAuth2 token");
             final TokenPair tokenPair = authenticator.getOAuth2TokenPair(promptBehavior);
 
             if (tokenPair != null && tokenPair.AccessToken != null) {
@@ -152,6 +159,7 @@ public class UserPasswordCredentialProvider {
             }
 
         } else if (authenticator.isPersonalAccessTokenSupported()) {
+            logger.info("Getting credential based on PersonalAccessToken");
             final Token token = authenticator.getPersonalAccessToken(uri,
                     options.patGenerationOptions.tokenScope,
                     options.patGenerationOptions.displayName,
@@ -167,6 +175,7 @@ public class UserPasswordCredentialProvider {
     }
 
     private Credential createCreds(final String username, final String password) {
+        logger.info("Username exist? {}, password exists? {}", username != null, password != null);
         return (username != null && password != null) ? new Credential(username, password) : null;
     }
 }

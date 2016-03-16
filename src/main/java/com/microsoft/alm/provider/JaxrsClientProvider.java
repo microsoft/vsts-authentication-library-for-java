@@ -97,13 +97,15 @@ public class JaxrsClientProvider {
 
         Client client = null;
 
+        logger.info("Getting a jaxrs client that works across multiple accounts.");
         if (authenticator.isOAuth2TokenSupported()) {
+            logger.debug("Getting a jaxrs client backed by OAuth2 token.");
             final TokenPair tokenPair = authenticator.getOAuth2TokenPair(promptBehavior);
             client = getClientWithOAuth2RequestFilter(tokenPair);
-
         }
         // Get a client backed by a global PAT
         else if (authenticator.isPersonalAccessTokenSupported()) {
+            logger.debug("Getting a jaxrs client backed by PersonalAccessToken.");
             final Token token = authenticator.getPersonalAccessToken(
                     options.patGenerationOptions.tokenScope,
                     options.patGenerationOptions.displayName,
@@ -113,6 +115,8 @@ public class JaxrsClientProvider {
                 client = getClientWithUsernamePassword(authenticator.getAuthType(), token.Value);
             }
         }
+
+        logger.info("Successfully created an authenticated client? {}", client != null);
 
         return client;
     }
@@ -156,8 +160,10 @@ public class JaxrsClientProvider {
         Debug.Assert(options != null, "options cannot be null");
 
         Client client = null;
+        logger.info("Getting a jaxrs client for uri: {}.", uri);
 
         if (authenticator.isCredentialSupported()) {
+            logger.debug("Getting a jaxrs client backed by basic auth.");
             final Credential credential = authenticator.getCredential(uri, promptBehavior);
             if (credential != null) {
                 client = getClientWithUsernamePassword(credential.Username, credential.Password);
@@ -168,11 +174,13 @@ public class JaxrsClientProvider {
          * global as OAuth2 token is not scoped to one account
          */
         else if (authenticator.isOAuth2TokenSupported()) {
+            logger.debug("Getting a jaxrs client backed by OAuth2 token.");
             final TokenPair tokenPair = authenticator.getOAuth2TokenPair(promptBehavior);
             client = getClientWithOAuth2RequestFilter(tokenPair);
         }
 
         else if (authenticator.isPersonalAccessTokenSupported()) {
+            logger.debug("Getting a jaxrs client backed by PersonalAccessToken.");
             final Token token = authenticator.getPersonalAccessToken(
                     uri,
                     options.patGenerationOptions.tokenScope,
@@ -184,6 +192,7 @@ public class JaxrsClientProvider {
             }
         }
 
+        logger.debug("Successfully created an authenticated client for uri: {}? {}", uri, client != null);
         return client;
     }
 
@@ -247,11 +256,13 @@ public class JaxrsClientProvider {
 
         if (proxyHost != null) {
             final String proxyUrl = String.format("http://%s:%s", proxyHost, proxyPort);
+            logger.debug("Proxy is set, adding proxy: {}", proxyUrl);
 
             clientConfig.property(ClientProperties.PROXY_URI, proxyUrl);
 
             final SslConfigurator sslConfigurator = getSslConfigurator();
             if (sslConfigurator != null) {
+                logger.debug("Setting up ssl configurator.");
                 clientConfig.property(ApacheClientProperties.SSL_CONFIG, sslConfigurator);
             }
         }
@@ -263,6 +274,7 @@ public class JaxrsClientProvider {
 
         final SslConfigurator sslConfigurator;
         if (trustStore != null && trustStorePassword != null) {
+            logger.debug("Setting up ssl configurator with trustStore: {}", trustStore);
             sslConfigurator = SslConfigurator.newInstance()
                     .trustStoreFile(trustStore)
                     .trustStorePassword(trustStorePassword)
@@ -271,6 +283,9 @@ public class JaxrsClientProvider {
                     .securityProtocol("SSL");
 
         } else {
+            logger.debug("trustStore exists? {}, trustStorePassword is specified? {}",
+                    trustStore != null,
+                    trustStorePassword != null);
             sslConfigurator = null;
         }
 

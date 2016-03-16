@@ -5,18 +5,22 @@ package com.microsoft.alm.auth.secret;
 
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.helpers.StringHelper;
-import com.microsoft.alm.helpers.Trace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 
 public abstract class Secret {
+
+    private static final Logger logger = LoggerFactory.getLogger(Secret.class);
+
     public static String uriToName(final URI targetUri, final String namespace) {
         final String TokenNameBaseFormat = "%1$s:%2$s://%3$s";
         final String TokenNamePortFormat = TokenNameBaseFormat + ":%4$s";
 
         Debug.Assert(targetUri != null, "The targetUri parameter is null");
 
-        Trace.writeLine("Secret::uriToName");
+        logger.debug("Secret::uriToName");
 
         String targetName = null;
         // trim any trailing slashes and/or whitespace for compat with git-credential-winstore
@@ -29,7 +33,7 @@ public abstract class Secret {
             targetName = String.format(TokenNamePortFormat, namespace, targetUri.getScheme(), trimmedHostUrl, targetUri.getPort());
         }
 
-        Trace.writeLine("   target name = " + targetName);
+        logger.debug("   target name = {}", targetName);
 
         return targetName;
     }
