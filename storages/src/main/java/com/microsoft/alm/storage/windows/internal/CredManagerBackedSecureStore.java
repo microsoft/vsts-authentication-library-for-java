@@ -130,14 +130,12 @@ public abstract class CredManagerBackedSecureStore<E extends Secret> implements 
      * Add the specified secret to Windows Credential Manager
      *
      * Multi-thread safe, synchronized access to store
-     *
-     * @param key
+     *  @param key
      *      TargetName in the credential structure
      * @param secret
-     *      Secret that will be saved
      */
     @Override
-    public void add(String key, E secret) {
+    public boolean add(String key, E secret) {
         final String username = getUsername(secret);
         final String credentialBlob = getCredentialBlob(secret);
         byte[] credBlob = StringHelper.UTF8GetBytes(credentialBlob);
@@ -148,6 +146,11 @@ public abstract class CredManagerBackedSecureStore<E extends Secret> implements 
             synchronized (INSTANCE) {
                 INSTANCE.CredWrite(cred, 0);
             }
+
+            return true;
+        }
+        catch (LastErrorException e) {
+            return false;
         } finally {
             cred.CredentialBlob.clear(credBlob.length);
             Arrays.fill(credBlob, (byte) 0);

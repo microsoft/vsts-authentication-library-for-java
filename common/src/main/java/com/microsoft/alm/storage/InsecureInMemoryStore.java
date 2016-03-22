@@ -8,7 +8,7 @@ import com.microsoft.alm.secret.Secret;
 import java.util.HashMap;
 import java.util.Map;
 
-public class InsecureInMemoryStore<E extends Secret> implements SecretStore {
+public class InsecureInMemoryStore<E extends Secret> implements SecretStore<E> {
 
     private final Map<String, E> store;
 
@@ -31,8 +31,8 @@ public class InsecureInMemoryStore<E extends Secret> implements SecretStore {
     }
 
     @Override
-    public void add(final String key, final Secret secret) {
+    public boolean add(final String key, final E secret) {
         // if there is a way to workaround Java's type erasure, I am really interested to get rid of this
-        store.put(key, (E) secret);
+        return store.put(key, secret) != null;
     }
 }
