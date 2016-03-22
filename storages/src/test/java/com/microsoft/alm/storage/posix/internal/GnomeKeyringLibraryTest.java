@@ -4,14 +4,12 @@
 package com.microsoft.alm.storage.posix.internal;
 
 import com.microsoft.alm.helpers.StringHelper;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class GnomeKeyringLibraryTest {
@@ -72,7 +70,7 @@ public class GnomeKeyringLibraryTest {
 
         result = underTest.gnome_keyring_store_password_sync(
                 schema,
-                GnomeKeyringLibrary.GNOME_KEYRING_DEFAULT, //save to memory only
+                GnomeKeyringLibrary.GNOME_KEYRING_DEFAULT, //save to disk
                 "E2E Manual Testing Secret", // same display name
                 password3,
                 //attributes list

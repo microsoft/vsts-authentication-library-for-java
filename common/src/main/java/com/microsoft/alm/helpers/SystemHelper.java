@@ -21,4 +21,8 @@ public class SystemHelper {
     public static boolean isWindows() {
         return Provider.isWindows(osName);
     }
+
+    public static boolean isLinux() {
+        return Provider.isLinux(osName);
+    }
 }
