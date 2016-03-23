@@ -32,7 +32,6 @@ public class InsecureInMemoryStore<E extends Secret> implements SecretStore<E> {
 
     @Override
     public boolean add(final String key, final E secret) {
-        // if there is a way to workaround Java's type erasure, I am really interested to get rid of this
         return store.put(key, secret) != null;
     }
 }

@@ -37,7 +37,7 @@ public interface SecretStore<E extends Secret> {
 
     /**
      * Save the secret identified by the key to this store.  Replace existing secret if it exists.
-     *  @param key
+     * @param key
      *      for which a secret is associated with
      * @param secret
      *      secret to be stored
