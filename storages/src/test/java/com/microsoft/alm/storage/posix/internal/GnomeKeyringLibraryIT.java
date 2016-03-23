@@ -4,7 +4,6 @@
 package com.microsoft.alm.storage.posix.internal;
 
 import com.microsoft.alm.helpers.StringHelper;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Random;
@@ -12,7 +11,7 @@ import java.util.Random;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class GnomeKeyringLibraryTest {
+public class GnomeKeyringLibraryIT {
 
     GnomeKeyringLibrary underTest;
     GnomeKeyringLibrary.GnomeKeyringPasswordSchema schema;
@@ -25,8 +24,11 @@ public class GnomeKeyringLibraryTest {
     }
 
     @Test
-    @Ignore("Only work on Linux platform with gnome-keyring support, needs to be run manually, in interactive mode")
     public void e2e() throws Exception {
+        //Only test on platform that has gnome-keyring support
+        if (!GnomeKeyringBackedSecureStore.isGnomeKeyringSupported()) {
+            return;
+        }
 
         setUp();
 

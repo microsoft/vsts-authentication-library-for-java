@@ -130,9 +130,10 @@ public abstract class CredManagerBackedSecureStore<E extends Secret> implements 
      * Add the specified secret to Windows Credential Manager
      *
      * Multi-thread safe, synchronized access to store
-     *  @param key
+     * @param key
      *      TargetName in the credential structure
      * @param secret
+     *      secret to be stored
      */
     @Override
     public boolean add(String key, E secret) {

@@ -3,17 +3,13 @@
 
 package com.microsoft.alm.storage.posix;
 
-import com.microsoft.alm.secret.Credential;
 import com.microsoft.alm.secret.TokenPair;
-import org.junit.Before;
-import org.junit.Ignore;
+import com.microsoft.alm.storage.posix.internal.GnomeKeyringBackedSecureStore;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-public class GnomeKeyringBackedTokenPairStoreTest {
+public class GnomeKeyringBackedTokenPairStoreIT {
 
     GnomeKeyringBackedTokenPairStore underTest;
 
@@ -41,18 +37,28 @@ public class GnomeKeyringBackedTokenPairStoreTest {
             "e9po5P_sE5flQEBNZ7orOghChj63DxV2usxJDekTb5r9x8L1qH2sSrhavPzbqvn6hb2lF6FXHq6Z6SxDY4UDsQhhzDhl" +
             "n71n1yP0mLmz24-5MP0DCFVU3Du4mjcf5AFjqw3Sv3WXGFMUp1x2_wswzXYSZQCQNRUIAA";
 
-    @Before
-    public void setUp() throws Exception {
-        underTest = new GnomeKeyringBackedTokenPairStore();
-    }
-
     @Test
-    public void serializeDeserialize_tokens() {
-        final TokenPair tokenPair = new TokenPair(sampleAssessToken, sampleRefreshToken);
+    public void saveTokenPair() {
+        if (GnomeKeyringBackedSecureStore.isGnomeKeyringSupported()) {
+            underTest = new GnomeKeyringBackedTokenPairStore();
 
-        final TokenPair processed = underTest.deserialize(underTest.serialize(tokenPair));
+            final String testKey = "http://thisisatestkey";
 
-        assertEquals(tokenPair.AccessToken, processed.AccessToken);
-        assertEquals(tokenPair.RefreshToken, processed.RefreshToken);
+            final TokenPair tokenPair = new TokenPair(sampleAssessToken, sampleRefreshToken);
+            boolean added = underTest.add(testKey, tokenPair);
+
+            assertTrue(added);
+
+            final TokenPair readValue = underTest.get(testKey);
+
+            assertEquals(tokenPair.AccessToken, readValue.AccessToken);
+            assertEquals(tokenPair.RefreshToken, readValue.RefreshToken);
+
+            boolean deleted = underTest.delete(testKey);
+            assertTrue(deleted);
+
+            final TokenPair nonExistent = underTest.get(testKey);
+            assertNull(nonExistent);
+        }
     }
 }

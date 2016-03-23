@@ -40,6 +40,10 @@ public interface SecretStore<E extends Secret> {
      *  @param key
      *      for which a secret is associated with
      * @param secret
+     *      secret to be stored
+     *
+     * @return {@code true} if secret is added successfully
+     *         {@code false} otherwise
      */
     boolean add(final String key, final E secret);
 }

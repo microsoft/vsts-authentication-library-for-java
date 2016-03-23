@@ -29,26 +29,4 @@ public class GnomeKeyringBackedCredentialStoreTest {
         assertEquals(password, processedCred.Password);
     }
 
-
-    @Test
-    @Ignore("Only work on Linux platform with gnome-keyring support, needs to be run manually, in interactive mode")
-    public void saveCredential() {
-        final String testKey = "http://thisisatestkey";
-
-        final Credential credential = new Credential("username", "pass:\"word");
-        boolean added = underTest.add(testKey, credential);
-
-        assertTrue(added);
-
-        final Credential readValue = underTest.get(testKey);
-
-        assertEquals(credential.Username, readValue.Username);
-        assertEquals(credential.Password, readValue.Password);
-
-        boolean deleted = underTest.delete(testKey);
-        assertTrue(deleted);
-
-        final Credential nonExistent = underTest.get(testKey);
-        assertNull(nonExistent);
-    }
 }
