@@ -46,29 +46,4 @@ public class CredManagerBackedCredentialStoreTest {
         assertEquals("CredentialBlob is not correct", password,
                 underTest.getCredentialBlob(credential));
     }
-
-    @Test
-    public void e2eTestStoreReadDelete() {
-        Credential credential= new Credential(username, password);
-        final String key = "CredManagerTest:http://test.com:Credential";
-
-        // this should have been saved to cred manager, it would be good if you can set a breakpoint
-        // and manually verify this now
-        underTest.add(key, credential);
-
-        Credential readCred = underTest.get(key);
-
-        assertEquals("Retrieved Credential.Username is different", username, credential.Username);
-        assertEquals("Retrieved Credential.Password is different", password, credential.Password);
-
-        // The credential under the specified key should be deleted now, it's a good idea to manually verify this now
-        boolean deleted = underTest.delete(key);
-        assertTrue("Test credential should be deleted", deleted);
-
-        deleted = underTest.delete(key);
-        assertFalse("Test credential deleted twice, did first delete fail?", deleted);
-
-        readCred = underTest.get(key);
-        assertNull("Cred can still be read from store?  Did delete fail?", readCred);
-    }
 }
