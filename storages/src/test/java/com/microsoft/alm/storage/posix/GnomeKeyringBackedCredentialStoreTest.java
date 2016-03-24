@@ -5,10 +5,9 @@ package com.microsoft.alm.storage.posix;
 
 import com.microsoft.alm.secret.Credential;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class GnomeKeyringBackedCredentialStoreTest {
 

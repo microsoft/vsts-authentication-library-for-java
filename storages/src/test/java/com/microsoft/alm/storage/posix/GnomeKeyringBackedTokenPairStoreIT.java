@@ -5,13 +5,25 @@ package com.microsoft.alm.storage.posix;
 
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.storage.posix.internal.GnomeKeyringBackedSecureStore;
+import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 public class GnomeKeyringBackedTokenPairStoreIT {
 
     GnomeKeyringBackedTokenPairStore underTest;
+
+    @Before
+    public void setUp() throws Exception {
+        //Only test on platform that has gnome-keyring support
+        assumeTrue(GnomeKeyringBackedSecureStore.isGnomeKeyringSupported());
+
+        underTest = new GnomeKeyringBackedTokenPairStore();
+    }
 
     private final String sampleAssessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik1uQ19WWmNBVGZNNXBPWW" +
             "lKSE1iYTlnb0VLWSIsImtpZCI6Ik1uQ19WWmNBVGZNNXBPWWlKSE1iYTlnb0VLWSJ9.eyJhdWQiOiJodHRwcz" +
@@ -39,26 +51,22 @@ public class GnomeKeyringBackedTokenPairStoreIT {
 
     @Test
     public void saveTokenPair() {
-        if (GnomeKeyringBackedSecureStore.isGnomeKeyringSupported()) {
-            underTest = new GnomeKeyringBackedTokenPairStore();
+        final String testKey = "http://thisisatestkey";
 
-            final String testKey = "http://thisisatestkey";
+        final TokenPair tokenPair = new TokenPair(sampleAssessToken, sampleRefreshToken);
+        boolean added = underTest.add(testKey, tokenPair);
 
-            final TokenPair tokenPair = new TokenPair(sampleAssessToken, sampleRefreshToken);
-            boolean added = underTest.add(testKey, tokenPair);
+        assertTrue(added);
 
-            assertTrue(added);
+        final TokenPair readValue = underTest.get(testKey);
 
-            final TokenPair readValue = underTest.get(testKey);
+        assertEquals(tokenPair.AccessToken, readValue.AccessToken);
+        assertEquals(tokenPair.RefreshToken, readValue.RefreshToken);
 
-            assertEquals(tokenPair.AccessToken, readValue.AccessToken);
-            assertEquals(tokenPair.RefreshToken, readValue.RefreshToken);
+        boolean deleted = underTest.delete(testKey);
+        assertTrue(deleted);
 
-            boolean deleted = underTest.delete(testKey);
-            assertTrue(deleted);
-
-            final TokenPair nonExistent = underTest.get(testKey);
-            assertNull(nonExistent);
-        }
+        final TokenPair nonExistent = underTest.get(testKey);
+        assertNull(nonExistent);
     }
 }

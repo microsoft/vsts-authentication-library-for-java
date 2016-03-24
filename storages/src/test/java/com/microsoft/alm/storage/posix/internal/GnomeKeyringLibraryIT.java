@@ -3,20 +3,24 @@
 
 package com.microsoft.alm.storage.posix.internal;
 
-import com.microsoft.alm.helpers.StringHelper;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 public class GnomeKeyringLibraryIT {
 
     GnomeKeyringLibrary underTest;
     GnomeKeyringLibrary.GnomeKeyringPasswordSchema schema;
 
+    @Before
     public void setUp() throws Exception {
+        //Only test on platform that has gnome-keyring support
+        assumeTrue(GnomeKeyringBackedSecureStore.isGnomeKeyringSupported());
+
         underTest = GnomeKeyringLibrary.INSTANCE;
         schema = new GnomeKeyringLibrary.GnomeKeyringPasswordSchema();
         schema.item_type = GnomeKeyringLibrary.GNOME_KEYRING_ITEM_GENERIC_SECRET;
@@ -25,13 +29,6 @@ public class GnomeKeyringLibraryIT {
 
     @Test
     public void e2e() throws Exception {
-        //Only test on platform that has gnome-keyring support
-        if (!GnomeKeyringBackedSecureStore.isGnomeKeyringSupported()) {
-            return;
-        }
-
-        setUp();
-
         final String type = "PersonalAccessToken";
 
         final String password1 = "testingPassword";
