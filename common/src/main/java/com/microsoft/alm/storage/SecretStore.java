@@ -37,11 +37,13 @@ public interface SecretStore<E extends Secret> {
 
     /**
      * Save the secret identified by the key to this store.  Replace existing secret if it exists.
-     *
      * @param key
      *      for which a secret is associated with
      * @param secret
-     *      the secret to be saved
+     *      secret to be stored
+     *
+     * @return {@code true} if secret is added successfully
+     *         {@code false} otherwise
      */
-    void add(final String key, final E secret);
+    boolean add(final String key, final E secret);
 }

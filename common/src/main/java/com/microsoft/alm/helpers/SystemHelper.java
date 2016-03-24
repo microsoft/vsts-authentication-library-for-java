@@ -21,4 +21,14 @@ public class SystemHelper {
     public static boolean isWindows() {
         return Provider.isWindows(osName);
     }
+
+    /**
+     * Check if it is running on Linux 
+     *
+     * @return
+     *      true if running on Windows; false otherwise
+     */
+    public static boolean isLinux() {
+        return Provider.isLinux(osName);
+    }
 }
