@@ -120,9 +120,6 @@ public class GnomeKeyringLibraryIT {
         underTest.gnome_keyring_free_password(p.pointer);
         underTest.gnome_keyring_free_password(p3.pointer);
 
-        assertTrue("Password1 isn't correctly zero'ed", StringHelper.isNullOrEmpty(p.pointer.getString(0)));
-        assertTrue("Password3 isn't correctly zero'ed", StringHelper.isNullOrEmpty(p3.pointer.getString(0)));
-
         // now let's delete them all
         result = underTest.gnome_keyring_delete_password_sync(schema, "Type", type, "Key", key1, null);
         assertEquals(GnomeKeyringLibrary.GNOME_KEYRING_RESULT_OK, result);
