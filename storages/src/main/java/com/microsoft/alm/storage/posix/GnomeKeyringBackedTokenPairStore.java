@@ -8,13 +8,16 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.alm.helpers.Debug;
-import com.microsoft.alm.secret.Credential;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.storage.posix.internal.GnomeKeyringBackedSecureStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class GnomeKeyringBackedTokenPairStore extends GnomeKeyringBackedSecureStore<TokenPair> {
+
+    private static final Logger logger = LoggerFactory.getLogger(GnomeKeyringBackedTokenPairStore.class);
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -46,6 +49,8 @@ public class GnomeKeyringBackedTokenPairStore extends GnomeKeyringBackedSecureSt
 
             return new TokenPair(tokenPairWrapper.accessToken, tokenPairWrapper.refreshToken);
         } catch (IOException e) {
+            logger.error("Failed to deserialize the stored secret. Return null.", e);
+
             return null;
         }
     }

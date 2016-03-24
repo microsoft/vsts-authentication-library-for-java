@@ -10,10 +10,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.secret.Credential;
 import com.microsoft.alm.storage.posix.internal.GnomeKeyringBackedSecureStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class GnomeKeyringBackedCredentialStore extends GnomeKeyringBackedSecureStore<Credential> {
+
+    private static final Logger logger = LoggerFactory.getLogger(GnomeKeyringBackedCredentialStore.class);
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -30,6 +34,7 @@ public class GnomeKeyringBackedCredentialStore extends GnomeKeyringBackedSecureS
 
             return new Credential(credentialWrapper.username, credentialWrapper.password);
         } catch (IOException e) {
+            logger.error("Failed to deserialize credential.", e);
             return null;
         }
     }
