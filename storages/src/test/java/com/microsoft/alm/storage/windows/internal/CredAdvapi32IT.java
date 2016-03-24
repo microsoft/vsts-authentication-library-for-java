@@ -3,20 +3,29 @@
 
 package com.microsoft.alm.storage.windows.internal;
 
+import com.microsoft.alm.helpers.SystemHelper;
 import com.sun.jna.LastErrorException;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Advapi32;
 import com.sun.jna.ptr.IntByReference;
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
-public class CredAdvapi32Test {
+public class CredAdvapi32IT {
+
+    @Before
+    public void setUp() {
+        assumeTrue(SystemHelper.isWindows());
+    }
 
     public static final String UTF8 = "UTF-8";
 
@@ -26,7 +35,6 @@ public class CredAdvapi32Test {
     private static final String COMMENT = "Testing CredAdvapi32 instance";
 
     @Test
-    @Ignore("Only on Windows platform, needs to be run manually, in interactive mode")
     public void e2eTest() throws UnsupportedEncodingException {
         CredAdvapi32 instance = CredAdvapi32.INSTANCE;
 
