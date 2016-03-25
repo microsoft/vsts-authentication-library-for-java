@@ -5,15 +5,15 @@ package com.microsoft.alm.storage;
 
 import com.microsoft.alm.secret.Secret;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class InsecureInMemoryStore<E extends Secret> implements SecretStore<E> {
 
-    private final Map<String, E> store;
+    private final ConcurrentMap<String, E> store;
 
     public InsecureInMemoryStore() {
-        store = new HashMap<String, E>();
+        store = new ConcurrentHashMap<String, E>();
     }
 
     @Override
