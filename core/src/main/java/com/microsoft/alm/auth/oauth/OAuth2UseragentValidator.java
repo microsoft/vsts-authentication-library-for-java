@@ -31,9 +31,6 @@ public class OAuth2UseragentValidator {
     /**
      * Determines if oauth2 useragent can be used on the current running system.
      *
-     * Except we don't have for desktop environment -- plugin should guarantee a desktop
-     * environment is available.
-     *
      * Be conservative, could return false negative.
      *
      * @return {@code true} if oauth2-useragent can be used 100% positively

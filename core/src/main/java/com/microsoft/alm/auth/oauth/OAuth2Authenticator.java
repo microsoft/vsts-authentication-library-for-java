@@ -141,7 +141,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                         final AuthenticationResult result = getAadAccessToken();
                         return new TokenPair(result.getAccessToken(), result.getRefreshToken());
                     } catch (Exception e) {
-                        logger.error("Failed to get authenticaiton result. ", e);
+                        logger.error("Failed to get authentication result.", e);
 
                         return null;
                     }
