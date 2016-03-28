@@ -179,6 +179,22 @@ Licensed under the MIT license. See License.txt in the project root. -->
       <groupId>com.microsoft.alm</groupId>
       <artifactId>oauth2-useragent</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.microsoftopentechnologies.auth</groupId>
+      <artifactId>aad-interactive-auth</artifactId>
+      <version>1.0.1-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>18.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.3.1</version>
+    </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>

@@ -3,17 +3,23 @@
 
 package com.microsoft.alm.auth.oauth;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.alm.auth.BaseAuthenticator;
 import com.microsoft.alm.auth.PromptBehavior;
-import com.microsoft.alm.secret.TokenPair;
+import com.microsoft.alm.auth.oauth.helpers.MSOpenTechExternalBrowserLauncher;
 import com.microsoft.alm.helpers.Debug;
+import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.storage.InsecureInMemoryStore;
 import com.microsoft.alm.storage.SecretStore;
+import com.microsoftopentechnologies.auth.AuthenticationContext;
+import com.microsoftopentechnologies.auth.AuthenticationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 public class OAuth2Authenticator extends BaseAuthenticator {
 
@@ -121,7 +127,25 @@ public class OAuth2Authenticator extends BaseAuthenticator {
             @Override
             protected TokenPair doRetrieve() {
                 logger.debug("Ready to launch browser flow to retrieve oauth2 token.");
-                return getAzureAuthority().acquireToken(clientId, resource, redirectUri, POPUP_QUERY_PARAM);
+
+                final boolean userExplicitlyBlocksJavaFX
+                        = "false".equalsIgnoreCase(System.getProperty("useJavaFxAuthLibrary"));
+
+                if (OAuth2UseragentValidator.oauth2UserAgentAvailable() && !userExplicitlyBlocksJavaFX) {
+                    logger.info("Using oauth2-useragent providers to retrieve AAD token.");
+                    return getAzureAuthority().acquireToken(clientId, resource, redirectUri, POPUP_QUERY_PARAM);
+                } else {
+                    try {
+                        logger.info("Fallback to MSOpenTech's AAD providers to retrieve AAD token.");
+
+                        final AuthenticationResult result = getAadAccessToken();
+                        return new TokenPair(result.getAccessToken(), result.getRefreshToken());
+                    } catch (Exception e) {
+                        logger.error("Failed to get authentication result.", e);
+
+                        return null;
+                    }
+                }
             }
         };
 
@@ -130,6 +154,31 @@ public class OAuth2Authenticator extends BaseAuthenticator {
 
     public boolean signOut() {
         return super.signOut(APP_VSSPS_VISUALSTUDIO);
+    }
+
+    /**
+     * Retrieve an Azure Active Directory backed OAuth token.
+     *
+     * @return an authentication result which encloses an access token
+     * @throws IOException
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
+    private AuthenticationResult getAadAccessToken() throws IOException, ExecutionException, InterruptedException {
+        final AuthenticationContext context = new AuthenticationContext("login.microsoftonline.com");
+        context.setBrowserLauncher(new MSOpenTechExternalBrowserLauncher());
+        final ListenableFuture<AuthenticationResult> future = context.acquireTokenInteractiveAsync(
+                azureAuthority.CommonTenant,
+                this.resource,
+                this.clientId,
+                this.redirectUri.toString(),
+                "login"
+        );
+
+        final AuthenticationResult result = future.get();
+
+        context.dispose();
+        return result;
     }
 
     public static class OAuth2AuthenticatorBuilder {
