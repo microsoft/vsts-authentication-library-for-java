@@ -6,20 +6,20 @@ package com.microsoft.alm.auth.sample;
 import com.microsoft.alm.auth.PromptBehavior;
 import com.microsoft.alm.auth.oauth.OAuth2Authenticator;
 import com.microsoft.alm.auth.pat.VstsPatAuthenticator;
+import com.microsoft.alm.provider.JaxrsClientProvider;
+import com.microsoft.alm.provider.Options;
+import com.microsoft.alm.provider.UserPasswordCredentialProvider;
 import com.microsoft.alm.secret.Credential;
 import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.secret.VsoTokenScope;
-import com.microsoft.alm.provider.JaxrsClientProvider;
-import com.microsoft.alm.provider.Options;
-import com.microsoft.alm.provider.UserPasswordCredentialProvider;
 import com.microsoft.alm.sourcecontrol.webapi.GitHttpClient;
 import com.microsoft.alm.sourcecontrol.webapi.model.GitRepository;
+import com.microsoft.alm.storage.InsecureFileBackedTokenStore;
 import com.microsoft.alm.storage.InsecureInMemoryStore;
 import com.microsoft.alm.storage.SecretStore;
 import com.microsoft.visualstudio.services.account.Account;
 import com.microsoft.visualstudio.services.account.AccountHttpClient;
-import org.apache.log4j.BasicConfigurator;
 
 import javax.ws.rs.client.Client;
 import java.net.URI;
@@ -35,7 +35,7 @@ public class App {
         // Create the storage for OAuth token and token, if you already have an OAuth store that contains
         // valid OAuth AccessTokens, this is the place to reuse them
         final SecretStore<TokenPair> accessTokenStore = new InsecureInMemoryStore<TokenPair>();
-        final SecretStore<Token> tokenStore = new InsecureInMemoryStore<Token>();
+        final SecretStore<Token> tokenStore = new InsecureFileBackedTokenStore();
 
         //First create the authenticator
         final VstsPatAuthenticator patAuthenticator = new VstsPatAuthenticator(CLIENT_ID, REDIRECT_URL,
