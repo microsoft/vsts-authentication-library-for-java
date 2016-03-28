@@ -40,9 +40,14 @@ public class AzureAuthority {
     public static final String AuthorityHostUrlBase = "https://login.microsoftonline.com";
 
     /**
+     * Common tenant for discovery of real tenant
+     */
+    public static final String CommonTenant = "common";
+
+    /**
      * The common Url for logon services in Azure.
      */
-    public static final String DefaultAuthorityHostUrl = AuthorityHostUrlBase + "/common";
+    public static final String DefaultAuthorityHostUrl = AuthorityHostUrlBase + "/" + CommonTenant;
 
     private final UserAgent userAgent;
 
