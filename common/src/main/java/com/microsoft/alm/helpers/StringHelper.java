@@ -113,6 +113,56 @@ public class StringHelper {
     }
 
     /**
+     * Concatenates the specified elements of a string array,
+     * using the specified separator between each element.
+     *
+     * @param separator  The string to use as a separator.
+     *                   separator is included in the returned string only if value has more than one element.
+     * @param value      An array that contains the elements to concatenate.
+     * @param startIndex The first element in value to use.
+     * @param count      The number of elements of value to use.
+     * @param processor  A callback that gets to intercept and modify elements before they are inserted.
+     * @return A string that consists of the strings in value delimited by the separator string.
+     * -or-
+     * {@link StringHelper#Empty} if count is zero, value has no elements,
+     * or separator and all the elements of value are {@link StringHelper#Empty}.
+     */
+    public static String join(final String separator, final String[] value, final int startIndex, final int count,
+                              final Func<String, String> processor) {
+        if (value == null)
+            throw new IllegalArgumentException("value is null");
+        if (startIndex < 0)
+            throw new IllegalArgumentException("startIndex is less than 0");
+        if (count < 0)
+            throw new IllegalArgumentException("count is less than 0");
+        if (startIndex + count > value.length)
+            throw new IllegalArgumentException("startIndex + count is greater than the number of elements in value");
+
+        // "If separator is null, an empty string ( String.Empty) is used instead."
+        final String sep = ObjectExtensions.coalesce(separator, StringHelper.Empty);
+
+        final StringBuilder result = new StringBuilder();
+
+        if (value.length > 0 && count > 0) {
+            String element = ObjectExtensions.coalesce(value[startIndex], StringHelper.Empty);
+            if (processor != null) {
+                element = processor.call(element);
+            }
+            result.append(element);
+            for (int i = startIndex + 1; i < startIndex + count; i++) {
+                result.append(sep);
+                element = ObjectExtensions.coalesce(value[i], StringHelper.Empty);
+                if (processor != null) {
+                    element = processor.call(element);
+                }
+                result.append(element);
+            }
+        }
+
+        return result.toString();
+    }
+
+    /**
      * Removes all trailing occurrences of a set of characters specified in an array from s.
      *
      * @param s         The string to trim from.

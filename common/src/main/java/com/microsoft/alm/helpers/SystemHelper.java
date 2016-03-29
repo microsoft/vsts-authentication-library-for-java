@@ -13,10 +13,10 @@ public class SystemHelper {
     final static String osName = System.getProperty("os.name");
 
     /**
-     * Check if it is running on Windows
+     * Check if the process is running on Windows platform
      *
      * @return
-     *      true if running on Windows; false otherwise
+     *      {@code true} if running on Windows; {@code false} otherwise
      */
     public static boolean isWindows() {
         return Provider.isWindows(osName);
@@ -26,9 +26,19 @@ public class SystemHelper {
      * Check if it is running on Linux 
      *
      * @return
-     *      true if running on Windows; false otherwise
+     *      {@code true} if running on Linux; {@code false} otherwise
      */
     public static boolean isLinux() {
         return Provider.isLinux(osName);
+    }
+
+    /**
+     * Check if it is running on Mac OSX
+     *
+     * @return
+     *      {@code true} if running on Linux; {@code false} otherwise
+     */
+    public static boolean isMac() {
+        return Provider.isMac(osName);
     }
 }

@@ -64,7 +64,7 @@ public class Token extends Secret {
         this.Value = value;
     }
 
-    Token(final String value, final String typeName) {
+    public Token(final String value, final String typeName) {
         Debug.Assert(!StringHelper.isNullOrWhiteSpace(value), "The value parameter is null or invalid");
         Debug.Assert(!StringHelper.isNullOrWhiteSpace(typeName), "The typeName parameter is null or invalid");
 

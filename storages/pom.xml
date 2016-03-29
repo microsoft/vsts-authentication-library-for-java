@@ -131,6 +131,65 @@ Licensed under the MIT license. See License.txt in the project root. -->
           <additionalparam>-quiet</additionalparam>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>net.ju-n.maven.plugins</groupId>
+        <artifactId>checksum-maven-plugin</artifactId>
+        <version>1.2</version>
+        <executions>
+          <execution>
+            <phase>verify</phase>
+            <goals>
+              <goal>artifacts</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <algorithms>
+            <algorithm>SHA-256</algorithm>
+          </algorithms>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.gmavenplus</groupId>
+        <artifactId>gmavenplus-plugin</artifactId>
+        <version>1.5</version>
+        <executions>
+          <execution>
+            <id>gmavenplus-test</id>
+            <goals>
+              <goal>testCompile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>gmavenplus-verify</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>execute</goal>
+            </goals>
+            <configuration>
+              <!-- http://stackoverflow.com/a/9339405 -->
+              <properties>
+                <shaded_jar_checksum_file>${artifactId}-${version}.jar.sha256</shaded_jar_checksum_file>
+              </properties>
+              <scripts>
+                <script><![CDATA[
+            final String targetDir = project.build.directory;
+            final String shadedJarChecksumFile = shaded_jar_checksum_file;
+            final File checksumFile = new File(targetDir, shadedJarChecksumFile);
+            final String checksum = checksumFile.getText();
+            ]]></script>
+              </scripts>
+            </configuration>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-ant</artifactId>
+            <version>2.4.5</version>
+          </dependency>
+        </dependencies>
+      </plugin>
     </plugins>
   </build>
 
@@ -210,5 +269,11 @@ Licensed under the MIT license. See License.txt in the project root. -->
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy</artifactId>
+      <version>2.4.5</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>
