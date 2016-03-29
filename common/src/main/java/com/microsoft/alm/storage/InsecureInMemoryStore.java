@@ -34,4 +34,9 @@ public class InsecureInMemoryStore<E extends Secret> implements SecretStore<E> {
     public boolean add(final String key, final E secret) {
         return store.put(key, secret) != null;
     }
+
+    @Override
+    public boolean isSecure() {
+        return false;
+    }
 }

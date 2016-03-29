@@ -19,4 +19,14 @@ public class KeychainSecurityBackedTokenStore extends KeychainSecurityCliStore i
         return true;
     }
 
+    /**
+     * Keychain Access is secure
+     *
+     * @return {@code true} for Keychain Access
+     */
+    @Override
+    public boolean isSecure() {
+        return true;
+    }
+
 }
