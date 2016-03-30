@@ -15,9 +15,10 @@ import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.secret.VsoTokenScope;
 import com.microsoft.alm.sourcecontrol.webapi.GitHttpClient;
 import com.microsoft.alm.sourcecontrol.webapi.model.GitRepository;
-import com.microsoft.alm.storage.InsecureFileBackedTokenStore;
 import com.microsoft.alm.storage.InsecureInMemoryStore;
 import com.microsoft.alm.storage.SecretStore;
+import com.microsoft.alm.storage.StorageProvider;
+import com.microsoft.alm.storage.StorageProvider.SecureOption;
 import com.microsoft.visualstudio.services.account.Account;
 import com.microsoft.visualstudio.services.account.AccountHttpClient;
 
@@ -35,7 +36,7 @@ public class App {
         // Create the storage for OAuth token and token, if you already have an OAuth store that contains
         // valid OAuth AccessTokens, this is the place to reuse them
         final SecretStore<TokenPair> accessTokenStore = new InsecureInMemoryStore<TokenPair>();
-        final SecretStore<Token> tokenStore = new InsecureFileBackedTokenStore();
+        final SecretStore<Token> tokenStore = StorageProvider.getTokenStorage(false, SecureOption.PREFER);
 
         //First create the authenticator
         final VstsPatAuthenticator patAuthenticator = new VstsPatAuthenticator(CLIENT_ID, REDIRECT_URL,
