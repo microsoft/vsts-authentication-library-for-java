@@ -78,8 +78,8 @@ public class AzureAuthority {
     }
 
     private URI createAuthorizationEndpointUri(final String authorityHostUrl, final String resource, final String clientId,
-                                              final URI redirectUri, final UserIdentifier userId, final String state,
-                                              final PromptBehavior promptBehavior, final String queryParameters) {
+                                               final URI redirectUri, final UserIdentifier userId, final String state,
+                                               final PromptBehavior promptBehavior, final String queryParameters) {
         final QueryString qs = new QueryString();
         qs.put(OAuthParameter.RESOURCE, resource);
         qs.put(OAuthParameter.CLIENT_ID, clientId);
@@ -166,7 +166,7 @@ public class AzureAuthority {
      * @return If successful, a {@link TokenPair}; otherwise null.
      */
     public TokenPair acquireToken(final String clientId, final String resource,
-                                  final URI redirectUri, String queryParameters) {
+                                  final URI redirectUri, String queryParameters) throws AuthorizationException {
         Debug.Assert(!StringHelper.isNullOrWhiteSpace(clientId), "The clientId parameter is null or empty");
         Debug.Assert(!StringHelper.isNullOrWhiteSpace(resource), "The resource parameter is null or empty");
         Debug.Assert(redirectUri != null, "The redirectUri parameter is null");
@@ -208,21 +208,18 @@ public class AzureAuthority {
     }
 
     private String acquireAuthorizationCode(final String resource, final String clientId, final URI redirectUri,
-                                            final String queryParameters) {
+                                            final String queryParameters) throws AuthorizationException {
         final String expectedState = UUID.randomUUID().toString();
         String authorizationCode = null;
-        try {
-            final URI authorizationEndpoint = createAuthorizationEndpointUri(authorityHostUrl, resource, clientId,
-                    redirectUri, UserIdentifier.ANY_USER, expectedState, PromptBehavior.ALWAYS, queryParameters);
-            final AuthorizationResponse response = userAgent.requestAuthorizationCode(authorizationEndpoint, redirectUri);
-            authorizationCode = response.getCode();
-            // verify that the authorization response gave us the state we sent in the authz endpoint URI
-            final String actualState = response.getState();
-            if (!expectedState.equals(actualState)) {
-                // the states are somehow different; better to assume malice and ignore the authz code
-                authorizationCode = null;
-            }
-        } catch (final AuthorizationException ignored) {
+        final URI authorizationEndpoint = createAuthorizationEndpointUri(authorityHostUrl, resource, clientId,
+                redirectUri, UserIdentifier.ANY_USER, expectedState, PromptBehavior.ALWAYS, queryParameters);
+        final AuthorizationResponse response = userAgent.requestAuthorizationCode(authorizationEndpoint, redirectUri);
+        authorizationCode = response.getCode();
+        // verify that the authorization response gave us the state we sent in the authz endpoint URI
+        final String actualState = response.getState();
+        if (!expectedState.equals(actualState)) {
+            // the states are somehow different; better to assume malice and ignore the authz code
+            authorizationCode = null;
         }
         return authorizationCode;
     }

@@ -3,6 +3,7 @@
 
 package com.microsoft.alm.auth.oauth;
 
+import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.storage.SecretStore;
 import org.junit.Before;
@@ -41,7 +42,7 @@ public class OAuth2AuthenticatorTest {
     }
 
     @Test
-    public void retrieveToken() throws URISyntaxException {
+    public void retrieveToken() throws URISyntaxException, AuthorizationException {
         when(mockAzureAuthority.acquireToken(clientId.toString(), "test_resource",
                         new URI("https://testredirect.com"), underTest.POPUP_QUERY_PARAM))
                 .thenReturn(new TokenPair("access", "refresh"));
