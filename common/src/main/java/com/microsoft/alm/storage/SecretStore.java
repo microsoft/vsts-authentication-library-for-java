@@ -46,4 +46,14 @@ public interface SecretStore<E extends Secret> {
      *         {@code false} otherwise
      */
     boolean add(final String key, final E secret);
+
+    /**
+     * Indicate whether this store is secure or not.  Generally a secure storage is password protected, and all
+     * data maybe encrypted on disk.  However this method does not assert any of those claims - it simply
+     * returns this value as an attribute of the underlying storage
+     *
+     * @return {@code true} if the underlying storage is considered "secure"
+     *         {@code false} otherwise
+     */
+    boolean isSecure();
 }

@@ -133,6 +133,16 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
     }
 
     /**
+     * Gnome-keyring is considered secure
+     *
+     * @return {@code true} for gnome-keyring
+     */
+    @Override
+    public boolean isSecure() {
+        return true;
+    }
+
+    /**
      * Check for gnome-keyring suppport on this platform
      *
      * @return {@code true} if gnome-keyring library is available; {$code false} otherwise

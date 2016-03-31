@@ -34,4 +34,9 @@ public class InsecureFileBackedCredentialStore implements SecretStore<Credential
             return false;
         }
     }
+
+    @Override
+    public boolean isSecure() {
+        return false;
+    }
 }

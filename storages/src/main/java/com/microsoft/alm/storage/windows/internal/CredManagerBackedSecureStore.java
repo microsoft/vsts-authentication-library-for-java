@@ -179,6 +179,16 @@ public abstract class CredManagerBackedSecureStore<E extends Secret> implements 
         }
     }
 
+    /**
+     * Windows credential manager is considered a secure storage for secrets
+     *
+     * @return {@code true} for Windows Crednetial Manager
+     */
+    @Override
+    public boolean isSecure() {
+        return true;
+    }
+
     private CredAdvapi32.CREDENTIAL buildCred(String key, String username, byte[] credentialBlob) {
         final CredAdvapi32.CREDENTIAL credential = new CredAdvapi32.CREDENTIAL();
 

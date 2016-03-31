@@ -34,4 +34,9 @@ public class InsecureFileBackedTokenStore implements SecretStore<Token> {
             return false;
         }
     }
+
+    @Override
+    public boolean isSecure() {
+        return false;
+    }
 }
