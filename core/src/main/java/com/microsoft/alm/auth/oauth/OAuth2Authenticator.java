@@ -8,6 +8,7 @@ import com.microsoft.alm.auth.BaseAuthenticator;
 import com.microsoft.alm.auth.PromptBehavior;
 import com.microsoft.alm.auth.oauth.helpers.MSOpenTechExternalBrowserLauncher;
 import com.microsoft.alm.helpers.Debug;
+import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.storage.InsecureInMemoryStore;
 import com.microsoft.alm.storage.SecretStore;
@@ -132,19 +133,30 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                         = "false".equalsIgnoreCase(System.getProperty("useJavaFxAuthLibrary"));
 
                 if (OAuth2UseragentValidator.oauth2UserAgentAvailable() && !userExplicitlyBlocksJavaFX) {
-                    logger.info("Using oauth2-useragent providers to retrieve AAD token.");
-                    return getAzureAuthority().acquireToken(clientId, resource, redirectUri, POPUP_QUERY_PARAM);
-                } else {
                     try {
-                        logger.info("Fallback to MSOpenTech's AAD providers to retrieve AAD token.");
-
-                        final AuthenticationResult result = getAadAccessToken();
-                        return new TokenPair(result.getAccessToken(), result.getRefreshToken());
-                    } catch (Exception e) {
-                        logger.error("Failed to get authentication result.", e);
-
-                        return null;
+                        logger.info("Using oauth2-useragent providers to retrieve AAD token.");
+                        return getAzureAuthority().acquireToken(clientId, resource, redirectUri, POPUP_QUERY_PARAM);
+                    } catch (final AuthorizationException e) {
+                        logger.error("Failed to launch oauth2-useragent.", e);
+                        // unless we failed with unknown reasons (such as failed to load javafx) we probably should
+                        // just return null
+                        if (!"unknown_error".equalsIgnoreCase(e.getCode())) {
+                            // This error code isn't exposed as a value, so just hardcode this string
+                            return null;
+                        }
                     }
+                }
+
+                // Always fallback to SWT browser if we failed to launch oauth2-useragent unexpectedly
+                try {
+                    logger.info("Fallback to MSOpenTech's AAD providers to retrieve AAD token.");
+
+                    final AuthenticationResult result = getAadAccessToken();
+                    return new TokenPair(result.getAccessToken(), result.getRefreshToken());
+                } catch (Exception e) {
+                    logger.error("Failed to get authentication result.", e);
+
+                    return null;
                 }
             }
         };
