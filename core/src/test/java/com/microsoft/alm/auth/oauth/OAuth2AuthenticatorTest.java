@@ -8,6 +8,7 @@ import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.storage.SecretStore;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -42,6 +43,7 @@ public class OAuth2AuthenticatorTest {
     }
 
     @Test
+    @Ignore
     public void retrieveToken() throws URISyntaxException, AuthorizationException {
         when(mockAzureAuthority.acquireToken(clientId.toString(), "test_resource",
                         new URI("https://testredirect.com"), underTest.POPUP_QUERY_PARAM))
