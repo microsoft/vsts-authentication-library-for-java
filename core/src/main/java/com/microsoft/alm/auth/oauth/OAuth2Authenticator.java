@@ -152,6 +152,11 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                     logger.info("Fallback to MSOpenTech's AAD providers to retrieve AAD token.");
 
                     final AuthenticationResult result = getAadAccessToken();
+                    if (result == null) {
+                        logger.info("Failed to get an accessToken from MSOpenTech's AAD provider.");
+                        return null;
+                    }
+
                     return new TokenPair(result.getAccessToken(), result.getRefreshToken());
                 } catch (Exception e) {
                     logger.error("Failed to get authentication result.", e);
