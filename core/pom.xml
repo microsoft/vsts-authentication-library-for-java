@@ -14,10 +14,6 @@ Licensed under the MIT license. See License.txt in the project root. -->
   <description>A library for authenticating against VSTS and TFS</description>
   <url>https://java.visualstudio.com/</url>
 
-  <properties>
-    <oauth2.useragent.version>0.6.0</oauth2.useragent.version>
-  </properties>
-
   <build>
     <resources>
       <resource>
