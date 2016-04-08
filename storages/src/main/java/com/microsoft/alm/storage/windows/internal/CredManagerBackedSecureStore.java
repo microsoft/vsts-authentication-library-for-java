@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 
+import static com.microsoft.alm.helpers.LoggingHelper.logError;
+
 /**
  * This class exposes functions to interact with Windows Credential Manager
  */
@@ -95,7 +97,7 @@ public abstract class CredManagerBackedSecureStore<E extends Secret> implements 
             }
 
         } catch (final LastErrorException e) {
-            logger.error("Getting secret failed.", e);
+            logError(logger, "Getting secret failed.", e);
             cred = null;
 
         } finally {
@@ -133,7 +135,7 @@ public abstract class CredManagerBackedSecureStore<E extends Secret> implements 
                 return deleted;
             }
         } catch (LastErrorException e) {
-            logger.error("Deleteing secret failed.", e);
+            logError(logger, "Deleteing secret failed.", e);
             return false;
         }
     }
@@ -171,7 +173,7 @@ public abstract class CredManagerBackedSecureStore<E extends Secret> implements 
             return true;
         }
         catch (LastErrorException e) {
-            logger.error("Adding secret failed.", e);
+            logError(logger, "Adding secret failed.", e);
             return false;
         } finally {
             cred.CredentialBlob.clear(credBlob.length);

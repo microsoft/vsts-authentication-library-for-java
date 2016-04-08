@@ -7,6 +7,8 @@ import com.microsoft.alm.secret.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.microsoft.alm.helpers.LoggingHelper.logError;
+
 public class InsecureFileBackedTokenStore implements SecretStore<Token> {
 
     private static Logger logger = LoggerFactory.getLogger(InsecureFileBackedTokenStore.class);
@@ -30,7 +32,7 @@ public class InsecureFileBackedTokenStore implements SecretStore<Token> {
 
             return true;
         } catch (final Throwable t) {
-            logger.error("Failed to add secret to file backed token store.", t);
+            logError(logger, "Failed to add secret to file backed token store.", t);
             return false;
         }
     }
