@@ -3,12 +3,12 @@
 
 package com.microsoft.alm.auth.oauth.helpers;
 
-import com.microsoftopentechnologies.auth.ADJarLoader;
-import com.microsoftopentechnologies.auth.browser.BrowserLauncher;
-import com.microsoftopentechnologies.auth.browser.BrowserLauncherHelper;
-
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.microsoftopentechnologies.auth.browser.BrowserLauncher;
+import com.microsoftopentechnologies.auth.browser.BrowserLauncherHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
@@ -21,6 +21,9 @@ import java.io.File;
  * this problem.
  */
 public class MSOpenTechExternalBrowserLauncher implements BrowserLauncher {
+
+    private static final Logger logger = LoggerFactory.getLogger(MSOpenTechExternalBrowserLauncher.class);
+
     public ListenableFuture<Void> browseAsync(final String url,
                                               final String redirectUrl,
                                               final String callbackUrl,
@@ -28,6 +31,7 @@ public class MSOpenTechExternalBrowserLauncher implements BrowserLauncher {
                                               final boolean noShell) {
         try {
             final File appJar = ADJarLoader.load();
+            logger.debug("Loaded {}", appJar != null ? appJar.getAbsolutePath() : " none, failed to download swt jar.");
             BrowserLauncherHelper.launchExternalProcess(appJar, url, redirectUrl, callbackUrl, windowTitle, noShell);
 
             // Browser is started in a different process, nothing is blocked on current thread
