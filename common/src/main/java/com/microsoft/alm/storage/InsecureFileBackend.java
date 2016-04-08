@@ -33,6 +33,8 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.microsoft.alm.helpers.LoggingHelper.logError;
+
 class InsecureFileBackend {
 
     private static final Logger logger = LoggerFactory.getLogger(InsecureFileBackend.class);
@@ -143,8 +145,7 @@ class InsecureFileBackend {
             }
             return result;
         } catch (final Exception e) {
-            logger.error("Warning: unable to deserialize InsecureFileBackend. Is the file corrupted?");
-
+            logError(logger, "Warning: unable to deserialize InsecureFileBackend. Is the file corrupted?", e);
             return null;
         }
     }

@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import static com.microsoft.alm.helpers.LoggingHelper.logError;
+
 public class GnomeKeyringBackedCredentialStore extends GnomeKeyringBackedSecureStore<Credential> {
 
     private static final Logger logger = LoggerFactory.getLogger(GnomeKeyringBackedCredentialStore.class);
@@ -34,7 +36,7 @@ public class GnomeKeyringBackedCredentialStore extends GnomeKeyringBackedSecureS
 
             return new Credential(credentialWrapper.username, credentialWrapper.password);
         } catch (IOException e) {
-            logger.error("Failed to deserialize credential.", e);
+            logError(logger, "Failed to deserialize credential.", e);
             return null;
         }
     }

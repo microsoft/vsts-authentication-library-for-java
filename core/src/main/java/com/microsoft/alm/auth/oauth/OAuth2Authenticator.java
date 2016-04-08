@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.util.UUID;
 
+import static com.microsoft.alm.helpers.LoggingHelper.logError;
+
 public class OAuth2Authenticator extends BaseAuthenticator {
 
     private static final Logger logger = LoggerFactory.getLogger(OAuth2Authenticator.class);
@@ -136,7 +138,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                         logger.info("Using oauth2-useragent providers to retrieve AAD token.");
                         return getAzureAuthority().acquireToken(clientId, resource, redirectUri, POPUP_QUERY_PARAM);
                     } catch (final AuthorizationException e) {
-                        logger.error("Failed to launch oauth2-useragent.", e);
+                        logError(logger, "Failed to launch oauth2-useragent.", e);
                         // unless we failed with unknown reasons (such as failed to load javafx) we probably should
                         // just return null
                         if (!"unknown_error".equalsIgnoreCase(e.getCode())) {
@@ -160,7 +162,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
 
                     return new TokenPair(result.getAccessToken(), result.getRefreshToken());
                 } catch (Exception e) {
-                    logger.error("Failed to get authentication result.", e);
+                    logError(logger, "Failed to get authentication result.", e);
 
                     return null;
                 }

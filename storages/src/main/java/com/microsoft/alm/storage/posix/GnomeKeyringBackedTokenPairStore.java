@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import static com.microsoft.alm.helpers.LoggingHelper.logError;
+
 public class GnomeKeyringBackedTokenPairStore extends GnomeKeyringBackedSecureStore<TokenPair> {
 
     private static final Logger logger = LoggerFactory.getLogger(GnomeKeyringBackedTokenPairStore.class);
@@ -49,8 +51,7 @@ public class GnomeKeyringBackedTokenPairStore extends GnomeKeyringBackedSecureSt
 
             return new TokenPair(tokenPairWrapper.accessToken, tokenPairWrapper.refreshToken);
         } catch (IOException e) {
-            logger.error("Failed to deserialize the stored secret. Return null.", e);
-
+            logError(logger, "Failed to deserialize the stored secret. Return null.", e);
             return null;
         }
     }
