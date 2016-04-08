@@ -6,13 +6,15 @@ package com.microsoft.alm.auth.oauth;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.storage.SecretStore;
+import com.microsoftopentechnologies.auth.AuthenticationResult;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.Ignore;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -28,25 +30,30 @@ public class OAuth2AuthenticatorTest {
 
     private AzureAuthority mockAzureAuthority;
 
+    private OAuth2UseragentValidator mockOAuth2UseragentValidator;
+
     private UUID clientId = UUID.randomUUID();
 
     @Before
     public void setUp() throws Exception {
         mockStore = mock(SecretStore.class);
         mockAzureAuthority = mock(AzureAuthority.class);
+        mockOAuth2UseragentValidator = mock(OAuth2UseragentValidator.class);
 
         underTest = new OAuth2Authenticator("test_resource",
                 clientId.toString(),
                 URI.create("https://testredirect.com"),
                 mockStore,
-                mockAzureAuthority);
+                mockAzureAuthority,
+                mockOAuth2UseragentValidator);
     }
 
     @Test
-    @Ignore
-    public void retrieveToken() throws URISyntaxException, AuthorizationException {
+    public void getTokenByAcquireToken_if_oauth2_useragent_available()
+                throws URISyntaxException, AuthorizationException {
+        when(mockOAuth2UseragentValidator.oauth2UserAgentAvailable()).thenReturn(true);
         when(mockAzureAuthority.acquireToken(clientId.toString(), "test_resource",
-                        new URI("https://testredirect.com"), underTest.POPUP_QUERY_PARAM))
+                new URI("https://testredirect.com"), underTest.POPUP_QUERY_PARAM))
                 .thenReturn(new TokenPair("access", "refresh"));
 
         TokenPair token = underTest.getOAuth2TokenPair();
@@ -54,6 +61,20 @@ public class OAuth2AuthenticatorTest {
         assertEquals("access", token.AccessToken.Value);
         assertEquals("refresh", token.RefreshToken.Value);
 
+    }
+
+    @Test
+    public void getTokenByAcquireAuthenticationResult_if_oauth2_useragent_not_available()
+                throws URISyntaxException, InterruptedException, ExecutionException, IOException {
+        when(mockOAuth2UseragentValidator.oauth2UserAgentAvailable()).thenReturn(false);
+        when(mockAzureAuthority.acquireAuthenticationResult(clientId.toString(), "test_resource",
+                new URI("https://testredirect.com")))
+                .thenReturn(new AuthenticationResult("AccessTokenType", "access", "refresh", 0, null, null));
+
+        TokenPair token = underTest.getOAuth2TokenPair();
+
+        assertEquals("access", token.AccessToken.Value);
+        assertEquals("refresh", token.RefreshToken.Value);
     }
 
     @Test
