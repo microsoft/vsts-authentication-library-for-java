@@ -23,7 +23,7 @@ Licensed under the MIT license. See License.txt in the project root. -->
   <build>
     <resources>
       <resource>
-        <directory>${basedir}</directory>
+        <directory>${basedir}/..</directory>
         <targetPath>./</targetPath>
         <filtering>false</filtering>
         <includes>
@@ -33,16 +33,7 @@ Licensed under the MIT license. See License.txt in the project root. -->
     </resources>
     <plugins>
       <plugin>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>2.5.1</version>
-        <configuration>
-          <goals>deploy</goals>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>1.4.1</version>
         <executions>
           <execution>
             <id>enforce-versions</id>
@@ -60,18 +51,15 @@ Licensed under the MIT license. See License.txt in the project root. -->
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.3</version>
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
         </configuration>
       </plugin>
-      <plugin>
+      <plugin>  
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>animal-sniffer-maven-plugin</artifactId>
-        <version>1.14</version>
         <configuration>
           <signature>
             <groupId>org.codehaus.mojo.signature</groupId>
@@ -90,48 +78,6 @@ Licensed under the MIT license. See License.txt in the project root. -->
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.15</version>
-        <executions>
-          <execution>
-            <id>verify-style</id>
-            <phase>process-classes</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <checkstyleRules>
-            <module name="Checker">
-              <module name="Header">
-                <property name="headerFile" value="config/checkstyle/java.header" />
-                <property name="fileExtensions" value="java" />
-              </module>
-            </module>
-          </checkstyleRules>
-          <includeTestSourceDirectory>true</includeTestSourceDirectory>
-          <logViolationsToConsole>true</logViolationsToConsole>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.9.1</version>
-        <executions>
-          <execution>
-            <id>attach-javadocs</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <additionalparam>-quiet</additionalparam>
-        </configuration>
-      </plugin>
-      <plugin>
         <groupId>net.ju-n.maven.plugins</groupId>
         <artifactId>checksum-maven-plugin</artifactId>
         <version>1.2</version>
@@ -141,14 +87,14 @@ Licensed under the MIT license. See License.txt in the project root. -->
             <goals>
               <goal>artifacts</goal>
             </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <algorithms>
-            <algorithm>SHA-256</algorithm>
-          </algorithms>
-        </configuration>
-      </plugin>
+            </execution>
+            </executions>
+            <configuration>
+              <algorithms>
+                <algorithm>SHA-256</algorithm>
+              </algorithms>
+            </configuration>
+        </plugin>
       <plugin>
         <groupId>org.codehaus.gmavenplus</groupId>
         <artifactId>gmavenplus-plugin</artifactId>
@@ -192,43 +138,6 @@ Licensed under the MIT license. See License.txt in the project root. -->
       </plugin>
     </plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <id>release</id>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>2.2.1</version>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-  </profiles>
 
   <dependencies>
     <dependency>
