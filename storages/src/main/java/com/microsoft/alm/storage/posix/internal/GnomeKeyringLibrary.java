@@ -208,4 +208,38 @@ public interface GnomeKeyringLibrary extends Library {
      *      pointer to the secret to be freed
      */
     public void gnome_keyring_free_password(final Pointer password);
+
+    /**
+     * Get information about keyring.
+     * The GnomeKeyringInfo structure returned in info must be freed with gnome_keyring_info_free().
+     *
+     * @param keyring
+     *    keyring name
+     * @param keyring_info
+     *    pointer to pointer to keyring info
+     *
+     * @return
+     *    return code
+     */
+    public int gnome_keyring_get_info_sync(final String keyring, PointerToPointer keyring_info);
+
+    /**
+     * Free the keyring info pointer return by gnome_keyring_get_info_sync
+     *
+     * If null pointer is passed nothing occurs.
+     *
+     * @param keyring_info
+     *      pointer to keyring_info
+     */
+    public void gnome_keyring_info_free(final Pointer keyring_info);
+
+    /**
+     * Get whether the keyring is locked or not.
+     *
+     * @param keyring_info
+     *      pointer to keyring_info
+     * @return
+     *      {@code true} when the keyring is locked; {@code false} otherwise.
+     */
+    public boolean gnome_keyring_info_get_is_locked(final Pointer keyring_info);
 }

@@ -7,7 +7,6 @@ import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.helpers.SystemHelper;
 import com.microsoft.alm.secret.Secret;
 import com.microsoft.alm.storage.SecretStore;
-import com.sun.jna.Pointer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +17,7 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
     private static final GnomeKeyringLibrary INSTANCE = getGnomeKeyringLibrary();
     private static final GnomeKeyringLibrary.GnomeKeyringPasswordSchema SCHEMA = getGnomeKeyringPasswordSchema();
 
+    public static final String ALLOW_UNLOCK_KEYRING = "AUTH_LIB_ALLOW_UNLOCK_GNOME_KEYRING";
 
     /**
      * Create a {@code Secret} from the stored string representation
@@ -138,6 +138,35 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
      */
     public static boolean isGnomeKeyringSupported() {
         if (INSTANCE != null && SCHEMA != null) {
+            // If we are here that means we have loaded gnome-keyring library
+
+            // First make sure it's not locked
+            GnomeKeyringLibrary.PointerToPointer keyring_info_container = new GnomeKeyringLibrary.PointerToPointer();
+            int ret  = INSTANCE.gnome_keyring_get_info_sync(
+                    GnomeKeyringLibrary.GNOME_KEYRING_DEFAULT, keyring_info_container);
+
+            if (ret != GnomeKeyringLibrary.GNOME_KEYRING_RESULT_OK) {
+                logger.info("Failed to get default keyring info, gnome-keyring is not supported.");
+                return false;
+            }
+
+            try {
+                final boolean locked = INSTANCE.gnome_keyring_info_get_is_locked(keyring_info_container.pointer);
+
+                if (locked) {
+                    logger.info("Gnome keyring is locked, most likely due to UI is unavailable or user logged in " +
+                            "automatically without supply password.");
+                    final boolean allowUnlock = Boolean.valueOf(System.getProperty(ALLOW_UNLOCK_KEYRING));
+                    if (!allowUnlock) {
+                        logger.info("Do not allow unlock gnome-keyring, gnome-keyring is not available.");
+                        return false;
+                    }
+                }
+            } finally {
+                INSTANCE.gnome_keyring_info_free(keyring_info_container.pointer);
+            }
+
+            logger.debug("Try access gnome-keyring with dummy data to make sure it's accessible...");
             try {
                 GnomeKeyringLibrary.PointerToPointer pPassword = new GnomeKeyringLibrary.PointerToPointer();
                 INSTANCE.gnome_keyring_find_password_sync(SCHEMA,
@@ -177,35 +206,7 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
     }
 
     private static GnomeKeyringLibrary getGnomeKeyringLibrary() {
-        if (isGnomeKeyringLibraryAvaialble()) {
-            return GnomeKeyringLibrary.INSTANCE;
-        } else {
-            logger.warn("Gnome keyring library not present, returning a dummy library.  " +
-                    "This is a bug unless you are testing");
-
-            // on platform that doesn't suport gnome keyring, just return a dummy
-            return new GnomeKeyringLibrary() {
-                @Override
-                public int gnome_keyring_store_password_sync(GnomeKeyringPasswordSchema schema, String keyring, String display_name, String password, Object... args) {
-                    return -1;
-                }
-
-                @Override
-                public int gnome_keyring_find_password_sync(GnomeKeyringPasswordSchema schema, PointerToPointer pPassword, Object... args) {
-                    return -1;
-                }
-
-                @Override
-                public int gnome_keyring_delete_password_sync(GnomeKeyringPasswordSchema schema, Object... args) {
-                    return -1;
-                }
-
-                @Override
-                public void gnome_keyring_free_password(Pointer password) {
-
-                }
-            };
-        }
+        return isGnomeKeyringLibraryAvaialble() ? GnomeKeyringLibrary.INSTANCE : null;
     }
 
     private static GnomeKeyringLibrary.GnomeKeyringPasswordSchema getGnomeKeyringPasswordSchema() {
