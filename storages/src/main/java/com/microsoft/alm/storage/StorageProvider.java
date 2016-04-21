@@ -86,7 +86,7 @@ public class StorageProvider {
 
         final NonPersistentStoreGenerator<Token> inMemoryStoreGenerator = new NonPersistentStoreGenerator<Token>() {
             @Override
-            public SecretStore<Token> getPotentiallyInsecureNonPersistentStore() {
+            public SecretStore<Token> getInsecureNonPersistentStore() {
                 return new InsecureInMemoryStore<Token>();
             }
 
@@ -108,7 +108,7 @@ public class StorageProvider {
 
         final NonPersistentStoreGenerator<TokenPair> inMemoryStoreGenerator = new NonPersistentStoreGenerator<TokenPair>() {
             @Override
-            public SecretStore<TokenPair> getPotentiallyInsecureNonPersistentStore() {
+            public SecretStore<TokenPair> getInsecureNonPersistentStore() {
                 return new InsecureInMemoryStore<TokenPair>();
             }
 
@@ -130,7 +130,7 @@ public class StorageProvider {
 
         final NonPersistentStoreGenerator<Credential> inMemoryStoreGenerator = new NonPersistentStoreGenerator<Credential>() {
             @Override
-            public SecretStore<Credential> getPotentiallyInsecureNonPersistentStore() {
+            public SecretStore<Credential> getInsecureNonPersistentStore() {
                 return new InsecureInMemoryStore<Credential>();
             }
 
@@ -181,10 +181,9 @@ public class StorageProvider {
             candidate = findPersistedStore(secureOption, stores);
         } else {
             // not persisted
-            if (secureOption == SecureOption.PREFER) {
-                candidate = nonPersistentStoreGenerator.getPotentiallyInsecureNonPersistentStore();
-            } else {
-                candidate = nonPersistentStoreGenerator.getSecureNonPersistentStore();
+            candidate = nonPersistentStoreGenerator.getSecureNonPersistentStore();
+            if (candidate == null && secureOption == SecureOption.PREFER) {
+                candidate = nonPersistentStoreGenerator.getInsecureNonPersistentStore();
             }
         }
 
@@ -192,7 +191,7 @@ public class StorageProvider {
     }
 
     interface NonPersistentStoreGenerator<E extends Secret> {
-        SecretStore<E> getPotentiallyInsecureNonPersistentStore();
+        SecretStore<E> getInsecureNonPersistentStore();
         SecretStore<E> getSecureNonPersistentStore();
     }
 }
