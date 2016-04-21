@@ -109,7 +109,7 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
             int result = INSTANCE.gnome_keyring_store_password_sync(
                     SCHEMA,
                     GnomeKeyringLibrary.GNOME_KEYRING_DEFAULT, // save to disk
-                    "Microsoft authentication data for Visual Studio Team Services", //display name
+                    key, //display name
                     serialize(secret),
                     //attributes list
                     "Type", getType(),
@@ -142,7 +142,7 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
             final GnomeKeyringLibrary.PointerToPointer keyring_info = getGnomeKeyringInfoStruct();
             if (keyring_info != null) { 
                 try {
-                    return  isSimplePasswordAPISupported() && isGnomeKeyringUnlocked(keyring_info);
+                    return isSimplePasswordAPISupported() && isGnomeKeyringUnlocked(keyring_info);
                 } finally {
                     INSTANCE.gnome_keyring_info_free(keyring_info.pointer);
                 }
@@ -168,7 +168,7 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
     }
 
     private static boolean isSimplePasswordAPISupported() {
-        // Simple password API is introduced in v2.22.  Unfortunately there is no easy way to discover the verion
+        // Simple password API is introduced in v2.22.  Unfortunately there is no easy way to discover the version
         // of Gnome Keyring library
 
         // Make sure gnome-keyring supports simple password API - this check does not require 
@@ -179,7 +179,7 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
             INSTANCE.gnome_keyring_find_password_sync(
                     SCHEMA,
                     pPassword,
-                    // The following two value should not match anything, calling this method purely
+                    // The following two values should not match anything, calling this method purely
                     // to determine existence of this function since we have no version information
                     "Type", "NullType",
                     "Key", "NullKey",
