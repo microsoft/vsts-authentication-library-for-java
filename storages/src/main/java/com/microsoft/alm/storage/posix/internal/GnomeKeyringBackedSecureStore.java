@@ -36,7 +36,7 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
     protected abstract String serialize(final E secret);
 
     /**
-     * Return the type of this securestore, used to match the secret in gnome-keyring
+     * Return the type of this secure store, used to match the secret in gnome-keyring
      *
      * @return type string representation of the secret type
      */
@@ -132,7 +132,7 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
     }
 
     /**
-     * Check for gnome-keyring suppport on this platform
+     * Check for gnome-keyring support on this platform
      *
      * @return {@code true} if gnome-keyring library is available; {$code false} otherwise
      */
@@ -189,11 +189,11 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
         return false;
     }
 
-    private static boolean isGnomeKeyringLibraryAvaialble() {
+    private static boolean isGnomeKeyringLibraryAvailable() {
         if (SystemHelper.isLinux()) {
             try {
                 // First make sure gnome-keyring library exists
-                GnomeKeyringLibrary gnomeKeyringLibrary = GnomeKeyringLibrary.INSTANCE;
+                GnomeKeyringLibrary ignored = GnomeKeyringLibrary.INSTANCE;
 
                 return true;
             } catch (UnsatisfiedLinkError error) {
@@ -206,11 +206,11 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
     }
 
     private static GnomeKeyringLibrary getGnomeKeyringLibrary() {
-        return isGnomeKeyringLibraryAvaialble() ? GnomeKeyringLibrary.INSTANCE : null;
+        return isGnomeKeyringLibraryAvailable() ? GnomeKeyringLibrary.INSTANCE : null;
     }
 
     private static GnomeKeyringLibrary.GnomeKeyringPasswordSchema getGnomeKeyringPasswordSchema() {
-        if (isGnomeKeyringLibraryAvaialble()) {
+        if (isGnomeKeyringLibraryAvailable()) {
             logger.debug("Gnome keyring is supported, return a password SCHEMA");
             GnomeKeyringLibrary.GnomeKeyringPasswordSchema schema
                     = new GnomeKeyringLibrary.GnomeKeyringPasswordSchema();

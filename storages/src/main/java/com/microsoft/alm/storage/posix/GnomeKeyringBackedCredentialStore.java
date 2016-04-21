@@ -28,7 +28,7 @@ public class GnomeKeyringBackedCredentialStore extends GnomeKeyringBackedSecureS
     }
 
     @Override
-    protected Credential deserialize(String secret) {
+    protected Credential deserialize(final String secret) {
         Debug.Assert(secret != null, "secret cannot be null");
 
         try {

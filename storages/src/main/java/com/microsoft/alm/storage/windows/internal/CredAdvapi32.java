@@ -13,6 +13,7 @@ import com.sun.jna.win32.StdCallLibrary;
 import com.sun.jna.win32.W32APIOptions;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -27,33 +28,33 @@ interface CredAdvapi32 extends StdCallLibrary {
     /**
      * CredRead flag
      */
-    public static final int CRED_FLAGS_PROMPT_NOW = 0x0002;
-    public static final int CRED_FLAGS_USERNAME_TARGET = 0x0004;
+    int CRED_FLAGS_PROMPT_NOW = 0x0002;
+    int CRED_FLAGS_USERNAME_TARGET = 0x0004;
 
     /**
      * Type of Credential
      */
-    public static final int CRED_TYPE_GENERIC = 1;
-    public static final int CRED_TYPE_DOMAIN_PASSWORD = 2;
-    public static final int CRED_TYPE_DOMAIN_CERTIFICATE = 3;
-    public static final int CRED_TYPE_DOMAIN_VISIBLE_PASSWORD = 4;
-    public static final int CRED_TYPE_GENERIC_CERTIFICATE = 5;
-    public static final int CRED_TYPE_DOMAIN_EXTENDED = 6;
-    public static final int CRED_TYPE_MAXIMUM = 7;       // Maximum supported cred type
-    public static final int CRED_TYPE_MAXIMUM_EX = CRED_TYPE_MAXIMUM + 1000;
+    int CRED_TYPE_GENERIC = 1;
+    int CRED_TYPE_DOMAIN_PASSWORD = 2;
+    int CRED_TYPE_DOMAIN_CERTIFICATE = 3;
+    int CRED_TYPE_DOMAIN_VISIBLE_PASSWORD = 4;
+    int CRED_TYPE_GENERIC_CERTIFICATE = 5;
+    int CRED_TYPE_DOMAIN_EXTENDED = 6;
+    int CRED_TYPE_MAXIMUM = 7;       // Maximum supported cred type
+    int CRED_TYPE_MAXIMUM_EX = CRED_TYPE_MAXIMUM + 1000;
 
     /**
      * CredWrite flag
      */
-    public static final int CRED_PRESERVE_CREDENTIAL_BLOB = 0x1;
+    int CRED_PRESERVE_CREDENTIAL_BLOB = 0x1;
 
     /**
      * Values of the Credential Persist field
      */
-    public static final int CRED_PERSIST_NONE = 0;
-    public static final int CRED_PERSIST_SESSION = 1;
-    public static final int CRED_PERSIST_LOCAL_MACHINE = 2;
-    public static final int CRED_PERSIST_ENTERPRISE = 3;
+    int CRED_PERSIST_NONE = 0;
+    int CRED_PERSIST_SESSION = 1;
+    int CRED_PERSIST_LOCAL_MACHINE = 2;
+    int CRED_PERSIST_ENTERPRISE = 3;
 
     /**
      * Credential attributes
@@ -68,18 +69,16 @@ interface CredAdvapi32 extends StdCallLibrary {
      * } CREDENTIAL_ATTRIBUTE, *PCREDENTIAL_ATTRIBUTE;
      *
      */
-    public static class CREDENTIAL_ATTRIBUTE extends Structure {
+    class CREDENTIAL_ATTRIBUTE extends Structure {
 
         public static class ByReference extends CREDENTIAL_ATTRIBUTE implements Structure.ByReference { }
 
         @Override
         protected List getFieldOrder() {
-            return Arrays.asList(new String[]{
-                "Keyword",
-                "Flags",
-                "ValueSize",
-                "Value"
-            });
+            return Arrays.asList("Keyword",
+                    "Flags",
+                    "ValueSize",
+                    "Value");
         }
 
         /**
@@ -113,11 +112,11 @@ interface CredAdvapi32 extends StdCallLibrary {
     /**
      * Pointer to {@See CREDENTIAL_ATTRIBUTE} struct
      */
-    public static class PCREDENTIAL_ATTRIBUTE extends Structure {
+    class PCREDENTIAL_ATTRIBUTE extends Structure {
 
         @Override
         protected List getFieldOrder() {
-            return Arrays.asList(new String[] {"credential_attribute"} );
+            return Collections.singletonList("credential_attribute");
         }
 
         public PCREDENTIAL_ATTRIBUTE() {
@@ -158,12 +157,11 @@ interface CredAdvapi32 extends StdCallLibrary {
      *   LPTSTR                UserName;
      * } CREDENTIAL, *PCREDENTIAL;
      */
-    public static class CREDENTIAL extends Structure {
+    class CREDENTIAL extends Structure {
 
         @Override
         protected List<String> getFieldOrder() {
-            return Arrays.asList(new String[]{
-                    "Flags",
+            return Arrays.asList("Flags",
                     "Type",
                     "TargetName",
                     "Comment",
@@ -174,8 +172,7 @@ interface CredAdvapi32 extends StdCallLibrary {
                     "AttributeCount",
                     "Attributes",
                     "TargetAlias",
-                    "UserName"
-            });
+                    "UserName");
         }
 
         public CREDENTIAL() {
@@ -297,11 +294,11 @@ interface CredAdvapi32 extends StdCallLibrary {
     /**
      *  Pointer to {@see CREDENTIAL} struct
      */
-    public static class PCREDENTIAL extends Structure {
+    class PCREDENTIAL extends Structure {
 
         @Override
         protected List getFieldOrder() {
-            return Arrays.asList(new String[] {"credential"} );
+            return Collections.singletonList("credential");
         }
 
         public PCREDENTIAL() {
@@ -347,7 +344,7 @@ interface CredAdvapi32 extends StdCallLibrary {
      * @throws LastErrorException
      *      GetLastError
      */
-    public boolean CredRead(String targetName, int type, int flags, PCREDENTIAL pcredential) throws LastErrorException;
+    boolean CredRead(String targetName, int type, int flags, PCREDENTIAL pcredential) throws LastErrorException;
 
     /**
      * The CredWrite function creates a new credential or modifies an existing credential in the user's credential set.
@@ -371,7 +368,7 @@ interface CredAdvapi32 extends StdCallLibrary {
      * @throws LastErrorException
      *      GetLastError
      */
-    public boolean CredWrite(CREDENTIAL credential, int flags) throws LastErrorException;
+    boolean CredWrite(CREDENTIAL credential, int flags) throws LastErrorException;
 
     /**
      * The CredDelete function deletes a credential from the user's credential set. The credential set used is the one
@@ -396,7 +393,7 @@ interface CredAdvapi32 extends StdCallLibrary {
      * @throws LastErrorException
      *      GetLastError
      */
-    public boolean CredDelete(String targetName, int type, int flags) throws LastErrorException;
+    boolean CredDelete(String targetName, int type, int flags) throws LastErrorException;
 
     /**
      * The CredFree function frees a buffer returned by any of the credentials management functions.
@@ -409,5 +406,5 @@ interface CredAdvapi32 extends StdCallLibrary {
      * @throws LastErrorException
      *      GetLastError
      */
-    public void CredFree(Pointer credential) throws LastErrorException;
+    void CredFree(Pointer credential) throws LastErrorException;
 }

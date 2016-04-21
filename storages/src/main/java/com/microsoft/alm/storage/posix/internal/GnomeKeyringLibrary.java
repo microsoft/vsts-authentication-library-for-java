@@ -9,6 +9,7 @@ import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -24,12 +25,12 @@ public interface GnomeKeyringLibrary extends Library {
     /**
      * Save secrets to disk
      */
-    public static final String GNOME_KEYRING_DEFAULT = null;
+    String GNOME_KEYRING_DEFAULT = null;
 
     /**
      * Save secrets in memory
      */
-    public static final String GNOME_KEYRING_SESSION = "session";
+    String GNOME_KEYRING_SESSION = "session";
 
     /**
      * GnomeKeyringResult:
@@ -44,16 +45,16 @@ public interface GnomeKeyringLibrary extends Library {
      *  GNOME_KEYRING_RESULT_KEYRING_ALREADY_EXISTS,
      *  GNOME_KEYRING_RESULT_NO_MATCH
      */
-    public static final int GNOME_KEYRING_RESULT_OK                     = 0;
-    public static final int GNOME_KEYRING_RESULT_DENIED                 = 1;
-    public static final int GNOME_KEYRING_RESULT_NO_KEYRING_DAEMON      = 2;
-    public static final int GNOME_KEYRING_RESULT_ALREADY_UNLOCKED       = 3;
-    public static final int GNOME_KEYRING_RESULT_NO_SUCH_KEYRING        = 4;
-    public static final int GNOME_KEYRING_RESULT_BAD_ARGUMENTS          = 5;
-    public static final int GNOME_KEYRING_RESULT_IO_ERROR               = 6;
-    public static final int GNOME_KEYRING_RESULT_CANCELLED              = 7;
-    public static final int GNOME_KEYRING_RESULT_KEYRING_ALREADY_EXISTS = 8;
-    public static final int GNOME_KEYRING_RESULT_NO_MATCH               = 9;
+    int GNOME_KEYRING_RESULT_OK                     = 0;
+    int GNOME_KEYRING_RESULT_DENIED                 = 1;
+    int GNOME_KEYRING_RESULT_NO_KEYRING_DAEMON      = 2;
+    int GNOME_KEYRING_RESULT_ALREADY_UNLOCKED       = 3;
+    int GNOME_KEYRING_RESULT_NO_SUCH_KEYRING        = 4;
+    int GNOME_KEYRING_RESULT_BAD_ARGUMENTS          = 5;
+    int GNOME_KEYRING_RESULT_IO_ERROR               = 6;
+    int GNOME_KEYRING_RESULT_CANCELLED              = 7;
+    int GNOME_KEYRING_RESULT_KEYRING_ALREADY_EXISTS = 8;
+    int GNOME_KEYRING_RESULT_NO_MATCH               = 9;
 
     /**
      * The item types
@@ -68,19 +69,19 @@ public interface GnomeKeyringLibrary extends Library {
      * Not used, remains here only for compatibility
      *  GNOME_KEYRING_ITEM_LAST_TYPE,
      */
-    public static final int GNOME_KEYRING_ITEM_GENERIC_SECRET           = 0;
-    public static final int GNOME_KEYRING_ITEM_NETWORK_PASSWORD         = 1;
-    public static final int GNOME_KEYRING_ITEM_NOTE                     = 2;
-    public static final int GNOME_KEYRING_ITEM_CHAINED_KEYRING_PASSWORD = 3;
-    public static final int GNOME_KEYRING_ITEM_ENCRYPTION_KEY_PASSWORD  = 4;
+    int GNOME_KEYRING_ITEM_GENERIC_SECRET           = 0;
+    int GNOME_KEYRING_ITEM_NETWORK_PASSWORD         = 1;
+    int GNOME_KEYRING_ITEM_NOTE                     = 2;
+    int GNOME_KEYRING_ITEM_CHAINED_KEYRING_PASSWORD = 3;
+    int GNOME_KEYRING_ITEM_ENCRYPTION_KEY_PASSWORD  = 4;
 
     /**
      * GnomeKeyringAttributeType:
      *   GNOME_KEYRING_ATTRIBUTE_TYPE_STRING,
      *   GNOME_KEYRING_ATTRIBUTE_TYPE_UINT32
      */
-    public static final int GNOME_KEYRING_ATTRIBUTE_TYPE_STRING         = 0;
-    public static final int GNOME_KEYRING_ATTRIBUTE_TYPE_UINT32         = 1;
+    int GNOME_KEYRING_ATTRIBUTE_TYPE_STRING         = 0;
+    int GNOME_KEYRING_ATTRIBUTE_TYPE_UINT32         = 1;
 
 
     /**
@@ -88,14 +89,11 @@ public interface GnomeKeyringLibrary extends Library {
      *
      * https://developer.gnome.org/gnome-keyring/stable/gnome-keyring-Item-Attributes.html
      */
-    public static class GnomeKeyringPasswordSchemaAttribute extends Structure {
+    class GnomeKeyringPasswordSchemaAttribute extends Structure {
 
         @Override
         protected List getFieldOrder() {
-            return Arrays.asList(new String[]{
-                    "name",
-                    "type"
-            });
+            return Arrays.asList("name", "type");
         }
 
         public String name;
@@ -108,14 +106,11 @@ public interface GnomeKeyringLibrary extends Library {
      *
      * https://developer.gnome.org/gnome-keyring/stable/gnome-keyring-Simple-Password-Storage.html#GnomeKeyringPasswordSchema
      */
-    public static class GnomeKeyringPasswordSchema extends Structure {
+    class GnomeKeyringPasswordSchema extends Structure {
 
         @Override
         protected List getFieldOrder() {
-            return Arrays.asList(new String[]{
-                    "item_type",
-                    "attributes"
-            });
+            return Arrays.asList("item_type", "attributes");
         }
 
         public int item_type;
@@ -126,13 +121,11 @@ public interface GnomeKeyringLibrary extends Library {
     /**
      * A pointer to pointer helper structure
      */
-    public static class PointerToPointer extends Structure {
+    class PointerToPointer extends Structure {
 
         @Override
         protected List getFieldOrder() {
-            return Arrays.asList(new String[] {
-                    "pointer"
-            });
+            return Collections.singletonList("pointer");
         }
 
         public Pointer pointer;
@@ -157,11 +150,11 @@ public interface GnomeKeyringLibrary extends Library {
      * @return
      *      return code
      */
-    public int gnome_keyring_store_password_sync(final GnomeKeyringPasswordSchema schema,
-                                                 final String keyring,
-                                                 final String display_name,
-                                                 final String password,
-                                                 Object... args);
+    int gnome_keyring_store_password_sync(final GnomeKeyringPasswordSchema schema,
+                                          final String keyring,
+                                          final String display_name,
+                                          final String password,
+                                          Object... args);
 
     /**
      * Retrieving a stored secret, without paraphrasing, please read:
@@ -178,9 +171,9 @@ public interface GnomeKeyringLibrary extends Library {
      * @return
      *      return code
      */
-    public int gnome_keyring_find_password_sync(final GnomeKeyringPasswordSchema schema,
-                                                final PointerToPointer pPassword,
-                                                Object... args);
+    int gnome_keyring_find_password_sync(final GnomeKeyringPasswordSchema schema,
+                                         final PointerToPointer pPassword,
+                                         Object... args);
 
     /**
      * Delete a stored secret, without paraphrasing, please read:
@@ -195,8 +188,8 @@ public interface GnomeKeyringLibrary extends Library {
      * @return
      *      return code
      */
-    public int gnome_keyring_delete_password_sync(final GnomeKeyringPasswordSchema schema,
-                                                  Object... args);
+    int gnome_keyring_delete_password_sync(final GnomeKeyringPasswordSchema schema,
+                                           Object... args);
 
 
     /**
@@ -207,7 +200,7 @@ public interface GnomeKeyringLibrary extends Library {
      * @param password
      *      pointer to the secret to be freed
      */
-    public void gnome_keyring_free_password(final Pointer password);
+    void gnome_keyring_free_password(final Pointer password);
 
     /**
      * Get information about keyring.
@@ -221,7 +214,7 @@ public interface GnomeKeyringLibrary extends Library {
      * @return
      *    return code
      */
-    public int gnome_keyring_get_info_sync(final String keyring, PointerToPointer keyring_info);
+    int gnome_keyring_get_info_sync(final String keyring, PointerToPointer keyring_info);
 
     /**
      * Free the keyring info pointer return by gnome_keyring_get_info_sync
@@ -231,7 +224,7 @@ public interface GnomeKeyringLibrary extends Library {
      * @param keyring_info
      *      pointer to keyring_info
      */
-    public void gnome_keyring_info_free(final Pointer keyring_info);
+    void gnome_keyring_info_free(final Pointer keyring_info);
 
     /**
      * Get whether the keyring is locked or not.
@@ -241,5 +234,5 @@ public interface GnomeKeyringLibrary extends Library {
      * @return
      *      {@code true} when the keyring is locked; {@code false} otherwise.
      */
-    public boolean gnome_keyring_info_get_is_locked(final Pointer keyring_info);
+    boolean gnome_keyring_info_get_is_locked(final Pointer keyring_info);
 }
