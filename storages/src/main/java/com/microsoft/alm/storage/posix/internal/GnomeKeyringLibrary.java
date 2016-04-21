@@ -235,4 +235,18 @@ public interface GnomeKeyringLibrary extends Library {
      *      {@code true} when the keyring is locked; {@code false} otherwise.
      */
     boolean gnome_keyring_info_get_is_locked(final Pointer keyring_info);
+
+    /**
+     * Unlock a keyring, so that its contents may be accessed.  If password is null, user
+     * will be prompted for password to unlock the keyring.
+     *
+     * @param keyring
+     *      keyring name
+     * @param password
+     *      password to unlock.  If password is null, user will be prompted.  
+     *
+     * @return
+     *      {@code true} when the keyring is unlocked; {@code false} otherwise.
+     */
+    int gnome_keyring_unlock_sync(final String keyring, final String password);
 }

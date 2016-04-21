@@ -134,59 +134,94 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
     /**
      * Check for gnome-keyring support on this platform
      *
-     * @return {@code true} if gnome-keyring library is available; {$code false} otherwise
+     * @return {@code true} if gnome-keyring library is available; {@code false} otherwise
      */
     public static boolean isGnomeKeyringSupported() {
         if (INSTANCE != null && SCHEMA != null) {
             // If we are here that means we have loaded gnome-keyring library
-
-            // First make sure it's not locked
-            GnomeKeyringLibrary.PointerToPointer keyring_info_container = new GnomeKeyringLibrary.PointerToPointer();
-            int ret  = INSTANCE.gnome_keyring_get_info_sync(
-                    GnomeKeyringLibrary.GNOME_KEYRING_DEFAULT, keyring_info_container);
-
-            if (ret != GnomeKeyringLibrary.GNOME_KEYRING_RESULT_OK) {
-                logger.info("Failed to get default keyring info, gnome-keyring is not supported.");
-                return false;
-            }
-
-            try {
-                final boolean locked = INSTANCE.gnome_keyring_info_get_is_locked(keyring_info_container.pointer);
-
-                if (locked) {
-                    logger.info("Gnome keyring is locked, most likely due to UI is unavailable or user logged in " +
-                            "automatically without supply password.");
-                    final boolean allowUnlock = Boolean.valueOf(System.getProperty(ALLOW_UNLOCK_KEYRING));
-                    if (!allowUnlock) {
-                        logger.info("Do not allow unlock gnome-keyring, gnome-keyring is not available.");
-                        return false;
-                    }
+            final GnomeKeyringLibrary.PointerToPointer keyring_info = getGnomeKeyringInfoStruct();
+            if (keyring_info != null) { 
+                try {
+                    return  isSimplePasswordAPISupported() && isGnomeKeyringUnlocked(keyring_info);
+                } finally {
+                    INSTANCE.gnome_keyring_info_free(keyring_info.pointer);
                 }
-            } finally {
-                INSTANCE.gnome_keyring_info_free(keyring_info_container.pointer);
-            }
-
-            logger.debug("Try access gnome-keyring with dummy data to make sure it's accessible...");
-            try {
-                GnomeKeyringLibrary.PointerToPointer pPassword = new GnomeKeyringLibrary.PointerToPointer();
-                INSTANCE.gnome_keyring_find_password_sync(SCHEMA,
-                        pPassword,
-                        // The following two value should not match anything, calling this method purely
-                        // to determine existence of this function since we have no version information
-                        "Type", "NullType",
-                        "Key", "NullKey",
-                        null
-                        );
-
-                return true;
-
-            } catch (UnsatisfiedLinkError error) {
-                logger.warn("Gnome-keyring on this platform does not support the simple password API.  " +
-                        "We require gnome-keyring 2.12+.");
             }
         }
 
         return false;
+    }
+
+    private static GnomeKeyringLibrary.PointerToPointer getGnomeKeyringInfoStruct() { 
+        // First make sure we can access gnome-keyring (ssh session may have trouble accessing gnome-keyring)     
+        final GnomeKeyringLibrary.PointerToPointer keyring_info_container = new GnomeKeyringLibrary.PointerToPointer();
+        final int ret  = INSTANCE.gnome_keyring_get_info_sync(
+                GnomeKeyringLibrary.GNOME_KEYRING_DEFAULT, keyring_info_container);
+
+        if (ret != GnomeKeyringLibrary.GNOME_KEYRING_RESULT_OK) {
+            logger.info("Failed to get default keyring info with error {}, gnome-keyring is not supported.", ret);
+
+            return null;
+        }
+
+        return keyring_info_container;
+    }
+
+    private static boolean isSimplePasswordAPISupported() {
+        // Simple password API is introduced in v2.22.  Unfortunately there is no easy way to discover the verion
+        // of Gnome Keyring library
+
+        // Make sure gnome-keyring supports simple password API - this check does not require 
+        // keyring to be unlocked first 
+        logger.debug("Try access gnome-keyring with dummy data to make sure it's accessible...");
+        try {
+            GnomeKeyringLibrary.PointerToPointer pPassword = new GnomeKeyringLibrary.PointerToPointer();
+            INSTANCE.gnome_keyring_find_password_sync(
+                    SCHEMA,
+                    pPassword,
+                    // The following two value should not match anything, calling this method purely
+                    // to determine existence of this function since we have no version information
+                    "Type", "NullType",
+                    "Key", "NullKey",
+                    null
+                    );
+        } catch (UnsatisfiedLinkError error) {
+            logger.warn("Gnome-keyring on this platform does not support the simple password API.  " +
+                    "We require gnome-keyring 2.22+.");
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private static boolean isGnomeKeyringUnlocked(final GnomeKeyringLibrary.PointerToPointer keyring_info) {
+        // Make sure it's not locked, and unlock it if user allows it (usually by popping up a dialog
+        // asking for user's password
+        final boolean locked = INSTANCE.gnome_keyring_info_get_is_locked(keyring_info.pointer);
+
+        if (locked) {
+            logger.info("Gnome keyring is locked, most likely due to UI is unavailable or user logged in " +
+                    "automatically without supplying a password.");
+
+            final boolean allowUnlock = Boolean.valueOf(System.getProperty(ALLOW_UNLOCK_KEYRING));
+            if (allowUnlock) {
+                final int ret = INSTANCE.gnome_keyring_unlock_sync(GnomeKeyringLibrary.GNOME_KEYRING_DEFAULT, null);
+                 
+                if (ret != GnomeKeyringLibrary.GNOME_KEYRING_RESULT_OK) {
+                    logger.info("Failed to unlock default keyring with error {}, gnome-keyring is not supported.", ret);
+
+                    return false;
+                }
+            } else {
+                logger.info("gnome-keyring is locked and unavailable, please set variable {} to " + 
+                        "allow unlocking the keyring with a popup dialog.", ALLOW_UNLOCK_KEYRING); 
+
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static boolean isGnomeKeyringLibraryAvailable() {
