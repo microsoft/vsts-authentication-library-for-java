@@ -19,7 +19,7 @@ public class StorageProviderTest {
 
     private NonPersistentStoreGenerator<Token> generator = new NonPersistentStoreGenerator<Token>() {
         @Override
-        public SecretStore<Token> getPotentialInsecureNonPersistentStore() {
+        public SecretStore<Token> getInsecureNonPersistentStore() {
             return getStore(false);
         }
 

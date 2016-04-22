@@ -126,13 +126,11 @@ public abstract class CredManagerBackedSecureStore<E extends Secret> implements 
     public boolean delete(String key) {
         Debug.Assert(key != null, "key cannot be null");
 
-        logger.info("Deleteing secret for {}", key);
+        logger.info("Deleting secret for {}", key);
 
         try {
             synchronized (INSTANCE) {
-                boolean deleted = INSTANCE.CredDelete(key, CredAdvapi32.CRED_TYPE_GENERIC, 0);
-
-                return deleted;
+                return INSTANCE.CredDelete(key, CredAdvapi32.CRED_TYPE_GENERIC, 0);
             }
         } catch (LastErrorException e) {
             logError(logger, "Deleteing secret failed.", e);
@@ -184,7 +182,7 @@ public abstract class CredManagerBackedSecureStore<E extends Secret> implements 
     /**
      * Windows credential manager is considered a secure storage for secrets
      *
-     * @return {@code true} for Windows Crednetial Manager
+     * @return {@code true} for Windows Credential Manager
      */
     @Override
     public boolean isSecure() {

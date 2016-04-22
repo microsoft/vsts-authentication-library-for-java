@@ -28,7 +28,7 @@ public class GnomeKeyringBackedTokenPairStore extends GnomeKeyringBackedSecureSt
     }
 
     @Override
-    protected String serialize(TokenPair tokenPair) {
+    protected String serialize(final TokenPair tokenPair) {
         Debug.Assert(tokenPair != null, "TokenPair cannot be null");
 
         final TokenPairWrapper wrapper = new TokenPairWrapper();
@@ -43,7 +43,7 @@ public class GnomeKeyringBackedTokenPairStore extends GnomeKeyringBackedSecureSt
     }
 
     @Override
-    protected TokenPair deserialize(String secret) {
+    protected TokenPair deserialize(final String secret) {
         Debug.Assert(secret != null, "secret cannot be null");
 
         try {

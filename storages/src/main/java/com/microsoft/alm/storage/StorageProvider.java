@@ -84,9 +84,9 @@ public class StorageProvider {
         logger.info("Getting a {} token store that {} be secure", persist ? "persistent" : "non-persistent",
                 secureOption == SecureOption.MUST ? "must" : "could");
 
-        final NonPersistentStoreGenerator<Token> inmemoryStoreGenerator = new NonPersistentStoreGenerator<Token>() {
+        final NonPersistentStoreGenerator<Token> inMemoryStoreGenerator = new NonPersistentStoreGenerator<Token>() {
             @Override
-            public SecretStore<Token> getPotentialInsecureNonPersistentStore() {
+            public SecretStore<Token> getInsecureNonPersistentStore() {
                 return new InsecureInMemoryStore<Token>();
             }
 
@@ -97,7 +97,7 @@ public class StorageProvider {
             }
         };
 
-        return getStore(persist, secureOption, PERSISTED_TOKEN_STORE_CANDIDATES, inmemoryStoreGenerator);
+        return getStore(persist, secureOption, PERSISTED_TOKEN_STORE_CANDIDATES, inMemoryStoreGenerator);
     }
 
     public static SecretStore<TokenPair> getTokenPairStorage(final boolean persist, final SecureOption secureOption) {
@@ -106,9 +106,9 @@ public class StorageProvider {
         logger.info("Getting a {} tokenPair store that {} be secure", persist ? "persistent" : "non-persistent",
                 secureOption == SecureOption.MUST ? "must" : "could");
 
-        final NonPersistentStoreGenerator<TokenPair> inmemoryStoreGenerator = new NonPersistentStoreGenerator<TokenPair>() {
+        final NonPersistentStoreGenerator<TokenPair> inMemoryStoreGenerator = new NonPersistentStoreGenerator<TokenPair>() {
             @Override
-            public SecretStore<TokenPair> getPotentialInsecureNonPersistentStore() {
+            public SecretStore<TokenPair> getInsecureNonPersistentStore() {
                 return new InsecureInMemoryStore<TokenPair>();
             }
 
@@ -119,7 +119,7 @@ public class StorageProvider {
             }
         };
 
-        return getStore(persist, secureOption, PERSISTED_TOKENPAIR_STORE_CANDIDATES, inmemoryStoreGenerator);
+        return getStore(persist, secureOption, PERSISTED_TOKENPAIR_STORE_CANDIDATES, inMemoryStoreGenerator);
     }
 
     public static SecretStore<Credential> getCredentialStorage(final boolean persist, final SecureOption secureOption) {
@@ -128,9 +128,9 @@ public class StorageProvider {
         logger.info("Getting a {} credential store that {} be secure", persist ? "persistent" : "non-persistent",
                 secureOption == SecureOption.MUST ? "must" : "could");
 
-        final NonPersistentStoreGenerator<Credential> inmemoryStoreGenerator = new NonPersistentStoreGenerator<Credential>() {
+        final NonPersistentStoreGenerator<Credential> inMemoryStoreGenerator = new NonPersistentStoreGenerator<Credential>() {
             @Override
-            public SecretStore<Credential> getPotentialInsecureNonPersistentStore() {
+            public SecretStore<Credential> getInsecureNonPersistentStore() {
                 return new InsecureInMemoryStore<Credential>();
             }
 
@@ -141,7 +141,7 @@ public class StorageProvider {
             }
         };
 
-        return getStore(persist, secureOption, PERSISTED_CREDENTIAL_STORE_CANDIDATES, inmemoryStoreGenerator);
+        return getStore(persist, secureOption, PERSISTED_CREDENTIAL_STORE_CANDIDATES, inMemoryStoreGenerator);
     }
 
     private static <E extends Secret> SecretStore<E> findSecureStore(final List<SecretStore<E>> stores) {
@@ -169,20 +169,21 @@ public class StorageProvider {
         return candidate;
     }
 
-    static <E extends Secret> SecretStore<E> getStore(final boolean persist, final SecureOption secureOption,
-            final List<SecretStore<E>> stores, final NonPersistentStoreGenerator<E> nonPersistentStoreGenerator) {
+    static <E extends Secret> SecretStore<E> getStore(final boolean persist,
+                                                      final SecureOption secureOption,
+                                                      final List<SecretStore<E>> stores,
+                                                      final NonPersistentStoreGenerator<E> nonPersistentStoreGenerator) {
         Debug.Assert(nonPersistentStoreGenerator != null, "nonPersistentStoreGenerator cannot be null.");
         Debug.Assert(stores != null, "stores cannot be null.");
 
-        SecretStore<E> candidate = null;
+        SecretStore<E> candidate;
         if (persist) {
             candidate = findPersistedStore(secureOption, stores);
         } else {
             // not persisted
-            if (secureOption == SecureOption.PREFER) {
-                candidate = nonPersistentStoreGenerator.getPotentialInsecureNonPersistentStore();
-            } else {
-                candidate = nonPersistentStoreGenerator.getSecureNonPersistentStore();
+            candidate = nonPersistentStoreGenerator.getSecureNonPersistentStore();
+            if (candidate == null && secureOption == SecureOption.PREFER) {
+                candidate = nonPersistentStoreGenerator.getInsecureNonPersistentStore();
             }
         }
 
@@ -190,7 +191,7 @@ public class StorageProvider {
     }
 
     interface NonPersistentStoreGenerator<E extends Secret> {
-        SecretStore<E> getPotentialInsecureNonPersistentStore();
+        SecretStore<E> getInsecureNonPersistentStore();
         SecretStore<E> getSecureNonPersistentStore();
     }
 }

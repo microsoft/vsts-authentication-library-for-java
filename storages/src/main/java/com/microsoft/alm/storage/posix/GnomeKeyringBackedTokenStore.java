@@ -10,12 +10,12 @@ import com.microsoft.alm.storage.posix.internal.GnomeKeyringBackedSecureStore;
 public class GnomeKeyringBackedTokenStore extends GnomeKeyringBackedSecureStore<Token> {
 
     @Override
-    protected Token deserialize(String secret) {
+    protected Token deserialize(final String secret) {
         return new Token(secret, TokenType.Personal);
     }
 
     @Override
-    protected String serialize(Token secret) {
+    protected String serialize(final Token secret) {
         return secret.Value;
     }
 
