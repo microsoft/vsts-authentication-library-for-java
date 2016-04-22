@@ -57,25 +57,18 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
         GnomeKeyringLibrary.PointerToPointer pPassword = new GnomeKeyringLibrary.PointerToPointer();
         String secret = null;
         try {
-            int result = -1;
-            synchronized (INSTANCE) {
-                result = INSTANCE.gnome_keyring_find_password_sync(
+            final int result = INSTANCE.gnome_keyring_find_password_sync(
                         SCHEMA,
                         pPassword,
                         "Type", getType(),
                         "Key", key,
                         null);
-            }
-
             if (result == GnomeKeyringLibrary.GNOME_KEYRING_RESULT_OK) {
                 secret = pPassword.pointer.getString(0);
             }
-
         } finally {
             if (pPassword.pointer != null) {
-                synchronized (INSTANCE) {
                     INSTANCE.gnome_keyring_free_password(pPassword.pointer);
-                }
             }
         }
 
@@ -87,15 +80,13 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
         Debug.Assert(key != null, "key cannot be null");
         logger.info("Deleting {} for {}", getType(), key);
 
-        synchronized (INSTANCE) {
-            int result = INSTANCE.gnome_keyring_delete_password_sync(
-                    SCHEMA,
-                    "Type", getType(),
-                    "Key", key,
-                    null);
+        final int result = INSTANCE.gnome_keyring_delete_password_sync(
+                SCHEMA,
+                "Type", getType(),
+                "Key", key,
+                null);
 
-            return result == GnomeKeyringLibrary.GNOME_KEYRING_RESULT_OK;
-        }
+        return result == GnomeKeyringLibrary.GNOME_KEYRING_RESULT_OK;
     }
 
     @Override
@@ -105,20 +96,18 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
 
         logger.info("Adding a {} for {}", getType(), key);
 
-        synchronized (INSTANCE) {
-            int result = INSTANCE.gnome_keyring_store_password_sync(
-                    SCHEMA,
-                    GnomeKeyringLibrary.GNOME_KEYRING_DEFAULT, // save to disk
-                    key, //display name
-                    serialize(secret),
-                    //attributes list
-                    "Type", getType(),
-                    "Key", key,
-                    null
-            );
+        final int result = INSTANCE.gnome_keyring_store_password_sync(
+                SCHEMA,
+                GnomeKeyringLibrary.GNOME_KEYRING_DEFAULT, // save to disk
+                key, //display name
+                serialize(secret),
+                //attributes list
+                "Type", getType(),
+                "Key", key,
+                null
+        );
 
-            return result == GnomeKeyringLibrary.GNOME_KEYRING_RESULT_OK;
-        }
+        return result == GnomeKeyringLibrary.GNOME_KEYRING_RESULT_OK;
     }
 
     /**
