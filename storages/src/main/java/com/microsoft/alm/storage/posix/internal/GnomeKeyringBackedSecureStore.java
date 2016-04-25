@@ -219,10 +219,19 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
                 // First make sure gnome-keyring library exists
                 GnomeKeyringLibrary ignored = GnomeKeyringLibrary.INSTANCE;
 
+                // Try set the application name to avoid warnings while we initialize -- if this fails,
+                // it's okay, it is not end of the world but user will see some warnings printed on screen
+                try {
+                    GLibInitializer.getInstance().initialize();
+                } catch (final UnsatisfiedLinkError error) {
+                    logger.warn("Glib not available -- user will see warnings printed on screen. Those warnings are " +
+                            "not serioues and can be ignored.");
+                }
+
                 return true;
-            } catch (UnsatisfiedLinkError error) {
+            } catch (final UnsatisfiedLinkError error) {
                 // ignore error
-                logger.debug("Gnome keyring library not present", error);
+                logger.info("Gnome keyring library not present", error);
             }
         }
 
