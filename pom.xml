@@ -5,7 +5,7 @@ Licensed under the MIT license. See License.txt in the project root. -->
 
   <groupId>com.microsoft.alm</groupId>
   <artifactId>java-auth-lib-parent</artifactId>
-  <version>0.1.5-SNAPSHOT</version>
+  <version>0.1.5</version>
   <packaging>pom</packaging>
 
   <name>Parent for Java Authentication Library for Visual Studio Team Services and Team Foundation Server</name>
