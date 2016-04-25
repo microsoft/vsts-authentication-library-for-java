@@ -65,7 +65,7 @@ public class OAuth2AuthenticatorTest {
 
     @Test
     public void getTokenByAcquireAuthenticationResult_if_oauth2_useragent_not_available()
-                throws URISyntaxException, InterruptedException, ExecutionException, IOException {
+            throws URISyntaxException, InterruptedException, ExecutionException, IOException, AuthorizationException {
         when(mockOAuth2UseragentValidator.oauth2UserAgentAvailable()).thenReturn(false);
         when(mockAzureAuthority.acquireAuthenticationResult(clientId.toString(), "test_resource",
                 new URI("https://testredirect.com")))
