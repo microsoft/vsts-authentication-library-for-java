@@ -31,6 +31,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Interfaces with Azure to perform authentication and identity services.
@@ -245,7 +247,7 @@ public class AzureAuthority {
      */
     public AuthenticationResult acquireAuthenticationResult(final String clientId, final String resource,
                                                             final URI redirectUri) throws
-            IOException, ExecutionException, InterruptedException {
+            IOException, ExecutionException, InterruptedException, AuthorizationException {
         Debug.Assert(!StringHelper.isNullOrWhiteSpace(clientId), "The clientId parameter is null or empty");
         Debug.Assert(!StringHelper.isNullOrWhiteSpace(resource), "The resource parameter is null or empty");
         Debug.Assert(redirectUri != null, "The redirectUri parameter is null");
@@ -263,7 +265,12 @@ public class AzureAuthority {
                 "login"
         );
 
-        final AuthenticationResult result = future.get();
+        final AuthenticationResult result;
+        try {
+            result = future.get(10, TimeUnit.MINUTES);
+        } catch (TimeoutException e) {
+            throw new AuthorizationException("Failed to get authentication result within 10 minutes.");
+        }
 
         logger.debug("Retrieved an authenticationResult, existing SWT library.");
 
