@@ -23,7 +23,8 @@ public class GnomeKeyringBackedCredentialStoreTest {
         final String username = "!@#$%^&*~";
         final String password = ":'\"/";
         final Credential cred = new Credential(username, password);
-        final Credential processedCred = underTest.deserialize(underTest.serialize(cred));
+        final String serialized = underTest.serialize(cred);
+        final Credential processedCred = underTest.deserialize(serialized);
         assertEquals(username, processedCred.Username);
         assertEquals(password, processedCred.Password);
     }
