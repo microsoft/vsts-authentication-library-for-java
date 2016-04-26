@@ -146,6 +146,11 @@ Licensed under the MIT license. See License.txt in the project root. -->
     </dependency>
 
     <dependency>
+      <groupId>com.microsoft.alm</groupId>
+      <artifactId>oauth2-useragent</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
       <version>${jna.version}</version>
