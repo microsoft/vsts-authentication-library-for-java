@@ -17,6 +17,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -56,7 +59,7 @@ public class MSOpenTechExternalBrowserLauncher implements BrowserLauncher {
                                               final String redirectUrl,
                                               final String callbackUrl,
                                               final String windowTitle,
-                                              final boolean noShell) throws IOException, AuthorizationException {
+                                              final boolean noShell) throws AuthorizationException {
         final List<String> args = new ArrayList<String>();
         final File javaHome = new File(System.getProperty("java.home"));
         final File javaExecutable = new File(javaHome, "bin" + File.separator + "java");
@@ -86,19 +89,23 @@ public class MSOpenTechExternalBrowserLauncher implements BrowserLauncher {
             final TestableProcessFactory processFactory = new DefaultProcessFactory();
             final TestableProcess process = processFactory.create(args.toArray(new String[args.size()]));
             final ProcessCoordinator coordinator = new ProcessCoordinator(process);
-            coordinator.waitFor();
+            final int retCode = coordinator.waitFor();
 
             final String response = coordinator.getStdOut();
             final String errorContents = coordinator.getStdErr();
 
+            logger.info("return code from SWT window subprocess: {}", retCode);
             logger.debug("stdout from swt window: {}", response);
             logger.warn("stderr from swt window: {}", errorContents);
+
+            if (retCode != 0) {
+                // SWT browser closed unexpectedly, we need to notify the web server that is waiting for the data
+                httpRequest(new URL(callbackUrl + "?" +
+                        URLEncoder.encode(String.format("status=failed&%s", errorContents), "UTF-8")));
+            }
         }
-        catch (final IOException e) {
-            throw new AuthorizationException("io_exception", e.getMessage(), null, e);
-        }
-        catch (final InterruptedException e) {
-            throw new AuthorizationException("interrupted_exception", e.getMessage(), null, e);
+        catch (final Exception e) {
+            throw new AuthorizationException("exception", e.getMessage(), null, e);
         }
     }
 
@@ -142,5 +149,10 @@ public class MSOpenTechExternalBrowserLauncher implements BrowserLauncher {
         final String prop = String.format("-D%s=%s", propName, propValue);
         logger.debug("Adding {} to swt process.", prop);
         args.add(prop);
+    }
+
+    private static void httpRequest(final URL url) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.getResponseCode();
     }
 }
