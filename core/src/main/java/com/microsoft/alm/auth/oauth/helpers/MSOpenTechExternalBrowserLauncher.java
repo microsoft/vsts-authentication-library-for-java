@@ -5,6 +5,7 @@ package com.microsoft.alm.auth.oauth.helpers;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.microsoft.alm.helpers.StringHelper;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.oauth2.useragent.AuthorizationResponse;
 import com.microsoft.alm.oauth2.useragent.subprocess.DefaultProcessFactory;
@@ -95,13 +96,21 @@ public class MSOpenTechExternalBrowserLauncher implements BrowserLauncher {
             final String errorContents = coordinator.getStdErr();
 
             logger.info("return code from SWT window subprocess: {}", retCode);
-            logger.debug("stdout from swt window: {}", response);
-            logger.warn("stderr from swt window: {}", errorContents);
+
+            if (!StringHelper.isNullOrEmpty(response)) {
+                logger.debug("stdout from swt window: {}", response);
+            }
+
+            if (!StringHelper.isNullOrEmpty(errorContents)) {
+                logger.warn("stderr from swt window: {}", errorContents);
+            }
 
             if (retCode != 0) {
                 // SWT browser closed unexpectedly, we need to notify the web server that is waiting for the data
-                httpRequest(new URL(callbackUrl + "?" +
-                        URLEncoder.encode(String.format("status=failed&%s", errorContents), "UTF-8")));
+                final URL localWebServerCallbackUrl = new URL(callbackUrl + "?" +
+                        URLEncoder.encode(String.format("status=failed&%s", errorContents), "UTF-8"));
+                HttpURLConnection connection = (HttpURLConnection) localWebServerCallbackUrl.openConnection();
+                connection.getResponseCode();
             }
         }
         catch (final Exception e) {
@@ -149,10 +158,5 @@ public class MSOpenTechExternalBrowserLauncher implements BrowserLauncher {
         final String prop = String.format("-D%s=%s", propName, propValue);
         logger.debug("Adding {} to swt process.", prop);
         args.add(prop);
-    }
-
-    private static void httpRequest(final URL url) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.getResponseCode();
     }
 }
