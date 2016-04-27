@@ -153,7 +153,16 @@ public class XmlHelper {
         String accessToken = null;
         String refreshToken = null;
 
-        // TODO: deserialize
+        final NodeList propertyNodes = tokenPairNode.getChildNodes();
+        for (int v = 0; v < propertyNodes.getLength(); v++) {
+            final Node propertyNode = propertyNodes.item(v);
+            final String propertyName = propertyNode.getNodeName();
+            if ("accessToken".equals(propertyName)) {
+                accessToken = XmlHelper.getText(propertyNode);
+            } else if ("refreshToken".equals(propertyName)) {
+                refreshToken = XmlHelper.getText(propertyNode);
+            }
+        }
 
         value = new TokenPair(accessToken, refreshToken);
         return value;
@@ -162,8 +171,15 @@ public class XmlHelper {
     public static Element toXml(final Document document, final TokenPair tokenPair) {
         final Element valueNode = document.createElement("value");
 
-        // TODO: serialize access token value
-        // TODO: serialize refresh token value
+        final Element accessTokenNode = document.createElement("accessToken");
+        final Text accessTokenValue = document.createTextNode(tokenPair.AccessToken.Value);
+        accessTokenNode.appendChild(accessTokenValue);
+        valueNode.appendChild(accessTokenNode);
+
+        final Element refreshTokenNode = document.createElement("refreshToken");
+        final Text refreshTokenValue = document.createTextNode(tokenPair.RefreshToken.Value);
+        refreshTokenNode.appendChild(refreshTokenValue);
+        valueNode.appendChild(refreshTokenNode);
 
         return valueNode;
     }
