@@ -5,6 +5,7 @@ package com.microsoft.alm.helpers;
 
 import com.microsoft.alm.secret.Credential;
 import com.microsoft.alm.secret.Token;
+import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.secret.TokenType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -143,6 +144,27 @@ public class XmlHelper {
             targetIdentityNode.appendChild(targetIdentityValue);
             valueNode.appendChild(targetIdentityNode);
         }
+        return valueNode;
+    }
+
+    public static TokenPair fromXmlToTokenPair(final Node tokenPairNode) {
+        TokenPair value;
+
+        String accessToken = null;
+        String refreshToken = null;
+
+        // TODO: deserialize
+
+        value = new TokenPair(accessToken, refreshToken);
+        return value;
+    }
+
+    public static Element toXml(final Document document, final TokenPair tokenPair) {
+        final Element valueNode = document.createElement("value");
+
+        // TODO: serialize access token value
+        // TODO: serialize refresh token value
+
         return valueNode;
     }
 }
