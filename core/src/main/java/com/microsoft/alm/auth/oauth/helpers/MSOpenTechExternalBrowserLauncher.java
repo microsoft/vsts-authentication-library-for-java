@@ -5,6 +5,12 @@ package com.microsoft.alm.auth.oauth.helpers;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.microsoft.alm.oauth2.useragent.AuthorizationException;
+import com.microsoft.alm.oauth2.useragent.AuthorizationResponse;
+import com.microsoft.alm.oauth2.useragent.subprocess.DefaultProcessFactory;
+import com.microsoft.alm.oauth2.useragent.subprocess.ProcessCoordinator;
+import com.microsoft.alm.oauth2.useragent.subprocess.TestableProcess;
+import com.microsoft.alm.oauth2.useragent.subprocess.TestableProcessFactory;
 import com.microsoftopentechnologies.auth.browser.BrowserLauncher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +56,7 @@ public class MSOpenTechExternalBrowserLauncher implements BrowserLauncher {
                                               final String redirectUrl,
                                               final String callbackUrl,
                                               final String windowTitle,
-                                              final boolean noShell) throws IOException {
+                                              final boolean noShell) throws IOException, AuthorizationException {
         final List<String> args = new ArrayList<String>();
         final File javaHome = new File(System.getProperty("java.home"));
         final File javaExecutable = new File(javaHome, "bin" + File.separator + "java");
@@ -75,8 +81,25 @@ public class MSOpenTechExternalBrowserLauncher implements BrowserLauncher {
         args.add(windowTitle);
         args.add("true");
         args.add(String.valueOf(noShell));
-        ProcessBuilder pb = new ProcessBuilder(args);
-        pb.start();
+
+        try {
+            final TestableProcessFactory processFactory = new DefaultProcessFactory();
+            final TestableProcess process = processFactory.create(args.toArray(new String[args.size()]));
+            final ProcessCoordinator coordinator = new ProcessCoordinator(process);
+            coordinator.waitFor();
+
+            final String response = coordinator.getStdOut();
+            final String errorContents = coordinator.getStdErr();
+
+            logger.debug("stdout from swt window: {}", response);
+            logger.warn("stderr from swt window: {}", errorContents);
+        }
+        catch (final IOException e) {
+            throw new AuthorizationException("io_exception", e.getMessage(), null, e);
+        }
+        catch (final InterruptedException e) {
+            throw new AuthorizationException("interrupted_exception", e.getMessage(), null, e);
+        }
     }
 
     private static void addSWTNetworkProxyOptions(final List<String> args) {
