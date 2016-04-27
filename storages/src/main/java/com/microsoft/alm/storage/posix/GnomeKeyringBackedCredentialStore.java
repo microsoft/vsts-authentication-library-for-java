@@ -3,17 +3,20 @@
 
 package com.microsoft.alm.storage.posix;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.alm.helpers.Debug;
+import com.microsoft.alm.helpers.StringHelper;
+import com.microsoft.alm.helpers.XmlHelper;
 import com.microsoft.alm.secret.Credential;
 import com.microsoft.alm.storage.posix.internal.GnomeKeyringBackedSecureStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-import java.io.IOException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 import static com.microsoft.alm.helpers.LoggingHelper.logError;
 
@@ -21,23 +24,37 @@ public class GnomeKeyringBackedCredentialStore extends GnomeKeyringBackedSecureS
 
     private static final Logger logger = LoggerFactory.getLogger(GnomeKeyringBackedCredentialStore.class);
 
-    private static final ObjectMapper mapper = new ObjectMapper();
-
-    static {
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-    }
-
     @Override
     protected Credential deserialize(final String secret) {
         Debug.Assert(secret != null, "secret cannot be null");
 
         try {
-            final CredentialWrapper credentialWrapper = mapper.readValue(secret, CredentialWrapper.class);
-
-            return new Credential(credentialWrapper.username, credentialWrapper.password);
-        } catch (IOException e) {
+            return fromXmlString(secret);
+        } catch (final Exception e) {
             logError(logger, "Failed to deserialize credential.", e);
             return null;
+        }
+    }
+
+    static Credential fromXmlString(final String xmlString) {
+        final byte[] bytes = StringHelper.UTF8GetBytes(xmlString);
+        final ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+        return fromXmlStream(inputStream);
+    }
+
+    static Credential fromXmlStream(final InputStream source) {
+        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        try {
+            final DocumentBuilder builder = dbf.newDocumentBuilder();
+            final Document document = builder.parse(source);
+            final Element rootElement = document.getDocumentElement();
+
+            final Credential result = XmlHelper.fromXmlToCredential(rootElement);
+
+            return result;
+        }
+        catch (final Exception e) {
+            throw new Error(e);
         }
     }
 
@@ -45,32 +62,30 @@ public class GnomeKeyringBackedCredentialStore extends GnomeKeyringBackedSecureS
     protected String serialize(final Credential credential) {
         Debug.Assert(credential != null, "Credential cannot be null");
 
-        final CredentialWrapper wrapper = new CredentialWrapper();
-        wrapper.setUsername(credential.Username);
-        wrapper.setPassword(credential.Password);
+        return toXmlString(credential);
+    }
 
+    static String toXmlString(final Credential credential) {
+        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
-            return mapper.writeValueAsString(wrapper);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            final DocumentBuilder builder = dbf.newDocumentBuilder();
+            final Document document = builder.newDocument();
+
+            final Element element = XmlHelper.toXml(document, credential);
+            document.appendChild(element);
+
+            final String result = XmlHelper.toString(document);
+
+            return result;
         }
+        catch (final Exception e) {
+            throw new Error(e);
+        }
+
     }
 
     @Override
     protected String getType() {
         return "Credential";
-    }
-
-    public static class CredentialWrapper {
-        private String username;
-        private String password;
-
-        public void setUsername(String username) {
-            this.username = username;
-        }
-
-        public void setPassword(String password) {
-            this.password = password;
-        }
     }
 }
