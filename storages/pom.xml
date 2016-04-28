@@ -17,7 +17,6 @@ Licensed under the MIT license. See License.txt in the project root. -->
 
   <properties>
     <jna.version>4.2.1</jna.version>
-    <jackson.version>2.4.1</jackson.version>
   </properties>
 
   <build>
@@ -146,6 +145,11 @@ Licensed under the MIT license. See License.txt in the project root. -->
     </dependency>
 
     <dependency>
+      <groupId>com.microsoft.alm</groupId>
+      <artifactId>oauth2-useragent</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
       <version>${jna.version}</version>
@@ -154,12 +158,6 @@ Licensed under the MIT license. See License.txt in the project root. -->
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
       <version>${jna.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson.version}</version>
     </dependency>
 
     <dependency>

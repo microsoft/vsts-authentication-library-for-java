@@ -3,8 +3,6 @@
 
 package com.microsoft.alm.helpers;
 
-import com.microsoft.alm.oauth2.useragent.Provider;
-
 /**
  * System utilities
  */
@@ -19,7 +17,7 @@ public class SystemHelper {
      *      {@code true} if running on Windows; {@code false} otherwise
      */
     public static boolean isWindows() {
-        return Provider.isWindows(osName);
+        return osName.startsWith("Windows");
     }
 
     /**
@@ -29,7 +27,7 @@ public class SystemHelper {
      *      {@code true} if running on Linux; {@code false} otherwise
      */
     public static boolean isLinux() {
-        return Provider.isLinux(osName);
+        return osName.equals("Linux");
     }
 
     /**
@@ -39,6 +37,6 @@ public class SystemHelper {
      *      {@code true} if running on Linux; {@code false} otherwise
      */
     public static boolean isMac() {
-        return Provider.isMac(osName);
+        return osName.equals("Mac OS X");
     }
 }

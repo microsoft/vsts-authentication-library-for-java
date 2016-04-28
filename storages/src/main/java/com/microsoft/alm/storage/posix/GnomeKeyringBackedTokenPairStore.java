@@ -3,17 +3,20 @@
 
 package com.microsoft.alm.storage.posix;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.alm.helpers.Debug;
+import com.microsoft.alm.helpers.StringHelper;
+import com.microsoft.alm.helpers.XmlHelper;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.storage.posix.internal.GnomeKeyringBackedSecureStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-import java.io.IOException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 import static com.microsoft.alm.helpers.LoggingHelper.logError;
 
@@ -21,24 +24,28 @@ public class GnomeKeyringBackedTokenPairStore extends GnomeKeyringBackedSecureSt
 
     private static final Logger logger = LoggerFactory.getLogger(GnomeKeyringBackedTokenPairStore.class);
 
-    private static final ObjectMapper mapper = new ObjectMapper();
-
-    static {
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-    }
-
     @Override
     protected String serialize(final TokenPair tokenPair) {
         Debug.Assert(tokenPair != null, "TokenPair cannot be null");
 
-        final TokenPairWrapper wrapper = new TokenPairWrapper();
-        wrapper.setAccessToken(tokenPair.AccessToken.Value);
-        wrapper.setRefreshToken(tokenPair.RefreshToken.Value);
+        return toXmlString(tokenPair);
+    }
 
+    static String toXmlString(final TokenPair tokenPair) {
+        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
-            return mapper.writeValueAsString(wrapper);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            final DocumentBuilder builder = dbf.newDocumentBuilder();
+            final Document document = builder.newDocument();
+
+            final Element element = XmlHelper.toXml(document, tokenPair);
+            document.appendChild(element);
+
+            final String result = XmlHelper.toString(document);
+
+            return result;
+        }
+        catch (final Exception e) {
+            throw new Error(e);
         }
     }
 
@@ -47,30 +54,37 @@ public class GnomeKeyringBackedTokenPairStore extends GnomeKeyringBackedSecureSt
         Debug.Assert(secret != null, "secret cannot be null");
 
         try {
-            final TokenPairWrapper tokenPairWrapper = mapper.readValue(secret, TokenPairWrapper.class);
-
-            return new TokenPair(tokenPairWrapper.accessToken, tokenPairWrapper.refreshToken);
-        } catch (IOException e) {
+            return fromXmlString(secret);
+        } catch (final Exception e) {
             logError(logger, "Failed to deserialize the stored secret. Return null.", e);
             return null;
+        }
+    }
+
+    static TokenPair fromXmlString(final String xmlString) {
+        final byte[] bytes = StringHelper.UTF8GetBytes(xmlString);
+        final ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+        return fromXmlStream(inputStream);
+    }
+
+    static TokenPair fromXmlStream(final InputStream source) {
+        final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        try {
+            final DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
+            final Document document = builder.parse(source);
+            final Element rootElement = document.getDocumentElement();
+
+            final TokenPair result = XmlHelper.fromXmlToTokenPair(rootElement);
+
+            return result;
+        }
+        catch (final Exception e) {
+            throw new Error(e);
         }
     }
 
     @Override
     protected String getType() {
         return "OAuth2Token";
-    }
-
-    public static class TokenPairWrapper {
-        private String accessToken;
-        private String refreshToken;
-
-        public void setAccessToken(final String accessToken) {
-            this.accessToken = accessToken;
-        }
-
-        public void setRefreshToken(final String refreshToken) {
-            this.refreshToken = refreshToken;
-        }
     }
 }

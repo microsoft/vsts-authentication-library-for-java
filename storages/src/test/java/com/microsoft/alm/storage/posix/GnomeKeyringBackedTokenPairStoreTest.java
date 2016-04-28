@@ -47,7 +47,8 @@ public class GnomeKeyringBackedTokenPairStoreTest {
     public void serializeDeserialize_tokens() {
         final TokenPair tokenPair = new TokenPair(sampleAssessToken, sampleRefreshToken);
 
-        final TokenPair processed = underTest.deserialize(underTest.serialize(tokenPair));
+        final String serialized = underTest.serialize(tokenPair);
+        final TokenPair processed = underTest.deserialize(serialized);
 
         assertEquals(tokenPair.AccessToken, processed.AccessToken);
         assertEquals(tokenPair.RefreshToken, processed.RefreshToken);

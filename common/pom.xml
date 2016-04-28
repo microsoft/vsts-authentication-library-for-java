@@ -75,10 +75,6 @@ Licensed under the MIT license. See License.txt in the project root. -->
   </build>
 
   <dependencies>
-    <dependency>
-      <groupId>com.microsoft.alm</groupId>
-      <artifactId>oauth2-useragent</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
