@@ -5,6 +5,7 @@ package com.microsoft.alm.auth.oauth;
 
 import com.microsoft.alm.auth.BaseAuthenticator;
 import com.microsoft.alm.auth.PromptBehavior;
+import com.microsoft.alm.helpers.Action;
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.secret.TokenPair;
@@ -40,6 +41,8 @@ public class OAuth2Authenticator extends BaseAuthenticator {
 
     private final OAuth2UseragentValidator oAuth2UseragentValidator;
 
+    private final Action<DeviceFlowResponse> deviceFlowCallback;
+
     /**
      * Get an OAuth2 authenticator
      *
@@ -65,6 +68,35 @@ public class OAuth2Authenticator extends BaseAuthenticator {
     }
 
     /**
+     * Get an OAuth2 authenticator
+     *
+     * @param clientId
+     *      Registered OAuth2 client id
+     * @param redirectUrl
+     *      Callback url for the registered client
+     * @param store
+     *      SecretStore to read and save access token to
+     * @param deviceFlowCallback
+     *      an implementation of {@link Action<DeviceFlowResponse>} to invoke when participating
+     *      in OAuth 2.0 Device Flow, providing the end-user with a URI and a code to use for
+     *      authenticating in an external web browser
+     *
+     * @return an OAuth2Authenticator
+     */
+    public static OAuth2Authenticator getAuthenticator(final String clientId, final String redirectUrl,
+                                                       final SecretStore<TokenPair> store, final Action<DeviceFlowResponse> deviceFlowCallback) {
+        logger.debug("Authenticator manages resource: {}", MANAGEMENT_CORE_RESOURCE);
+
+        return new OAuth2AuthenticatorBuilder()
+                .manage(MANAGEMENT_CORE_RESOURCE)
+                .withClientId(clientId)
+                .redirectTo(redirectUrl)
+                .backedBy(store)
+                .withDeviceFlowCallback(deviceFlowCallback)
+                .build();
+    }
+
+    /**
      * Private constructor so we are guaranteed resource is https://management.core.windows.net.
      *
      * If user wish to construct an authenticator that can work with other protected resource, use
@@ -72,13 +104,13 @@ public class OAuth2Authenticator extends BaseAuthenticator {
      *
      */
     private OAuth2Authenticator(final String resource, final String clientId, final URI redirectUri,
-                               final SecretStore<TokenPair> store) {
-        this(resource, clientId, redirectUri, store, new AzureAuthority(), new OAuth2UseragentValidator());
+                               final SecretStore<TokenPair> store, final Action<DeviceFlowResponse> deviceFlowCallback) {
+        this(resource, clientId, redirectUri, store, new AzureAuthority(), new OAuth2UseragentValidator(), deviceFlowCallback);
     }
 
     /*default*/ OAuth2Authenticator(final String resource, final String clientId, final URI redirectUri,
                         final SecretStore<TokenPair> store, final AzureAuthority azureAuthority,
-                        final OAuth2UseragentValidator oAuth2UseragentValidator) {
+                        final OAuth2UseragentValidator oAuth2UseragentValidator, final Action<DeviceFlowResponse> deviceFlowCallback) {
         Debug.Assert(resource != null, "resource cannot be null");
         Debug.Assert(clientId != null, "clientId cannot be null");
         Debug.Assert(redirectUri != null, "redirectUri cannot be null");
@@ -88,6 +120,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
         this.redirectUri = redirectUri;
         this.azureAuthority = azureAuthority;
         this.oAuth2UseragentValidator = oAuth2UseragentValidator;
+        this.deviceFlowCallback = deviceFlowCallback;
 
         logger.debug("Using default SecretStore? {}", store == null);
         this.store = store == null ? new InsecureInMemoryStore<TokenPair>() : store;
@@ -162,10 +195,19 @@ public class OAuth2Authenticator extends BaseAuthenticator {
 
                     return new TokenPair(result.getAccessToken(), result.getRefreshToken());
                 } catch (Exception e) {
-                    logError(logger, "Failed to get authentication result.", e);
-
-                    return null;
+                    logError(logger, "Failed to use the SWT-based authenticator.", e);
                 }
+
+                // Fallback to Device Flow if there's a callback and the SWT-based authenticator failed
+                if (deviceFlowCallback != null) {
+                    try {
+                        return getAzureAuthority().acquireToken(clientId, resource, deviceFlowCallback);
+                    } catch (final AuthorizationException e) {
+                        logError(logger, "Failed to use the Device Flow authenticator.", e);
+                    }
+                }
+
+                return null;
             }
         };
 
@@ -181,6 +223,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
         private String clientId;
         private URI redirectUri;
         private SecretStore store;
+        private Action<DeviceFlowResponse> deviceFlowCallback;
 
         public OAuth2AuthenticatorBuilder manage(final String resource) {
             Debug.Assert(resource != null, "resource cannot be null");
@@ -214,6 +257,11 @@ public class OAuth2Authenticator extends BaseAuthenticator {
             return this;
         }
 
+        public OAuth2AuthenticatorBuilder withDeviceFlowCallback(final Action<DeviceFlowResponse> deviceFlowCallback) {
+            this.deviceFlowCallback = deviceFlowCallback;
+            return this;
+        }
+
         public OAuth2Authenticator build() {
             if (this.clientId == null) {
                 throw new IllegalStateException("ClientId not set");
@@ -227,7 +275,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                 throw new IllegalStateException("redirectUri not set");
             }
 
-            return new OAuth2Authenticator(this.resource, this.clientId, this.redirectUri, this.store);
+            return new OAuth2Authenticator(this.resource, this.clientId, this.redirectUri, this.store, this.deviceFlowCallback);
         }
     }
 }
