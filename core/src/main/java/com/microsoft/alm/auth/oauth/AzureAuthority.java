@@ -57,6 +57,7 @@ public class AzureAuthority {
     public static final String DefaultAuthorityHostUrl = AuthorityHostUrlBase + "/" + CommonTenant;
 
     private final UserAgent userAgent;
+    private final AzureDeviceFlow azureDeviceFlow;
 
     private String authorityHostUrl;
 
@@ -73,15 +74,16 @@ public class AzureAuthority {
      * @param authorityHostUrl Non-default authority host url.
      */
     public AzureAuthority(final String authorityHostUrl) {
-        this(authorityHostUrl, new UserAgentImpl());
+        this(authorityHostUrl, new UserAgentImpl(), new AzureDeviceFlow());
     }
 
-    AzureAuthority(final String authorityHostUrl, final UserAgent userAgent) {
+    AzureAuthority(final String authorityHostUrl, final UserAgent userAgent, final AzureDeviceFlow azureDeviceFlow) {
         Debug.Assert(UriHelper.isWellFormedUriString(authorityHostUrl), "The authorityHostUrl parameter is invalid.");
         Debug.Assert(userAgent != null, "The userAgent parameter is null.");
 
         this.authorityHostUrl = authorityHostUrl;
         this.userAgent = userAgent;
+        this.azureDeviceFlow = azureDeviceFlow;
     }
 
     static URI createAuthorizationEndpointUri(final String authorityHostUrl, final String resource, final String clientId,
@@ -211,6 +213,26 @@ public class AzureAuthority {
             logger.debug("   token acquisition failed.");
             logger.debug("   IOException: {}", e);
         }
+        return tokens;
+    }
+
+    public TokenPair acquireToken(final String clientId, final String resource, final Action<DeviceFlowResponse> callback) throws AuthorizationException {
+        Debug.Assert(!StringHelper.isNullOrWhiteSpace(clientId), "The clientId parameter is null or empty");
+        Debug.Assert(!StringHelper.isNullOrWhiteSpace(resource), "The resource parameter is null or empty");
+        Debug.Assert(callback != null, "The callback parameter is null");
+
+        logger.debug("AzureAuthority::acquireToken");
+
+        azureDeviceFlow.setResource(resource);
+        final URI deviceEndpoint = URI.create(authorityHostUrl + "/oauth2/devicecode");
+        final DeviceFlowResponse response = azureDeviceFlow.requestAuthorization(deviceEndpoint, clientId, null);
+
+        callback.call(response);
+
+        final URI tokenEndpoint = createTokenEndpointUri(authorityHostUrl);
+        final TokenPair tokens = azureDeviceFlow.requestToken(tokenEndpoint, clientId, response);
+
+        logger.debug("   token acquisition succeeded.");
         return tokens;
     }
 
