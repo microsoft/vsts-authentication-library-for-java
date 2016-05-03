@@ -71,6 +71,11 @@ Licensed under the MIT license. See License.txt in the project root. -->
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.gmavenplus</groupId>
+        <artifactId>gmavenplus-plugin</artifactId>
+      </plugin>
+
     </plugins>
   </build>
 
@@ -95,6 +100,11 @@ Licensed under the MIT license. See License.txt in the project root. -->
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy</artifactId>
       <scope>test</scope>
     </dependency>
 

@@ -4,20 +4,17 @@
 package com.microsoft.alm.secret;
 
 import com.microsoft.alm.helpers.Debug;
+import com.microsoft.alm.helpers.PropertyBag;
 import com.microsoft.alm.helpers.StringHelper;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class TokenPair extends Secret {
     private static final Map<String, String> EMPTY_MAP = Collections.unmodifiableMap(new LinkedHashMap<String, String>(0));
     private static final String ACCESS_TOKEN = "access_token";
     private static final String REFRESH_TOKEN = "refresh_token";
-    // TODO: 449517: this won't match numerical values, such as '"expires_in":3600'
-    private static final Pattern JSON_NAME_VALUE_PAIR = Pattern.compile("\\s*\"([^\"]+)\"\\s*:\\s*\"([^\"]+)\"");
 
     /**
      * Creates a new {@link TokenPair} from raw access and refresh token data.
@@ -35,20 +32,26 @@ public class TokenPair extends Secret {
     }
 
     public TokenPair(final String accessTokenResponse) {
+        this(PropertyBag.fromJson(accessTokenResponse));
+    }
+
+    public TokenPair(final PropertyBag bag) {
         final LinkedHashMap<String, String> parameters = new LinkedHashMap<String, String>();
-        final Matcher matcher = JSON_NAME_VALUE_PAIR.matcher(accessTokenResponse);
         String accessToken = null;
         String refreshToken = null;
-        while (matcher.find()) {
-            final String name = matcher.group(1);
-            final String value = matcher.group(2);
+        for (final Map.Entry<String, Object> pair : bag.entrySet()) {
+            final String name = pair.getKey();
+            final Object value = pair.getValue();
             if (ACCESS_TOKEN.equals(name)) {
-                accessToken = value;
-            } else if (REFRESH_TOKEN.equals(name)) {
-                refreshToken = value;
-            } else {
-                parameters.put(name, value);
+                accessToken = (String) value;
             }
+            else if (REFRESH_TOKEN.equals(name)) {
+                refreshToken = (String) value;
+            }
+            else {
+                parameters.put(name, value.toString());
+            }
+
         }
         this.AccessToken = new Token(accessToken, TokenType.Access);
         this.RefreshToken = new Token(refreshToken, TokenType.Refresh);
