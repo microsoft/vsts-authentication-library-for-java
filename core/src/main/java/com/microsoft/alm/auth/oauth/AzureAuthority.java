@@ -84,7 +84,7 @@ public class AzureAuthority {
         this.userAgent = userAgent;
     }
 
-    private URI createAuthorizationEndpointUri(final String authorityHostUrl, final String resource, final String clientId,
+    static URI createAuthorizationEndpointUri(final String authorityHostUrl, final String resource, final String clientId,
                                                final URI redirectUri, final UserIdentifier userId, final String state,
                                                final PromptBehavior promptBehavior, final String queryParameters) {
         final QueryString qs = new QueryString();
@@ -133,7 +133,7 @@ public class AzureAuthority {
         return result;
     }
 
-    private URI createTokenEndpointUri(final String authorityHostUrl) {
+    static URI createTokenEndpointUri(final String authorityHostUrl) {
         final StringBuilder sb = new StringBuilder(authorityHostUrl);
         sb.append("/oauth2/token");
         final URI result;
@@ -145,7 +145,7 @@ public class AzureAuthority {
         return result;
     }
 
-    private StringContent createTokenRequest(final String resource, final String clientId, final String authorizationCode,
+    static StringContent createTokenRequest(final String resource, final String clientId, final String authorizationCode,
                                              final URI redirectUri, final UUID correlationId) {
         final QueryString qs = new QueryString();
         qs.put(OAuthParameter.RESOURCE, resource);
