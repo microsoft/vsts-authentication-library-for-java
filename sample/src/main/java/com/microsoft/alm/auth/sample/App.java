@@ -4,8 +4,10 @@
 package com.microsoft.alm.auth.sample;
 
 import com.microsoft.alm.auth.PromptBehavior;
+import com.microsoft.alm.auth.oauth.DeviceFlowResponse;
 import com.microsoft.alm.auth.oauth.OAuth2Authenticator;
 import com.microsoft.alm.auth.pat.VstsPatAuthenticator;
+import com.microsoft.alm.helpers.Action;
 import com.microsoft.alm.provider.JaxrsClientProvider;
 import com.microsoft.alm.provider.Options;
 import com.microsoft.alm.provider.UserPasswordCredentialProvider;
@@ -38,12 +40,22 @@ public class App {
         final SecretStore<TokenPair> accessTokenStore = new InsecureInMemoryStore<TokenPair>();
         final SecretStore<Token> tokenStore = StorageProvider.getTokenStorage(false, SecureOption.PREFER);
 
-        //First create the authenticator
-        final VstsPatAuthenticator patAuthenticator = new VstsPatAuthenticator(CLIENT_ID, REDIRECT_URL,
-                accessTokenStore, tokenStore);
+        final Action<DeviceFlowResponse> deviceFlowResponseAction = new Action<DeviceFlowResponse>() {
+            @Override
+            public void call(DeviceFlowResponse deviceFlowResponse) {
+                System.out.println("Go to the following url: ");
+                System.out.println(deviceFlowResponse.getVerificationUri());
+                System.out.println("and enter this code: ");
+                System.out.println(deviceFlowResponse.getUserCode());
+            }
+        };
 
+        //First create the authenticator
         final OAuth2Authenticator oAuth2Authenticator = OAuth2Authenticator.getAuthenticator(CLIENT_ID, REDIRECT_URL,
-                accessTokenStore);
+                accessTokenStore, deviceFlowResponseAction);
+
+        final VstsPatAuthenticator patAuthenticator = new VstsPatAuthenticator(oAuth2Authenticator, tokenStore);
+
         //Create a jaxrs client provider with this authenticator
         final JaxrsClientProvider clientProvider = new JaxrsClientProvider(patAuthenticator);
 
