@@ -216,14 +216,18 @@ public class AzureAuthority {
         return tokens;
     }
 
-    public TokenPair acquireToken(final String clientId, final String resource, final Action<DeviceFlowResponse> callback) throws AuthorizationException {
+    public TokenPair acquireToken(final String clientId, final String resource, final URI redirectUri,
+                                  final Action<DeviceFlowResponse> callback) throws AuthorizationException {
         Debug.Assert(!StringHelper.isNullOrWhiteSpace(clientId), "The clientId parameter is null or empty");
         Debug.Assert(!StringHelper.isNullOrWhiteSpace(resource), "The resource parameter is null or empty");
+        Debug.Assert(redirectUri != null, "The redirectUri parameter is null");
         Debug.Assert(callback != null, "The callback parameter is null");
 
         logger.debug("AzureAuthority::acquireToken");
 
         azureDeviceFlow.setResource(resource);
+        azureDeviceFlow.setRedirectUri(redirectUri.toString());
+
         final URI deviceEndpoint = URI.create(authorityHostUrl + "/oauth2/devicecode");
         final DeviceFlowResponse response = azureDeviceFlow.requestAuthorization(deviceEndpoint, clientId, null);
 

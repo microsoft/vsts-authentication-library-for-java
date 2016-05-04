@@ -35,7 +35,10 @@ public class OAuth2AuthenticatorTest {
 
     private Action<DeviceFlowResponse> testCallback;
 
-    private UUID clientId = UUID.randomUUID();
+    private final UUID clientId = UUID.randomUUID();
+
+    private final URI TEST_REDIRECT_URI = URI.create("https://redirect.test");
+    private final String TEST_RESOURCE = "test_resource";
 
     @Before
     public void setUp() throws Exception {
@@ -49,9 +52,9 @@ public class OAuth2AuthenticatorTest {
             }
         };
 
-        underTest = new OAuth2Authenticator("test_resource",
+        underTest = new OAuth2Authenticator(TEST_RESOURCE,
                 clientId.toString(),
-                URI.create("https://testredirect.com"),
+                TEST_REDIRECT_URI,
                 mockStore,
                 mockAzureAuthority,
                 mockOAuth2UseragentValidator,
@@ -62,8 +65,8 @@ public class OAuth2AuthenticatorTest {
     public void getTokenByAcquireToken_if_oauth2_useragent_available()
                 throws URISyntaxException, AuthorizationException {
         when(mockOAuth2UseragentValidator.oauth2UserAgentAvailable()).thenReturn(true);
-        when(mockAzureAuthority.acquireToken(clientId.toString(), "test_resource",
-                new URI("https://testredirect.com"), underTest.POPUP_QUERY_PARAM))
+        when(mockAzureAuthority.acquireToken(clientId.toString(), TEST_RESOURCE,
+                TEST_REDIRECT_URI, underTest.POPUP_QUERY_PARAM))
                 .thenReturn(new TokenPair("access", "refresh"));
 
         TokenPair token = underTest.getOAuth2TokenPair();
@@ -77,8 +80,7 @@ public class OAuth2AuthenticatorTest {
     public void getTokenByAcquireAuthenticationResult_if_oauth2_useragent_not_available()
             throws URISyntaxException, InterruptedException, ExecutionException, IOException, AuthorizationException {
         when(mockOAuth2UseragentValidator.oauth2UserAgentAvailable()).thenReturn(false);
-        when(mockAzureAuthority.acquireAuthenticationResult(clientId.toString(), "test_resource",
-                new URI("https://testredirect.com")))
+        when(mockAzureAuthority.acquireAuthenticationResult(clientId.toString(), TEST_RESOURCE, TEST_REDIRECT_URI))
                 .thenReturn(new AuthenticationResult("AccessTokenType", "access", "refresh", 0, null, null));
 
         TokenPair token = underTest.getOAuth2TokenPair();
@@ -91,10 +93,10 @@ public class OAuth2AuthenticatorTest {
     public void getTokenByAcquireAuthenticationResult_if_neither_browser_is_available()
             throws URISyntaxException, InterruptedException, ExecutionException, IOException, AuthorizationException {
         when(mockOAuth2UseragentValidator.oauth2UserAgentAvailable()).thenReturn(false);
-        when(mockAzureAuthority.acquireAuthenticationResult(clientId.toString(), "test_resource",
-                new URI("https://testredirect.com")))
+        when(mockAzureAuthority.acquireAuthenticationResult(clientId.toString(), TEST_RESOURCE, TEST_REDIRECT_URI))
                 .thenThrow(new IOException("Unable to launch local web server"));
-        when(mockAzureAuthority.acquireToken(clientId.toString(), "test_resource", testCallback)).thenReturn(new TokenPair("access", "refresh"));
+        when(mockAzureAuthority.acquireToken(clientId.toString(), TEST_RESOURCE, TEST_REDIRECT_URI, testCallback))
+                .thenReturn(new TokenPair("access", "refresh"));
 
         final TokenPair token = underTest.getOAuth2TokenPair();
 
@@ -106,12 +108,11 @@ public class OAuth2AuthenticatorTest {
     public void getTokenByAcquireAuthenticationResult_if_nothing_is_available()
             throws URISyntaxException, InterruptedException, ExecutionException, IOException, AuthorizationException {
         when(mockOAuth2UseragentValidator.oauth2UserAgentAvailable()).thenReturn(false);
-        when(mockAzureAuthority.acquireAuthenticationResult(clientId.toString(), "test_resource",
-                new URI("https://testredirect.com")))
+        when(mockAzureAuthority.acquireAuthenticationResult(clientId.toString(), TEST_RESOURCE, TEST_REDIRECT_URI))
                 .thenThrow(new IOException("Unable to launch local web server"));
-        final OAuth2Authenticator underTest = new OAuth2Authenticator("test_resource",
+        final OAuth2Authenticator underTest = new OAuth2Authenticator(TEST_RESOURCE,
                 clientId.toString(),
-                URI.create("https://testredirect.com"),
+                TEST_REDIRECT_URI,
                 mockStore,
                 mockAzureAuthority,
                 mockOAuth2UseragentValidator,
