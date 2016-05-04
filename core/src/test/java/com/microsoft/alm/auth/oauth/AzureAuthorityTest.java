@@ -28,6 +28,7 @@ public class AzureAuthorityTest {
     static final int TEST_INTERVAL = 5;
     static final String TEST_ACCESS_TOKEN = "bacf8b5f-63f2-4998-9170-d32cf7db4a78";
     static final String TEST_REFRESH_TOKEN = "c2be2d76-1e9e-487c-9684-78823747391c";
+    static final URI TEST_REDIRECT_URI = URI.create("https://redirect.test");
 
     @Test
     public void deviceFlow_success() throws Exception {
@@ -62,7 +63,7 @@ public class AzureAuthorityTest {
         };
         final AzureAuthority cut = new AzureAuthority(authorityHostUrl, null, testDeviceFlow);
 
-        final TokenPair actualTokenPair = cut.acquireToken(TEST_CLIENT_ID, TEST_RESOURCE, callback);
+        final TokenPair actualTokenPair = cut.acquireToken(TEST_CLIENT_ID, TEST_RESOURCE, TEST_REDIRECT_URI, callback);
 
         Assert.assertEquals(TEST_ACCESS_TOKEN, actualTokenPair.AccessToken.Value);
         Assert.assertEquals(TEST_REFRESH_TOKEN, actualTokenPair.RefreshToken.Value);
@@ -104,7 +105,7 @@ public class AzureAuthorityTest {
         final AzureAuthority cut = new AzureAuthority(authorityHostUrl, null, testDeviceFlow);
 
         try {
-            cut.acquireToken(TEST_CLIENT_ID, TEST_RESOURCE, callback);
+            cut.acquireToken(TEST_CLIENT_ID, TEST_RESOURCE, TEST_REDIRECT_URI, callback);
 
             Assert.fail("An exception should have been thrown before this line.");
         } catch (final AuthorizationException e) {

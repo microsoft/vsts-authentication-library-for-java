@@ -201,7 +201,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                 // Fallback to Device Flow if there's a callback and the SWT-based authenticator failed
                 if (deviceFlowCallback != null) {
                     try {
-                        return getAzureAuthority().acquireToken(clientId, resource, deviceFlowCallback);
+                        return getAzureAuthority().acquireToken(clientId, resource, redirectUri, deviceFlowCallback);
                     } catch (final AuthorizationException e) {
                         logError(logger, "Failed to use the Device Flow authenticator.", e);
                     }

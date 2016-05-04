@@ -65,9 +65,25 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
         this.store = store;
     }
 
+    /**
+     * Create a Personal Access Token Authenticator backed a particular {@link OAuth2Authenticator}
+     *
+     * @param oauth2Authenticator
+     *      a fully materialized oauth2 authenticator
+     * @param store
+     *      Store for personal access tokens
+     */
+    public VstsPatAuthenticator(final OAuth2Authenticator oauth2Authenticator, final SecretStore<Token> store) {
+        this(new VsoAzureAuthority(), oauth2Authenticator, store);
+    }
+
     /* default */ VstsPatAuthenticator(final VsoAzureAuthority vsoAzureAuthority,
                                        final OAuth2Authenticator oauth2Authenticator,
                                         final SecretStore<Token> store) {
+        //only those two fields are passed in from outside of this class
+        Debug.Assert(oauth2Authenticator != null, "oauth2Authenticatorcannot be null");
+        Debug.Assert(store != null, "store cannot be null");
+
         this.vsoAzureAuthority = vsoAzureAuthority;
         this.vstsOauthAuthenticator = oauth2Authenticator;
         this.store = store;
