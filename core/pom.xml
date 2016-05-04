@@ -81,7 +81,7 @@ Licensed under the MIT license. See License.txt in the project root. -->
   <dependencies>
     <dependency>
       <groupId>com.microsoft.alm</groupId>
-      <artifactId>java-auth-storages</artifactId>
+      <artifactId>java-auth-storage</artifactId>
     </dependency>
 
     <dependency>

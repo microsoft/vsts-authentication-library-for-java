@@ -14,7 +14,7 @@ Licensed under the MIT license. See License.txt in the project root. -->
 
   <modules>
     <module>common</module>
-    <module>storages</module>
+    <module>storage</module>
     <module>core</module>
     <module>providers</module>
     <module>sample</module>
@@ -221,7 +221,7 @@ Licensed under the MIT license. See License.txt in the project root. -->
       </dependency>
       <dependency>
         <groupId>com.microsoft.alm</groupId>
-        <artifactId>java-auth-storages</artifactId>
+        <artifactId>java-auth-storage</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

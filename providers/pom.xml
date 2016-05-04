@@ -11,8 +11,8 @@ Licensed under the MIT license. See License.txt in the project root. -->
   <artifactId>java-auth-providers</artifactId>
   <packaging>jar</packaging>
 
-  <name>Providers based on different authetnication backs provided by the core library</name>
-  <description>Providers for authenticating against VSTS and TFS</description>
+  <name>Authenticate data providers based on different authentication backends provided by the core module</name>
+  <description>Convenience utilities that provides authentication data based on different types of authenticators from the core module</description>
   <url>https://java.visualstudio.com/</url>
 
   <properties>
