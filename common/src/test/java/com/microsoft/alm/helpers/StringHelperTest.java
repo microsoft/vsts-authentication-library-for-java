@@ -127,6 +127,24 @@ public class StringHelperTest {
     }
 
     @Test
+    public void join_withQuotingProcessor() {
+        final Func<String, String> quotingProcessor = new Func<String, String>() {
+            @Override
+	public String call(final String s) {
+                if (s.contains(" ")) {
+                    return '"' + s + '"';
+                }
+                return s;
+            }
+        };
+        final String[] args = {"--user", "man-with-hat", "--password", "battery horse staple correct"};
+
+        final String actual = StringHelper.join(" ", args, 0, args.length, quotingProcessor);
+
+        Assert.assertEquals("--user man-with-hat --password \"battery horse staple correct\"", actual);
+    }
+
+    @Test
     public void trimEnd_documentationExample() {
         final String actual = StringHelper.trimEnd("123abc456xyz789", '1', '2', '3', '4', '5', '6', '7', '8', '9');
         Assert.assertEquals("123abc456xyz", actual);
