@@ -8,8 +8,8 @@ Licensed under the MIT license. See License.txt in the project root. -->
   <version>0.1.7</version>
   <packaging>pom</packaging>
 
-  <name>Parent for Java Authentication Library for Visual Studio Team Services and Team Foundation Server</name>
-  <description>POM for supporting multi-module Java Authentication library against VSTS and TFS</description>
+  <name>Authentication Library for Visual Studio Team Services and Team Foundation Server</name>
+  <description>Parent POM for supporting multi-module Authentication library for VSTS and TFS</description>
   <url>https://java.visualstudio.com/</url>
 
   <modules>

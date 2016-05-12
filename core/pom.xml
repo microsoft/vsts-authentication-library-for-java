@@ -10,8 +10,8 @@ Licensed under the MIT license. See License.txt in the project root. -->
   <artifactId>auth-core</artifactId>
   <packaging>jar</packaging>
 
-  <name>Java Authentication Library for Visual Studio Team Services and Team Foundation Server</name>
-  <description>A library for authenticating against VSTS and TFS</description>
+  <name>Authentication Library for Visual Studio Team Services and Team Foundation Server</name>
+  <description>A library for authenticating against VSTS and TFS.</description>
   <url>https://java.visualstudio.com/</url>
 
   <build>

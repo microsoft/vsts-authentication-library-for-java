@@ -11,7 +11,8 @@ Licensed under the MIT license. See License.txt in the project root. -->
   <artifactId>auth-sample</artifactId>
   <packaging>jar</packaging>
 
-  <name>Sample App that utilize the java auth library</name>
+  <name>Sample App of the Authentication Library</name>
+  <description>Sample App to demostrate how to use the Authentication Library to make RESTful calls against Visual Studio Team Services</description>
   <url>https://java.visualstudio.com/</url>
 
   <build>
