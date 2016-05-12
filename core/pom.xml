@@ -4,10 +4,10 @@ Licensed under the MIT license. See License.txt in the project root. -->
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.microsoft.alm</groupId>
-    <artifactId>java-auth-lib-parent</artifactId>
-    <version>0.1.6</version>
+    <artifactId>auth-lib-parent</artifactId>
+    <version>0.1.7</version>
   </parent>
-  <artifactId>java-auth-core</artifactId>
+  <artifactId>auth-core</artifactId>
   <packaging>jar</packaging>
 
   <name>Java Authentication Library for Visual Studio Team Services and Team Foundation Server</name>
@@ -81,7 +81,7 @@ Licensed under the MIT license. See License.txt in the project root. -->
   <dependencies>
     <dependency>
       <groupId>com.microsoft.alm</groupId>
-      <artifactId>java-auth-storage</artifactId>
+      <artifactId>auth-common</artifactId>
     </dependency>
 
     <dependency>

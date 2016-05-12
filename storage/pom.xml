@@ -5,10 +5,10 @@ Licensed under the MIT license. See License.txt in the project root. -->
 
   <parent>
     <groupId>com.microsoft.alm</groupId>
-    <artifactId>java-auth-lib-parent</artifactId>
-    <version>0.1.6</version>
+    <artifactId>auth-lib-parent</artifactId>
+    <version>0.1.7</version>
   </parent>
-  <artifactId>java-auth-storage</artifactId>
+  <artifactId>auth-secure-storage</artifactId>
   <packaging>jar</packaging>
 
   <name>Secure storage for storing credentials created by the Java Authentication Library</name>
@@ -141,7 +141,7 @@ Licensed under the MIT license. See License.txt in the project root. -->
   <dependencies>
     <dependency>
       <groupId>com.microsoft.alm</groupId>
-      <artifactId>java-auth-common</artifactId>
+      <artifactId>auth-common</artifactId>
     </dependency>
 
     <dependency>

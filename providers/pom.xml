@@ -5,10 +5,10 @@ Licensed under the MIT license. See License.txt in the project root. -->
 
   <parent>
     <groupId>com.microsoft.alm</groupId>
-    <artifactId>java-auth-lib-parent</artifactId>
-    <version>0.1.6</version>
+    <artifactId>auth-lib-parent</artifactId>
+    <version>0.1.7</version>
   </parent>
-  <artifactId>java-auth-providers</artifactId>
+  <artifactId>auth-providers</artifactId>
   <packaging>jar</packaging>
 
   <name>Authenticate data providers based on different authentication backends provided by the core module</name>
@@ -82,7 +82,7 @@ Licensed under the MIT license. See License.txt in the project root. -->
   <dependencies>
     <dependency>
       <groupId>com.microsoft.alm</groupId>
-      <artifactId>java-auth-core</artifactId>
+      <artifactId>auth-core</artifactId>
     </dependency>
 
     <dependency>

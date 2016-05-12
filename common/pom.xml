@@ -4,10 +4,10 @@ Licensed under the MIT license. See License.txt in the project root. -->
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.microsoft.alm</groupId>
-    <artifactId>java-auth-lib-parent</artifactId>
-    <version>0.1.6</version>
+    <artifactId>auth-lib-parent</artifactId>
+    <version>0.1.7</version>
   </parent>
-  <artifactId>java-auth-common</artifactId>
+  <artifactId>auth-common</artifactId>
   <packaging>jar</packaging>
 
   <name>Common interfaces, helpers and data models classes for Java Authentication Library</name>
