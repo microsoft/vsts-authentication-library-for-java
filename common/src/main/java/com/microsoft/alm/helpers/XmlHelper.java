@@ -3,9 +3,7 @@
 
 package com.microsoft.alm.helpers;
 
-import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenPair;
-import com.microsoft.alm.secret.TokenType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -19,7 +17,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayOutputStream;
-import java.util.UUID;
 
 public class XmlHelper {
     // Adapted from http://docs.oracle.com/javase/tutorial/jaxp/dom/readingXML.html
@@ -61,52 +58,6 @@ public class XmlHelper {
         } catch (final TransformerException e) {
             throw new Error(e);
         }
-    }
-
-    public static Token fromXmlToToken(final Node tokenNode) {
-        Token value;
-
-        String tokenValue = null;
-        TokenType tokenType = null;
-        UUID targetIdentity = Guid.Empty;
-
-        final NodeList propertyNodes = tokenNode.getChildNodes();
-        for (int v = 0; v < propertyNodes.getLength(); v++) {
-            final Node propertyNode = propertyNodes.item(v);
-            final String propertyName = propertyNode.getNodeName();
-            if ("Type".equals(propertyName)) {
-                tokenType = TokenType.valueOf(TokenType.class, XmlHelper.getText(propertyNode));
-            } else if ("Value".equals(propertyName)) {
-                tokenValue = XmlHelper.getText(propertyNode);
-            } else if ("targetIdentity".equals(propertyName)) {
-                targetIdentity = UUID.fromString(XmlHelper.getText(propertyNode));
-            }
-        }
-        value = new Token(tokenValue, tokenType);
-        value.setTargetIdentity(targetIdentity);
-        return value;
-    }
-
-    public static Element toXml(final Document document, final Token token) {
-        final Element valueNode = document.createElement("value");
-
-        final Element typeNode = document.createElement("Type");
-        final Text typeValue = document.createTextNode(token.Type.toString());
-        typeNode.appendChild(typeValue);
-        valueNode.appendChild(typeNode);
-
-        final Element tokenValueNode = document.createElement("Value");
-        final Text valueValue = document.createTextNode(token.Value);
-        tokenValueNode.appendChild(valueValue);
-        valueNode.appendChild(tokenValueNode);
-
-        if (!Guid.Empty.equals(token.getTargetIdentity())) {
-            final Element targetIdentityNode = document.createElement("targetIdentity");
-            final Text targetIdentityValue = document.createTextNode(token.getTargetIdentity().toString());
-            targetIdentityNode.appendChild(targetIdentityValue);
-            valueNode.appendChild(targetIdentityNode);
-        }
-        return valueNode;
     }
 
     public static TokenPair fromXmlToTokenPair(final Node tokenPairNode) {

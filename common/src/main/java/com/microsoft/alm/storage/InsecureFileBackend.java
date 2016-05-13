@@ -179,7 +179,7 @@ class InsecureFileBackend {
             if ("key".equals(keyOrValueName)) {
                 key = XmlHelper.getText(keyOrValueNode);
             } else if ("value".equals(keyOrValueName)) {
-                value = XmlHelper.fromXmlToToken(keyOrValueNode);
+                value = Token.fromXml(keyOrValueNode);
             }
         }
         result.Tokens.put(key, value);
@@ -220,7 +220,7 @@ class InsecureFileBackend {
 
             final Token value = entry.getValue();
             if (value != null) {
-                final Element valueNode = XmlHelper.toXml(document, value);
+                final Element valueNode = value.toXml(document);
 
                 entryNode.appendChild(valueNode);
             }
