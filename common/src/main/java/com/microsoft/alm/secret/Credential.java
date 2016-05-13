@@ -6,7 +6,9 @@ package com.microsoft.alm.secret;
 import com.microsoft.alm.helpers.ObjectExtensions;
 import com.microsoft.alm.helpers.StringHelper;
 
+import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.Charset;
+import java.util.Map;
 
 /**
  * Credential for user authentication.
@@ -71,6 +73,14 @@ public final class Credential extends Secret {
         {
             return Username.hashCode() + 7 * Password.hashCode();
         }
+    }
+
+    public void contributeHeader(final Map<String, String> headers) {
+        // credentials are packed into the 'Authorization' header as a base64 encoded pair
+        final String credPair = Username + ":" + Password;
+        final byte[] credBytes = credPair.getBytes(ASCII);
+        final String base64enc = DatatypeConverter.printBase64Binary(credBytes);
+        headers.put("Authorization", "Basic" + " " + base64enc);
     }
 
     public static void validate(final Credential credentials) {
