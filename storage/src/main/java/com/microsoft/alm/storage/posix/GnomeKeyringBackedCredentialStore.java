@@ -49,7 +49,7 @@ public class GnomeKeyringBackedCredentialStore extends GnomeKeyringBackedSecureS
             final Document document = builder.parse(source);
             final Element rootElement = document.getDocumentElement();
 
-            final Credential result = XmlHelper.fromXmlToCredential(rootElement);
+            final Credential result = Credential.fromXml(rootElement);
 
             return result;
         }
@@ -71,7 +71,7 @@ public class GnomeKeyringBackedCredentialStore extends GnomeKeyringBackedSecureS
             final DocumentBuilder builder = dbf.newDocumentBuilder();
             final Document document = builder.newDocument();
 
-            final Element element = XmlHelper.toXml(document, credential);
+            final Element element = credential.toXml(document);
             document.appendChild(element);
 
             final String result = XmlHelper.toString(document);

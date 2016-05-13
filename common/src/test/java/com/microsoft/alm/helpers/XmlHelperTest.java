@@ -3,7 +3,6 @@
 
 package com.microsoft.alm.helpers;
 
-import com.microsoft.alm.secret.Credential;
 import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.secret.TokenType;
@@ -26,35 +25,6 @@ public class XmlHelperTest {
     @Before
     public void setUp() {
         underTest = new XmlHelper();
-    }
-
-    @Test
-    public void xmlSerialization_roundTrip() throws Exception {
-        final Credential credential = new Credential("douglas.adams", "42");
-        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        final DocumentBuilder builder = dbf.newDocumentBuilder();
-        final Document serializationDoc = builder.newDocument();
-
-        final Element element = underTest.toXml(serializationDoc, credential);
-
-        serializationDoc.appendChild(element);
-        final String actualXmlString = XmlHelper.toString(serializationDoc);
-        final String expectedXmlString =
-                "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
-                        "<value>\n" +
-                        "    <Password>42</Password>\n" +
-                        "    <Username>douglas.adams</Username>\n" +
-                        "</value>";
-        StringHelperTest.assertLinesEqual(expectedXmlString, actualXmlString);
-
-        final ByteArrayInputStream bais = new ByteArrayInputStream(actualXmlString.getBytes());
-        final Document deserializationDoc = builder.parse(bais);
-        final Element rootNode = deserializationDoc.getDocumentElement();
-
-        final Credential actualCredential = underTest.fromXmlToCredential(rootNode);
-
-        assertEquals(credential.Username, actualCredential.Username);
-        assertEquals(credential.Password, actualCredential.Password);
     }
 
     @Test

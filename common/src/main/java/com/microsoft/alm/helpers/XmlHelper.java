@@ -3,7 +3,6 @@
 
 package com.microsoft.alm.helpers;
 
-import com.microsoft.alm.secret.Credential;
 import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.secret.TokenType;
@@ -62,43 +61,6 @@ public class XmlHelper {
         } catch (final TransformerException e) {
             throw new Error(e);
         }
-    }
-
-    public static Credential fromXmlToCredential(final Node credentialNode) {
-        Credential value;
-        String password = null;
-        String username = null;
-
-        final NodeList propertyNodes = credentialNode.getChildNodes();
-        for (int v = 0; v < propertyNodes.getLength(); v++) {
-            final Node propertyNode = propertyNodes.item(v);
-            if (propertyNode.getNodeType() != Node.ELEMENT_NODE) continue;
-
-            final String propertyName = propertyNode.getNodeName();
-            if ("Password".equals(propertyName)) {
-                password = XmlHelper.getText(propertyNode);
-            } else if ("Username".equals(propertyName)) {
-                username = XmlHelper.getText(propertyNode);
-            }
-        }
-        value = new Credential(username, password);
-        return value;
-    }
-
-    public static Element toXml(final Document document, final Credential cred) {
-        final Element valueNode = document.createElement("value");
-
-        final Element passwordNode = document.createElement("Password");
-        final Text passwordValue = document.createTextNode(cred.Password);
-        passwordNode.appendChild(passwordValue);
-        valueNode.appendChild(passwordNode);
-
-        final Element usernameNode = document.createElement("Username");
-        final Text usernameValue = document.createTextNode(cred.Username);
-        usernameNode.appendChild(usernameValue);
-        valueNode.appendChild(usernameNode);
-
-        return valueNode;
     }
 
     public static Token fromXmlToToken(final Node tokenNode) {
