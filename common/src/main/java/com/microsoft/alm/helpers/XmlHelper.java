@@ -3,12 +3,9 @@
 
 package com.microsoft.alm.helpers;
 
-import com.microsoft.alm.secret.TokenPair;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.Text;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -60,40 +57,4 @@ public class XmlHelper {
         }
     }
 
-    public static TokenPair fromXmlToTokenPair(final Node tokenPairNode) {
-        TokenPair value;
-
-        String accessToken = null;
-        String refreshToken = null;
-
-        final NodeList propertyNodes = tokenPairNode.getChildNodes();
-        for (int v = 0; v < propertyNodes.getLength(); v++) {
-            final Node propertyNode = propertyNodes.item(v);
-            final String propertyName = propertyNode.getNodeName();
-            if ("accessToken".equals(propertyName)) {
-                accessToken = XmlHelper.getText(propertyNode);
-            } else if ("refreshToken".equals(propertyName)) {
-                refreshToken = XmlHelper.getText(propertyNode);
-            }
-        }
-
-        value = new TokenPair(accessToken, refreshToken);
-        return value;
-    }
-
-    public static Element toXml(final Document document, final TokenPair tokenPair) {
-        final Element valueNode = document.createElement("value");
-
-        final Element accessTokenNode = document.createElement("accessToken");
-        final Text accessTokenValue = document.createTextNode(tokenPair.AccessToken.Value);
-        accessTokenNode.appendChild(accessTokenValue);
-        valueNode.appendChild(accessTokenNode);
-
-        final Element refreshTokenNode = document.createElement("refreshToken");
-        final Text refreshTokenValue = document.createTextNode(tokenPair.RefreshToken.Value);
-        refreshTokenNode.appendChild(refreshTokenValue);
-        valueNode.appendChild(refreshTokenNode);
-
-        return valueNode;
-    }
 }
