@@ -37,7 +37,7 @@ public class GnomeKeyringBackedTokenPairStore extends GnomeKeyringBackedSecureSt
             final DocumentBuilder builder = dbf.newDocumentBuilder();
             final Document document = builder.newDocument();
 
-            final Element element = XmlHelper.toXml(document, tokenPair);
+            final Element element = tokenPair.toXml(document);
             document.appendChild(element);
 
             final String result = XmlHelper.toString(document);
@@ -74,7 +74,7 @@ public class GnomeKeyringBackedTokenPairStore extends GnomeKeyringBackedSecureSt
             final Document document = builder.parse(source);
             final Element rootElement = document.getDocumentElement();
 
-            final TokenPair result = XmlHelper.fromXmlToTokenPair(rootElement);
+            final TokenPair result = TokenPair.fromXml(rootElement);
 
             return result;
         }

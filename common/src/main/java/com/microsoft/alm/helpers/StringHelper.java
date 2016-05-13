@@ -87,29 +87,7 @@ public class StringHelper {
      * or separator and all the elements of value are {@link StringHelper#Empty}.
      */
     public static String join(final String separator, final String[] value, final int startIndex, final int count) {
-        if (value == null)
-            throw new IllegalArgumentException("value is null");
-        if (startIndex < 0)
-            throw new IllegalArgumentException("startIndex is less than 0");
-        if (count < 0)
-            throw new IllegalArgumentException("count is less than 0");
-        if (startIndex + count > value.length)
-            throw new IllegalArgumentException("startIndex + count is greater than the number of elements in value");
-
-        // "If separator is null, an empty string ( String.Empty) is used instead."
-        final String sep = ObjectExtensions.coalesce(separator, StringHelper.Empty);
-
-        final StringBuilder result = new StringBuilder();
-
-        if (value.length > 0 && count > 0) {
-            result.append(ObjectExtensions.coalesce(value[startIndex], StringHelper.Empty));
-            for (int i = startIndex + 1; i < startIndex + count; i++) {
-                result.append(sep);
-                result.append(ObjectExtensions.coalesce(value[i], StringHelper.Empty));
-            }
-        }
-
-        return result.toString();
+        return join(separator, value, startIndex, count, null);
     }
 
     /**

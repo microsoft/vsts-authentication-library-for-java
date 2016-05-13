@@ -5,8 +5,16 @@ package com.microsoft.alm.secret;
 
 import com.microsoft.alm.helpers.ObjectExtensions;
 import com.microsoft.alm.helpers.StringHelper;
+import com.microsoft.alm.helpers.XmlHelper;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Text;
 
+import javax.xml.bind.DatatypeConverter;
 import java.nio.charset.Charset;
+import java.util.Map;
 
 /**
  * Credential for user authentication.
@@ -48,6 +56,43 @@ public final class Credential extends Secret {
      */
     public final String Username;
 
+    public static Credential fromXml(final Node credentialNode) {
+        Credential value;
+        String password = null;
+        String username = null;
+
+        final NodeList propertyNodes = credentialNode.getChildNodes();
+        for (int v = 0; v < propertyNodes.getLength(); v++) {
+            final Node propertyNode = propertyNodes.item(v);
+            if (propertyNode.getNodeType() != Node.ELEMENT_NODE) continue;
+
+            final String propertyName = propertyNode.getNodeName();
+            if ("Password".equals(propertyName)) {
+                password = XmlHelper.getText(propertyNode);
+            } else if ("Username".equals(propertyName)) {
+                username = XmlHelper.getText(propertyNode);
+            }
+        }
+        value = new Credential(username, password);
+        return value;
+    }
+
+    public Element toXml(final Document document) {
+        final Element valueNode = document.createElement("value");
+
+        final Element passwordNode = document.createElement("Password");
+        final Text passwordValue = document.createTextNode(this.Password);
+        passwordNode.appendChild(passwordValue);
+        valueNode.appendChild(passwordNode);
+
+        final Element usernameNode = document.createElement("Username");
+        final Text usernameValue = document.createTextNode(this.Username);
+        usernameNode.appendChild(usernameValue);
+        valueNode.appendChild(usernameNode);
+
+        return valueNode;
+    }
+
     /**
      * Compares an object to this {@link Credential} for equality.
      *
@@ -71,6 +116,14 @@ public final class Credential extends Secret {
         {
             return Username.hashCode() + 7 * Password.hashCode();
         }
+    }
+
+    public void contributeHeader(final Map<String, String> headers) {
+        // credentials are packed into the 'Authorization' header as a base64 encoded pair
+        final String credPair = Username + ":" + Password;
+        final byte[] credBytes = credPair.getBytes(ASCII);
+        final String base64enc = DatatypeConverter.printBase64Binary(credBytes);
+        headers.put("Authorization", "Basic" + " " + base64enc);
     }
 
     public static void validate(final Credential credentials) {
