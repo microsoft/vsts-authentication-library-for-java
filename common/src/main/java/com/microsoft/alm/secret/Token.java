@@ -279,7 +279,7 @@ public class Token extends Secret {
         return byteReference.get() != null;
     }
 
-    static void validate(final Token token) {
+    public static void validate(final Token token) {
         if (token == null)
             throw new IllegalArgumentException("The `token` parameter is null or invalid.");
         if (StringHelper.isNullOrWhiteSpace(token.Value))
