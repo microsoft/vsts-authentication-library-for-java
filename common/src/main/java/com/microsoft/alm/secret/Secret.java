@@ -49,4 +49,18 @@ public abstract class Secret {
             return Secret.uriToName(targetUri, namespace);
         }
     };
+
+    public static class PrefixedUriNameConversion implements IUriNameConversion {
+
+        private final String prefix;
+
+        public PrefixedUriNameConversion(final String prefix) {
+            this.prefix = prefix;
+        }
+
+        @Override
+        public String convert(final URI targetUri, final String namespace) {
+            return Secret.uriToName(targetUri, prefix + namespace);
+        }
+    }
 }
