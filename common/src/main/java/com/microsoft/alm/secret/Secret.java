@@ -39,8 +39,6 @@ public abstract class Secret {
     }
 
     public interface IUriNameConversion {
-        String DEFAULT_NAMESPACE = "java-auth";
-
         String convert(final URI targetUri, final String namespace);
     }
 
