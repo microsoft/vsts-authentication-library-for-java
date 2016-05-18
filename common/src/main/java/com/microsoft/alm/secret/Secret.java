@@ -39,20 +39,28 @@ public abstract class Secret {
     }
 
     public interface IUriNameConversion {
-        String DEFAULT_NAMESPACE = "java-auth";
-        String convert(final URI targetUri);
         String convert(final URI targetUri, final String namespace);
     }
 
     public static IUriNameConversion DefaultUriNameConversion = new IUriNameConversion() {
-        @Override
-        public String convert(final URI targetUri) {
-            return Secret.uriToName(targetUri, DEFAULT_NAMESPACE);
-        }
 
         @Override
         public String convert(final URI targetUri, final String namespace) {
             return Secret.uriToName(targetUri, namespace);
         }
     };
+
+    public static class PrefixedUriNameConversion implements IUriNameConversion {
+
+        private final String prefix;
+
+        public PrefixedUriNameConversion(final String prefix) {
+            this.prefix = prefix;
+        }
+
+        @Override
+        public String convert(final URI targetUri, final String namespace) {
+            return Secret.uriToName(targetUri, prefix + namespace);
+        }
+    }
 }

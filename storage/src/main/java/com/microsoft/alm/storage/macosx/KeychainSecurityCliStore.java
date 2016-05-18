@@ -33,7 +33,6 @@ class KeychainSecurityCliStore {
     static final String ACCOUNT_PARAMETER = "-a";
     static final String ACCOUNT_METADATA = "acct";
     static final String PASSWORD = "password";
-    static final String PREFIX = "gcm4ml:";
     private static final String SERVICE_PARAMETER = "-s";
     private static final String KIND_PARAMETER = "-D";
     private static final String PASSWORD_PARAMETER = "-w";
@@ -43,12 +42,11 @@ class KeychainSecurityCliStore {
     private static final String INTERACTIVE_MODE = "-i";
 
     public boolean delete(final String targetName) {
-        final String serviceName = createServiceName(targetName);
         try {
             final TestableProcess process = processFactory.create(
                 SECURITY,
                 DELETE_GENERIC_PASSWORD,
-                SERVICE_PARAMETER, serviceName
+                SERVICE_PARAMETER, targetName
             );
             // we don't care about the exit code
             process.waitFor();
@@ -84,19 +82,6 @@ class KeychainSecurityCliStore {
 
     KeychainSecurityCliStore(final TestableProcessFactory processFactory) {
         this.processFactory = processFactory;
-    }
-
-    /**
-     * Adds a prefix to the target name to avoid a collision
-     * with the built-in git-credential-osxkeychain.
-     * This is because the built-in helper will not validate the credentials first,
-     * leading to a poor user experience if the token is no longer valid.
-     *
-     * @param targetName the string provided to {@see ISecureStore} methods
-     * @return a string suitable for use as the "service name"
-     */
-    static String createServiceName(final String targetName) {
-        return PREFIX + targetName;
     }
 
     static Map<String, Object> parseKeychainMetaData(final String metadata) {
@@ -372,9 +357,7 @@ class KeychainSecurityCliStore {
     }
 
     public Credential readCredentials(final String targetName) {
-        final String serviceName = createServiceName(targetName);
-
-        final Map<String, Object> metaData = read(SecretKind.Credential, processFactory, serviceName);
+        final Map<String, Object> metaData = read(SecretKind.Credential, processFactory, targetName);
 
         final Credential result;
         if (metaData.size() > 0) {
@@ -390,9 +373,7 @@ class KeychainSecurityCliStore {
     }
 
     public Token readToken(final String targetName) {
-        final String serviceName = createServiceName(targetName);
-
-        final Map<String, Object> metaData = read(SecretKind.Token, processFactory, serviceName);
+        final Map<String, Object> metaData = read(SecretKind.Token, processFactory, targetName);
 
         final Token result;
         if (metaData.size() > 0) {
@@ -437,15 +418,13 @@ class KeychainSecurityCliStore {
     }
 
     public void writeCredential(final String targetName, final Credential credentials) {
-        final String serviceName = createServiceName(targetName);
-        write(SecretKind.Credential, processFactory, serviceName, credentials.Username, credentials.Password);
+        write(SecretKind.Credential, processFactory, targetName, credentials.Username, credentials.Password);
     }
 
     public void writeToken(final String targetName, final Token token) {
-        final String serviceName = createServiceName(targetName);
         final AtomicReference<String> accountNameReference = new AtomicReference<String>();
         Token.getFriendlyNameFromType(token.Type, accountNameReference);
         final String accountName = accountNameReference.get();
-        write(SecretKind.Token, processFactory, serviceName, accountName, token.Value);
+        write(SecretKind.Token, processFactory, targetName, accountName, token.Value);
     }
 }

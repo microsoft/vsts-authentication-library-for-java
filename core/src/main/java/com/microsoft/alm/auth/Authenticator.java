@@ -4,6 +4,7 @@
 package com.microsoft.alm.auth;
 
 import com.microsoft.alm.secret.Credential;
+import com.microsoft.alm.secret.Secret;
 import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.secret.VsoTokenScope;
@@ -30,6 +31,20 @@ public interface Authenticator {
      * @return String representation of the type
      */
     String getAuthType();
+
+    /**
+     * Get the converter that maps URIs to secret key names
+     *
+     * @return an implementation of {@link com.microsoft.alm.secret.Secret.IUriNameConversion}
+     */
+    Secret.IUriNameConversion getUriToKeyConversion();
+
+    /**
+     * Set the converter that maps URIs to secret key names
+     *
+     * @param conversion an implementation of {@link com.microsoft.alm.secret.Secret.IUriNameConversion}
+     */
+    void setUriToKeyConversion(final Secret.IUriNameConversion conversion);
 
     /**
      * Checks to see if this authenticator supports returning the authorization data in the form of

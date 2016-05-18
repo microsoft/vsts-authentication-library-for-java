@@ -28,6 +28,16 @@ public abstract class BaseAuthenticator implements Authenticator {
     protected Secret.IUriNameConversion uriToKeyConversion = Secret.DefaultUriNameConversion;
 
     @Override
+    public Secret.IUriNameConversion getUriToKeyConversion() {
+        return uriToKeyConversion;
+    }
+
+    @Override
+    public void setUriToKeyConversion(final Secret.IUriNameConversion conversion) {
+        uriToKeyConversion = conversion;
+    }
+
+    @Override
     public boolean isCredentialSupported() {
         return false;
     }

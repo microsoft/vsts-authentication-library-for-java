@@ -12,6 +12,7 @@ import com.microsoft.alm.provider.JaxrsClientProvider;
 import com.microsoft.alm.provider.Options;
 import com.microsoft.alm.provider.UserPasswordCredentialProvider;
 import com.microsoft.alm.secret.Credential;
+import com.microsoft.alm.secret.Secret;
 import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.secret.VsoTokenScope;
@@ -50,9 +51,12 @@ public class App {
             }
         };
 
+        final Secret.IUriNameConversion uriToKey = new Secret.PrefixedUriNameConversion("alm-auth:");
+
         //First create the authenticator
         final OAuth2Authenticator oAuth2Authenticator = OAuth2Authenticator.getAuthenticator(CLIENT_ID, REDIRECT_URL,
                 accessTokenStore, deviceFlowResponseAction);
+        oAuth2Authenticator.setUriToKeyConversion(uriToKey);
 
         final VstsPatAuthenticator patAuthenticator = new VstsPatAuthenticator(oAuth2Authenticator, tokenStore);
 

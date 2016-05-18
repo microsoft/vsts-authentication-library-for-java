@@ -25,12 +25,11 @@ public class KeychainSecurityCliStoreTest {
     static final String PASSWORD2 = "roundhouse kick"
     static final String VSTS_ACCOUNT = "https://example.visualstudio.com"
     static final String TARGET_NAME = "git:${VSTS_ACCOUNT}"
-    static final String SERVICE_NAME = "gcm4ml:${TARGET_NAME}"
     static final String SAMPLE_CREDENTIAL_METADATA = """\
 keychain: "/Users/${USER_NAME}/Library/Keychains/login.keychain"
 class: "genp"
 attributes:
-    0x00000007 <blob>="${SERVICE_NAME}"
+    0x00000007 <blob>="${TARGET_NAME}"
     0x00000008 <blob>=<NULL>
     "acct"<blob>="${USER_NAME}"
     "cdat"<timedate>=0x32303135313030353139343332355A00  "20151005194325Z\\000"
@@ -44,7 +43,7 @@ attributes:
     "nega"<sint32>=<NULL>
     "prot"<blob>=<NULL>
     "scrp"<sint32>=<NULL>
-    "svce"<blob>="${SERVICE_NAME}"
+    "svce"<blob>="${TARGET_NAME}"
     "type"<uint32>=<NULL>
 """
 
@@ -52,7 +51,7 @@ attributes:
 keychain: "/Users/${USER_NAME}/Library/Keychains/login.keychain"
 class: "genp"
 attributes:
-    0x00000007 <blob>="${SERVICE_NAME}"
+    0x00000007 <blob>="${TARGET_NAME}"
     0x00000008 <blob>=<NULL>
     "acct"<blob>="Personal Access Token"
     "cdat"<timedate>=0x32303135313030353139343332355A00  "20151005194325Z\\000"
@@ -66,7 +65,7 @@ attributes:
     "nega"<sint32>=<NULL>
     "prot"<blob>=<NULL>
     "scrp"<sint32>=<NULL>
-    "svce"<blob>="${SERVICE_NAME}"
+    "svce"<blob>="${TARGET_NAME}"
     "type"<uint32>=<NULL>
 """
 
@@ -77,7 +76,7 @@ attributes:
         def expected = [
             "keychain": "/Users/${USER_NAME}/Library/Keychains/login.keychain",
             "class": "genp",
-            "0x00000007": SERVICE_NAME,
+            "0x00000007": TARGET_NAME,
             "0x00000008": null,
             "acct": USER_NAME,
             // Not supported: "cdat" : '0x32303135313030353139343332355A00  "20151005194325Z\\000"',
@@ -91,7 +90,7 @@ attributes:
             "nega" : null,
             "prot" : null,
             "scrp" : null,
-            "svce" : SERVICE_NAME,
+            "svce" : TARGET_NAME,
             "type" : null,
         ]
         assert expected == actual
@@ -143,12 +142,12 @@ attributes:
     }
 
     @Test public void parseAttributeLine_hexKeyBlobString() {
-        def input = '''    0x00000007 <blob>="gcm4ml:git:https://example.visualstudio.com"'''
+        def input = '''    0x00000007 <blob>="git:https://example.visualstudio.com"'''
         def destination = [:]
 
         KeychainSecurityCliStore.parseAttributeLine(input, destination)
 
-        assert ["0x00000007" : "gcm4ml:git:https://example.visualstudio.com"] == destination
+        assert ["0x00000007" : "git:https://example.visualstudio.com"] == destination
     }
 
     @Test public void parseAttributeLine_hexKeyBlobNull() {
@@ -203,92 +202,92 @@ attributes:
     @Test public void simulatedInteraction() {
         def deleteCredentialSuccess = new FifoProcess(SAMPLE_CREDENTIAL_METADATA, "password has been deleted.")
         deleteCredentialSuccess.with {
-            expectedCommand = ["/usr/bin/security", "delete-generic-password", "-s", SERVICE_NAME]
+            expectedCommand = ["/usr/bin/security", "delete-generic-password", "-s", TARGET_NAME]
         }
 
         def deleteCredentialFailure = new FifoProcess(StringHelper.Empty, "security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain.")
         deleteCredentialFailure.with {
-            expectedCommand = ["/usr/bin/security", "delete-generic-password", "-s", SERVICE_NAME]
+            expectedCommand = ["/usr/bin/security", "delete-generic-password", "-s", TARGET_NAME]
             expectedExitCode = 44
         }
 
         def findNoCredential = new FifoProcess(StringHelper.Empty, "security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain.")
         findNoCredential.with {
-            expectedCommand = ["/usr/bin/security", "find-generic-password", "-s", SERVICE_NAME, "-D", "Credential", "-g"]
+            expectedCommand = ["/usr/bin/security", "find-generic-password", "-s", TARGET_NAME, "-D", "Credential", "-g"]
             expectedExitCode = 44
         }
 
         def addCredential = new FifoProcess(StringHelper.Empty)
         addCredential.with {
             expectedCommand = ["/usr/bin/security", "-i"]
-            expectedStandardInput = """add-generic-password -U -a ${USER_NAME} -s ${SERVICE_NAME} -w ${PASSWORD} -D Credential""" + Environment.NewLine
+            expectedStandardInput = """add-generic-password -U -a ${USER_NAME} -s ${TARGET_NAME} -w ${PASSWORD} -D Credential""" + Environment.NewLine
             expectedExitCode = 0
         }
 
         def findCredential = new FifoProcess(SAMPLE_CREDENTIAL_METADATA, """password: "${PASSWORD}"
 """)
         findCredential.with {
-            expectedCommand = ["/usr/bin/security", "find-generic-password", "-s", SERVICE_NAME, "-D", "Credential", "-g"]
+            expectedCommand = ["/usr/bin/security", "find-generic-password", "-s", TARGET_NAME, "-D", "Credential", "-g"]
             expectedExitCode = 0
         }
 
         def updateCredential = new FifoProcess(StringHelper.Empty)
         updateCredential.with {
             expectedCommand = ["/usr/bin/security", "-i"]
-            expectedStandardInput = """add-generic-password -U -a ${USER_NAME} -s ${SERVICE_NAME} -w "${PASSWORD2}" -D Credential""" + Environment.NewLine
+            expectedStandardInput = """add-generic-password -U -a ${USER_NAME} -s ${TARGET_NAME} -w "${PASSWORD2}" -D Credential""" + Environment.NewLine
             expectedExitCode = 0
         }
 
         def findUpdatedCredential = new FifoProcess(SAMPLE_CREDENTIAL_METADATA, """password: "${PASSWORD2}"
 """)
         findUpdatedCredential.with {
-            expectedCommand = ["/usr/bin/security", "find-generic-password", "-s", SERVICE_NAME, "-D", "Credential", "-g"]
+            expectedCommand = ["/usr/bin/security", "find-generic-password", "-s", TARGET_NAME, "-D", "Credential", "-g"]
             expectedExitCode = 0
         }
 
         
         def deleteTokenSuccess = new FifoProcess(SAMPLE_TOKEN_METADATA, "password has been deleted.")
         deleteTokenSuccess.with {
-            expectedCommand = ["/usr/bin/security", "delete-generic-password", "-s", SERVICE_NAME]
+            expectedCommand = ["/usr/bin/security", "delete-generic-password", "-s", TARGET_NAME]
         }
 
         def deleteTokenFailure = new FifoProcess(StringHelper.Empty, "security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain.")
         deleteTokenFailure.with {
-            expectedCommand = ["/usr/bin/security", "delete-generic-password", "-s", SERVICE_NAME]
+            expectedCommand = ["/usr/bin/security", "delete-generic-password", "-s", TARGET_NAME]
             expectedExitCode = 44
         }
 
         def findNoToken = new FifoProcess(StringHelper.Empty, "security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain.")
         findNoToken.with {
-            expectedCommand = ["/usr/bin/security", "find-generic-password", "-s", SERVICE_NAME, "-D", "Token", "-g"]
+            expectedCommand = ["/usr/bin/security", "find-generic-password", "-s", TARGET_NAME, "-D", "Token", "-g"]
             expectedExitCode = 44
         }
 
         def addToken = new FifoProcess(StringHelper.Empty)
         addToken.with {
             expectedCommand = ["/usr/bin/security", "-i"]
-            expectedStandardInput = """add-generic-password -U -a "Personal Access Token" -s ${SERVICE_NAME} -w ${PASSWORD} -D Token""" + Environment.NewLine
+            expectedStandardInput = """add-generic-password -U -a "Personal Access Token" -s ${TARGET_NAME} -w ${PASSWORD} -D Token""" + Environment.NewLine
             expectedExitCode = 0
         }
 
         def findToken = new FifoProcess(SAMPLE_TOKEN_METADATA, """password: "${PASSWORD}"
 """)
         findToken.with {
-            expectedCommand = ["/usr/bin/security", "find-generic-password", "-s", SERVICE_NAME, "-D", "Token", "-g"]
+            expectedCommand = ["/usr/bin/security", "find-generic-password", "-s", TARGET_NAME, "-D", "Token", "-g"]
             expectedExitCode = 0
         }
 
         def updateToken = new FifoProcess(StringHelper.Empty)
         updateToken.with {
             expectedCommand = ["/usr/bin/security", "-i"]
-            expectedStandardInput = """add-generic-password -U -a "Personal Access Token" -s ${SERVICE_NAME} -w "${PASSWORD2}" -D Token""" + Environment.NewLine
+            expectedStandardInput = """add-generic-password -U -a "Personal Access Token" -s ${TARGET_NAME} -w "${PASSWORD2}" -D Token""" + Environment.NewLine
             expectedExitCode = 0
         }
 
         def findUpdatedToken = new FifoProcess(SAMPLE_TOKEN_METADATA, """password: "${PASSWORD2}"
 """)
         findUpdatedToken.with {
-            expectedCommand = ["/usr/bin/security", "find-generic-password", "-s", SERVICE_NAME, "-D", "Token", "-g"]
+            expectedCommand = ["/usr/bin/security", "find-generic-password", "-s", TARGET_NAME, "-D", "Token", "-g"]
             expectedExitCode = 0
         }
 
