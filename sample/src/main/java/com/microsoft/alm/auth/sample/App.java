@@ -80,7 +80,7 @@ public class App {
 
         // now picked out one account from the list, and assume we cloned it, we should transfer the global PAT
         // to this particular account we cloned
-        URI targetAcct = URI.create("https://" + accounts.get(0).getAccountName() + ".visualstudio.com/DefaultCollection");
+        URI targetAcct = URI.create("https://" + accounts.get(0).getAccountName() + ".visualstudio.com");
 
         // save this pat for the cloned account so we have credential for it
         patAuthenticator.assignGlobalPatTo(targetAcct);
