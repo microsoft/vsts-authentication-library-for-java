@@ -63,7 +63,7 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
                         "Type", getType(),
                         "Key", key,
                         null);
-            if (result == GnomeKeyringLibrary.GNOME_KEYRING_RESULT_OK) {
+            if (checkResult(result, "Could not retrieve secret from storage.")) {
                 secret = pPassword.pointer.getString(0);
             }
         } finally {
@@ -86,7 +86,7 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
                 "Key", key,
                 null);
 
-        return result == GnomeKeyringLibrary.GNOME_KEYRING_RESULT_OK;
+        return checkResult(result, "Could not delete secret from storage");
     }
 
     @Override
@@ -107,7 +107,7 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
                 null
         );
 
-        return result == GnomeKeyringLibrary.GNOME_KEYRING_RESULT_OK;
+        return checkResult(result, "Could not save secret to the storage.");
     }
 
     /**
@@ -147,13 +147,8 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
         final int ret  = INSTANCE.gnome_keyring_get_info_sync(
                 GnomeKeyringLibrary.GNOME_KEYRING_DEFAULT, keyring_info_container);
 
-        if (ret != GnomeKeyringLibrary.GNOME_KEYRING_RESULT_OK) {
-            logger.info("Failed to get default keyring info with error {}, gnome-keyring is not supported.", ret);
-
-            return null;
-        }
-
-        return keyring_info_container;
+        return checkResult(ret, "Could not get default keyring info. Gnome-keyring is not available.")
+                ? keyring_info_container : null;
     }
 
     private static boolean isSimplePasswordAPISupported() {
@@ -196,12 +191,7 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
             final boolean allowUnlock = Boolean.valueOf(System.getProperty(ALLOW_UNLOCK_KEYRING));
             if (allowUnlock) {
                 final int ret = INSTANCE.gnome_keyring_unlock_sync(GnomeKeyringLibrary.GNOME_KEYRING_DEFAULT, null);
-                 
-                if (ret != GnomeKeyringLibrary.GNOME_KEYRING_RESULT_OK) {
-                    logger.info("Failed to unlock default keyring with error {}, gnome-keyring is not supported.", ret);
-
-                    return false;
-                }
+                return checkResult(ret, "Could not unlock keyring. Gnome-keyring is not available.");
             } else {
                 logger.info("gnome-keyring is locked and unavailable, please set variable {} to " + 
                         "allow unlocking the keyring with a popup dialog.", ALLOW_UNLOCK_KEYRING); 
@@ -271,4 +261,14 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
         return null;
     }
 
+    private static boolean checkResult(final int retCode, final String message) {
+        if (retCode != GnomeKeyringLibrary.GNOME_KEYRING_RESULT_OK) {
+            logger.error(message);
+            logger.error("Return code: {} description: {}", retCode, INSTANCE.gnome_keyring_result_to_message(retCode));
+
+            return false;
+        }
+
+        return true;
+    }
 }
