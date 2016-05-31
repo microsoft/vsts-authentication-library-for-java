@@ -225,7 +225,7 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
                     GLibInitializer.getInstance().initialize();
                 } catch (final UnsatisfiedLinkError error) {
                     logger.warn("Glib not available -- user will see warnings printed on screen. Those warnings are " +
-                            "not serioues and can be ignored.");
+                            "not serious and can be ignored.");
                 }
 
                 return true;
@@ -244,7 +244,7 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
 
     private static GnomeKeyringLibrary.GnomeKeyringPasswordSchema getGnomeKeyringPasswordSchema() {
         if (isGnomeKeyringLibraryAvailable()) {
-            logger.debug("Gnome keyring is supported, return a password SCHEMA");
+            logger.info("Gnome keyring library available, creating a password SCHEMA");
             GnomeKeyringLibrary.GnomeKeyringPasswordSchema schema
                     = new GnomeKeyringLibrary.GnomeKeyringPasswordSchema();
 
@@ -267,7 +267,8 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
             return schema;
         }
 
-        logger.debug("Gnome keyring is NOT supported, return null for SCHEMA");
+        logger.info("Gnome keyring library not loaded, return null for SCHEMA");
         return null;
     }
+
 }
