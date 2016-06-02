@@ -249,4 +249,15 @@ public interface GnomeKeyringLibrary extends Library {
      *      {@code true} when the keyring is unlocked; {@code false} otherwise.
      */
     int gnome_keyring_unlock_sync(final String keyring, final String password);
+
+    /**
+     * Translate error code to human readable string
+     *
+     * @param errorCode
+     *      keyring error code
+     *
+     * @return
+     *      Error description
+     */
+    String gnome_keyring_result_to_message(final int errorCode);
 }
