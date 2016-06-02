@@ -113,9 +113,9 @@ Licensed under the MIT license. See License.txt in the project root. -->
       <artifactId>oauth2-useragent</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.microsoftopentechnologies.auth</groupId>
-      <artifactId>aad-interactive-auth</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <groupId>com.microsoft.alm</groupId>
+      <artifactId>repackaged-msopentech-interactive-auth</artifactId>
+      <version>1.0.1</version>
     </dependency>
 
     <dependency>
