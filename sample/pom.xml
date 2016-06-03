@@ -6,7 +6,7 @@ Licensed under the MIT license. See License.txt in the project root. -->
   <parent>
     <groupId>com.microsoft.alm</groupId>
     <artifactId>auth-lib-parent</artifactId>
-    <version>0.1.9-SNAPSHOT</version>
+    <version>0.1.9</version>
   </parent>
   <artifactId>auth-sample</artifactId>
   <packaging>jar</packaging>
