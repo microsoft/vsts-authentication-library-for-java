@@ -219,9 +219,9 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
                 }
 
                 return true;
-            } catch (final Exception e) {
+            } catch (final Throwable t) {
                 // ignore error
-                logger.info("gnome-keyring library not loaded", e);
+                logger.info("gnome-keyring library not loaded", t);
             }
         }
 
