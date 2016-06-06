@@ -7,7 +7,6 @@ import com.microsoft.alm.helpers.Action;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.storage.SecretStore;
-import com.microsoftopentechnologies.auth.AuthenticationResult;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -77,24 +76,9 @@ public class OAuth2AuthenticatorTest {
     }
 
     @Test
-    public void getTokenByAcquireAuthenticationResult_if_oauth2_useragent_not_available()
-            throws URISyntaxException, InterruptedException, ExecutionException, IOException, AuthorizationException {
-        when(mockOAuth2UseragentValidator.oauth2UserAgentAvailable()).thenReturn(false);
-        when(mockAzureAuthority.acquireAuthenticationResult(clientId.toString(), TEST_RESOURCE, TEST_REDIRECT_URI))
-                .thenReturn(new AuthenticationResult("AccessTokenType", "access", "refresh", 0, null, null));
-
-        TokenPair token = underTest.getOAuth2TokenPair();
-
-        assertEquals("access", token.AccessToken.Value);
-        assertEquals("refresh", token.RefreshToken.Value);
-    }
-
-    @Test
     public void getTokenByAcquireAuthenticationResult_if_neither_browser_is_available()
             throws URISyntaxException, InterruptedException, ExecutionException, IOException, AuthorizationException {
         when(mockOAuth2UseragentValidator.oauth2UserAgentAvailable()).thenReturn(false);
-        when(mockAzureAuthority.acquireAuthenticationResult(clientId.toString(), TEST_RESOURCE, TEST_REDIRECT_URI))
-                .thenThrow(new IOException("Unable to launch local web server"));
         when(mockAzureAuthority.acquireToken(clientId.toString(), TEST_RESOURCE, TEST_REDIRECT_URI, testCallback))
                 .thenReturn(new TokenPair("access", "refresh"));
 
@@ -108,8 +92,6 @@ public class OAuth2AuthenticatorTest {
     public void getTokenByAcquireAuthenticationResult_if_nothing_is_available()
             throws URISyntaxException, InterruptedException, ExecutionException, IOException, AuthorizationException {
         when(mockOAuth2UseragentValidator.oauth2UserAgentAvailable()).thenReturn(false);
-        when(mockAzureAuthority.acquireAuthenticationResult(clientId.toString(), TEST_RESOURCE, TEST_REDIRECT_URI))
-                .thenThrow(new IOException("Unable to launch local web server"));
         final OAuth2Authenticator underTest = new OAuth2Authenticator(TEST_RESOURCE,
                 clientId.toString(),
                 TEST_REDIRECT_URI,

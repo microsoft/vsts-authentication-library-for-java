@@ -112,11 +112,6 @@ Licensed under the MIT license. See License.txt in the project root. -->
       <groupId>com.microsoft.alm</groupId>
       <artifactId>oauth2-useragent</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.microsoft.alm</groupId>
-      <artifactId>repackaged-msopentech-interactive-auth</artifactId>
-      <version>1.0.1</version>
-    </dependency>
 
     <dependency>
       <groupId>com.google.guava</groupId>
