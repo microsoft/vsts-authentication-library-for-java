@@ -3,9 +3,7 @@
 
 package com.microsoft.alm.auth.oauth;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.alm.auth.PromptBehavior;
-import com.microsoft.alm.auth.oauth.helpers.MSOpenTechExternalBrowserLauncher;
 import com.microsoft.alm.helpers.Action;
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.helpers.Guid;
@@ -20,8 +18,6 @@ import com.microsoft.alm.oauth2.useragent.AuthorizationResponse;
 import com.microsoft.alm.oauth2.useragent.UserAgent;
 import com.microsoft.alm.oauth2.useragent.UserAgentImpl;
 import com.microsoft.alm.secret.TokenPair;
-import com.microsoftopentechnologies.auth.AuthenticationContext;
-import com.microsoftopentechnologies.auth.AuthenticationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +26,6 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Interfaces with Azure to perform authentication and identity services.
@@ -255,52 +248,5 @@ public class AzureAuthority {
             authorizationCode = null;
         }
         return authorizationCode;
-    }
-
-
-    /**
-     * Retrieve an Azure Active Directory backed OAuth token based on MSOpenTech's SWT implementation.
-     *
-     * @param clientId        Identifier of the client requesting the token.
-     * @param resource        Identifier of the target resource that is the recipient of the requested token.
-     * @param redirectUri     Address to return to upon receiving a response from the authority.
-     *
-     * @return an authentication result which encloses an access token
-     *
-     * @throws IOException
-     * @throws ExecutionException
-     * @throws InterruptedException
-     */
-    public AuthenticationResult acquireAuthenticationResult(final String clientId, final String resource,
-                                                            final URI redirectUri) throws
-            IOException, ExecutionException, InterruptedException, AuthorizationException {
-        Debug.Assert(!StringHelper.isNullOrWhiteSpace(clientId), "The clientId parameter is null or empty");
-        Debug.Assert(!StringHelper.isNullOrWhiteSpace(resource), "The resource parameter is null or empty");
-        Debug.Assert(redirectUri != null, "The redirectUri parameter is null");
-        Debug.Assert(redirectUri.isAbsolute(), "The redirectUri parameter is not an absolute Uri");
-
-        logger.info("Acquiring AuthenticationInfo by SWT library");
-
-        final AuthenticationContext context = new AuthenticationContext("login.microsoftonline.com");
-        context.setBrowserLauncher(new MSOpenTechExternalBrowserLauncher());
-        final ListenableFuture<AuthenticationResult> future = context.acquireTokenInteractiveAsync(
-                CommonTenant,
-                resource,
-                clientId,
-                redirectUri.toString(),
-                "login"
-        );
-
-        final AuthenticationResult result;
-        try {
-            result = future.get(10, TimeUnit.MINUTES);
-        } catch (TimeoutException e) {
-            throw new AuthorizationException("Failed to get authentication result within 10 minutes.");
-        }
-
-        logger.debug("Retrieved an authenticationResult, existing SWT library.");
-
-        context.dispose();
-        return result;
     }
 }

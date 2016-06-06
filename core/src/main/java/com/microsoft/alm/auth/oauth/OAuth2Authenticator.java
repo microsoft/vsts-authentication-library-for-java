@@ -11,7 +11,6 @@ import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.storage.InsecureInMemoryStore;
 import com.microsoft.alm.storage.SecretStore;
-import com.microsoftopentechnologies.auth.AuthenticationResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -181,25 +180,9 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                     }
                 }
 
-                // Always fallback to SWT browser if we failed to launch oauth2-useragent unexpectedly
-                try {
-                    logger.info("Fallback to MSOpenTech's AAD providers to retrieve AAD token.");
-
-                    final AuthenticationResult result
-                            = getAzureAuthority().acquireAuthenticationResult(clientId, resource, redirectUri);
-
-                    if (result == null) {
-                        logger.info("Failed to get an accessToken from MSOpenTech's AAD provider.");
-                        return null;
-                    }
-
-                    return new TokenPair(result.getAccessToken(), result.getRefreshToken());
-                } catch (Exception e) {
-                    logError(logger, "Failed to use the SWT-based authenticator.", e);
-                }
-
                 // Fallback to Device Flow if there's a callback and the SWT-based authenticator failed
                 if (deviceFlowCallback != null) {
+                    logger.info("Fallback to Device Flow.");
                     try {
                         return getAzureAuthority().acquireToken(clientId, resource, redirectUri, deviceFlowCallback);
                     } catch (final AuthorizationException e) {
