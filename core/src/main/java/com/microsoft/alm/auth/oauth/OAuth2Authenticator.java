@@ -95,18 +95,6 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                 .build();
     }
 
-    /**
-     * Private constructor so we are guaranteed resource is https://management.core.windows.net.
-     *
-     * If user wish to construct an authenticator that can work with other protected resource, use
-     * {@link com.microsoft.alm.auth.oauth.OAuth2Authenticator.OAuth2AuthenticatorBuilder}
-     *
-     */
-    private OAuth2Authenticator(final String resource, final String clientId, final URI redirectUri,
-                               final SecretStore<TokenPair> store, final Action<DeviceFlowResponse> deviceFlowCallback) {
-        this(resource, clientId, redirectUri, store, new AzureAuthority(), new OAuth2UseragentValidator(), deviceFlowCallback);
-    }
-
     /*default*/ OAuth2Authenticator(final String resource, final String clientId, final URI redirectUri,
                         final SecretStore<TokenPair> store, final AzureAuthority azureAuthority,
                         final OAuth2UseragentValidator oAuth2UseragentValidator, final Action<DeviceFlowResponse> deviceFlowCallback) {
