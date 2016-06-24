@@ -166,6 +166,7 @@ public class AzureAuthority {
      * @param queryParameters Optional: appended as-is to the query string in the HTTP authentication request to the
      *                        authority.
      * @return If successful, a {@link TokenPair}; otherwise null.
+     * @throws AuthorizationException if unable to authenticate and authorize the request
      */
     public TokenPair acquireToken(final String clientId, final String resource,
                                   final URI redirectUri, String queryParameters) throws AuthorizationException {

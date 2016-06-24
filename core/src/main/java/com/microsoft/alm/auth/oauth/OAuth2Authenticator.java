@@ -76,7 +76,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
      * @param store
      *      SecretStore to read and save access token to
      * @param deviceFlowCallback
-     *      an implementation of {@link Action<DeviceFlowResponse>} to invoke when participating
+     *      an implementation of {@link Action} to invoke when participating
      *      in OAuth 2.0 Device Flow, providing the end-user with a URI and a code to use for
      *      authenticating in an external web browser
      *
