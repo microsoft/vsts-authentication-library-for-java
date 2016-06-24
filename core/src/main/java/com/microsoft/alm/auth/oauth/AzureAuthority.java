@@ -26,6 +26,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Interfaces with Azure to perform authentication and identity services.
@@ -48,6 +49,8 @@ public class AzureAuthority {
      * The common Url for logon services in Azure.
      */
     public static final String DefaultAuthorityHostUrl = AuthorityHostUrlBase + "/" + CommonTenant;
+    private static final String VSTS_BASE_DOMAIN = "visualstudio.com";
+    private static final String VSTS_RESOURCE_TENANT_HEADER = "X-VSS-ResourceTenant";
 
     private final UserAgent userAgent;
     private final AzureDeviceFlow azureDeviceFlow;
@@ -154,6 +157,48 @@ public class AzureAuthority {
         }
         final StringContent result = StringContent.createUrlEncoded(qs);
         return result;
+    }
+
+    /**
+     * Determines if there's the targetUri represents a Visual Studio Team Services account
+     * backed by Azure Active Directory (AAD).
+     *
+     * @param targetUri the resource which the authority protects.
+     * @return the AAD tenant ID if applicable; {@code null} otherwise.
+     */
+    public static UUID detectTenantId(final URI targetUri)
+    {
+        final AtomicReference<UUID> tenantId = new AtomicReference<UUID>(Guid.Empty);
+
+        if (StringHelper.endsWithIgnoreCase(targetUri.getHost(), VSTS_BASE_DOMAIN))
+        {
+            final HttpClient client = new HttpClient(Global.getUserAgent());
+            try
+            {
+                final HttpURLConnection connection = client.head(targetUri, new Action<HttpURLConnection>()
+                {
+                    @Override public void call(final HttpURLConnection conn)
+                    {
+                        conn.setInstanceFollowRedirects(false);
+                    }
+                });
+
+                final String tenant = connection.getHeaderField(VSTS_RESOURCE_TENANT_HEADER);
+
+                if (!StringHelper.isNullOrWhiteSpace(tenant)) {
+                    if (Guid.tryParse(tenant, tenantId)) {
+                        if (!Guid.Empty.equals(tenantId.get())) {
+                            return tenantId.get();
+                        }
+                    }
+                }
+            }
+            catch (final IOException e)
+            {
+                throw new Error(e);
+            }
+        }
+        return null;
     }
 
     /**
