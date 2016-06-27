@@ -76,7 +76,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
      * @param store
      *      SecretStore to read and save access token to
      * @param deviceFlowCallback
-     *      an implementation of {@link Action<DeviceFlowResponse>} to invoke when participating
+     *      an implementation of {@link Action} to invoke when participating
      *      in OAuth 2.0 Device Flow, providing the end-user with a URI and a code to use for
      *      authenticating in an external web browser
      *
@@ -93,18 +93,6 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                 .backedBy(store)
                 .withDeviceFlowCallback(deviceFlowCallback)
                 .build();
-    }
-
-    /**
-     * Private constructor so we are guaranteed resource is https://management.core.windows.net.
-     *
-     * If user wish to construct an authenticator that can work with other protected resource, use
-     * {@link com.microsoft.alm.auth.oauth.OAuth2Authenticator.OAuth2AuthenticatorBuilder}
-     *
-     */
-    private OAuth2Authenticator(final String resource, final String clientId, final URI redirectUri,
-                               final SecretStore<TokenPair> store, final Action<DeviceFlowResponse> deviceFlowCallback) {
-        this(resource, clientId, redirectUri, store, new AzureAuthority(), new OAuth2UseragentValidator(), deviceFlowCallback);
     }
 
     /*default*/ OAuth2Authenticator(final String resource, final String clientId, final URI redirectUri,
@@ -206,6 +194,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
         private String clientId;
         private URI redirectUri;
         private SecretStore store;
+        private String tenantId = AzureAuthority.CommonTenant;
         private Action<DeviceFlowResponse> deviceFlowCallback;
 
         public OAuth2AuthenticatorBuilder manage(final String resource) {
@@ -221,6 +210,16 @@ public class OAuth2Authenticator extends BaseAuthenticator {
         public OAuth2AuthenticatorBuilder withClientId(final String clientId) {
             Debug.Assert(clientId != null, "clientId cannot be null");
             this.clientId = clientId;
+            return this;
+        }
+
+        public OAuth2AuthenticatorBuilder withTenantId(final UUID tenantId) {
+            return this.withTenantId(tenantId.toString());
+        }
+
+        public OAuth2AuthenticatorBuilder withTenantId(final String tenantId) {
+            Debug.Assert(tenantId != null, "tenantId cannot be null");
+            this.tenantId = tenantId;
             return this;
         }
 
@@ -258,7 +257,12 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                 throw new IllegalStateException("redirectUri not set");
             }
 
-            return new OAuth2Authenticator(this.resource, this.clientId, this.redirectUri, this.store, this.deviceFlowCallback);
+            final String authorityHostUrl = AzureAuthority.DefaultAuthorityHostUrl + "/" + this.tenantId;
+            final AzureAuthority azureAuthority = new AzureAuthority(authorityHostUrl);
+
+            final OAuth2UseragentValidator oAuth2UseragentValidator = new OAuth2UseragentValidator();
+
+            return new OAuth2Authenticator(this.resource, this.clientId, this.redirectUri, this.store, azureAuthority, oAuth2UseragentValidator, this.deviceFlowCallback);
         }
     }
 }
