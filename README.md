@@ -3,7 +3,7 @@ Retrieve OAuth2 Access Token or Personal Accesss Tokens for Visual Studio Team S
 
 License
 -------
-The MIT license can be found in [License.txt](License.txt)
+The MIT license can be found in [LICENSE.txt](LICENSE.txt)
 
 What this library provides
 --------------------------
