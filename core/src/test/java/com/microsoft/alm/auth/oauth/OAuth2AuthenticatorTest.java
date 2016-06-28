@@ -63,7 +63,7 @@ public class OAuth2AuthenticatorTest {
     @Test
     public void getTokenByAcquireToken_if_oauth2_useragent_available()
                 throws URISyntaxException, AuthorizationException {
-        when(mockOAuth2UseragentValidator.oauth2UserAgentAvailable()).thenReturn(true);
+        when(mockOAuth2UseragentValidator.isOAuth2ProviderAvailable()).thenReturn(true);
         when(mockAzureAuthority.acquireToken(clientId.toString(), TEST_RESOURCE,
                 TEST_REDIRECT_URI, underTest.POPUP_QUERY_PARAM))
                 .thenReturn(new TokenPair("access", "refresh"));
@@ -78,7 +78,7 @@ public class OAuth2AuthenticatorTest {
     @Test
     public void getTokenByAcquireAuthenticationResult_if_neither_browser_is_available()
             throws URISyntaxException, InterruptedException, ExecutionException, IOException, AuthorizationException {
-        when(mockOAuth2UseragentValidator.oauth2UserAgentAvailable()).thenReturn(false);
+        when(mockOAuth2UseragentValidator.isOAuth2ProviderAvailable()).thenReturn(false);
         when(mockAzureAuthority.acquireToken(clientId.toString(), TEST_RESOURCE, TEST_REDIRECT_URI, testCallback))
                 .thenReturn(new TokenPair("access", "refresh"));
 
@@ -91,7 +91,7 @@ public class OAuth2AuthenticatorTest {
     @Test
     public void getTokenByAcquireAuthenticationResult_if_nothing_is_available()
             throws URISyntaxException, InterruptedException, ExecutionException, IOException, AuthorizationException {
-        when(mockOAuth2UseragentValidator.oauth2UserAgentAvailable()).thenReturn(false);
+        when(mockOAuth2UseragentValidator.isOAuth2ProviderAvailable()).thenReturn(false);
         final OAuth2Authenticator underTest = new OAuth2Authenticator(TEST_RESOURCE,
                 clientId.toString(),
                 TEST_REDIRECT_URI,

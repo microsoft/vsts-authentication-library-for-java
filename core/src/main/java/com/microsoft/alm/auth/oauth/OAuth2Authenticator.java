@@ -5,6 +5,7 @@ package com.microsoft.alm.auth.oauth;
 
 import com.microsoft.alm.auth.BaseAuthenticator;
 import com.microsoft.alm.auth.PromptBehavior;
+import com.microsoft.alm.auth.oauth.helper.SwtJarLoader;
 import com.microsoft.alm.helpers.Action;
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
@@ -14,8 +15,10 @@ import com.microsoft.alm.storage.SecretStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.net.URI;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.microsoft.alm.helpers.LoggingHelper.logError;
 
@@ -150,10 +153,10 @@ public class OAuth2Authenticator extends BaseAuthenticator {
             protected TokenPair doRetrieve() {
                 logger.debug("Ready to launch browser flow to retrieve oauth2 token.");
 
-                final boolean userExplicitlyBlocksJavaFX
-                        = "false".equalsIgnoreCase(System.getProperty("useJavaFxAuthLibrary"));
-
-                if (oAuth2UseragentValidator.oauth2UserAgentAvailable() && !userExplicitlyBlocksJavaFX) {
+                final AtomicReference<File> swtRuntime = new AtomicReference<File>();
+                if (oAuth2UseragentValidator.isOAuth2ProviderAvailable()
+                        || (oAuth2UseragentValidator.isOnlyMissingRuntimeFromSwtProvider()
+                            && SwtJarLoader.tryGetSwtJar(swtRuntime))) {
                     try {
                         logger.info("Using oauth2-useragent providers to retrieve AAD token.");
                         return getAzureAuthority().acquireToken(clientId, resource, redirectUri, POPUP_QUERY_PARAM);
@@ -168,7 +171,8 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                     }
                 }
 
-                // Fallback to Device Flow if there's a callback and the SWT-based authenticator failed
+                // Fallback to Device Flow if there's a callback and the oauth2-useragent couldn't launch the
+                // browser properly
                 if (deviceFlowCallback != null) {
                     logger.info("Fallback to Device Flow.");
                     try {

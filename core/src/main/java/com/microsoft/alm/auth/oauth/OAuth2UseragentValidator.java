@@ -5,7 +5,11 @@ package com.microsoft.alm.auth.oauth;
 
 import com.microsoft.alm.oauth2.useragent.Provider;
 import com.microsoft.alm.oauth2.useragent.ProviderScanner;
+import com.microsoft.alm.oauth2.useragent.StandardWidgetToolkitProvider;
 import com.microsoft.alm.oauth2.useragent.UserAgentImpl;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class verifies the availability of OAuth2-useragent on the current platform
@@ -20,11 +24,21 @@ public class OAuth2UseragentValidator {
      * @return {@code true} if oauth2-useragent can be used 100% positively
      *         {@code false} with any doubts
      */
-    public boolean oauth2UserAgentAvailable() {
+    public boolean isOAuth2ProviderAvailable() {
         // not tests are worthy adding since I don't control this implementation
-        final Provider provider = scanner.findCompatibleProvider("JavaFx");
+        final Provider provider = scanner.findCompatibleProvider();
 
-        // I only want JavaFx provider, don't want to use device profile provider while we still have SWT
-        return provider != null && "JavaFx".equals(provider.getClassName());
+        return provider != null;
+    }
+
+    public boolean isOnlyMissingRuntimeFromSwtProvider() {
+        final Map<Provider, List<String>> unmetProviderRequirements = scanner.getUnmetProviderRequirements();
+        final List<String> unmetSwtProviderRequirement = unmetProviderRequirements.get(Provider.STANDARD_WIDGET_TOOLKIT);
+
+        if (unmetSwtProviderRequirement != null && unmetSwtProviderRequirement.size() == 1) {
+            return unmetSwtProviderRequirement.get(0).contains(StandardWidgetToolkitProvider.getDefaultSwtJarPath());
+        }
+
+        return false;
     }
 }
