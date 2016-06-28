@@ -166,19 +166,15 @@ public class AzureAuthority {
      * @param targetUri the resource which the authority protects.
      * @return the AAD tenant ID if applicable; {@code null} otherwise.
      */
-    public static UUID detectTenantId(final URI targetUri)
-    {
+    public static UUID detectTenantId(final URI targetUri) {
         final AtomicReference<UUID> tenantId = new AtomicReference<UUID>(Guid.Empty);
 
-        if (StringHelper.endsWithIgnoreCase(targetUri.getHost(), VSTS_BASE_DOMAIN))
-        {
+        if (StringHelper.endsWithIgnoreCase(targetUri.getHost(), VSTS_BASE_DOMAIN)) {
             final HttpClient client = new HttpClient(Global.getUserAgent());
-            try
-            {
-                final HttpURLConnection connection = client.head(targetUri, new Action<HttpURLConnection>()
-                {
-                    @Override public void call(final HttpURLConnection conn)
-                    {
+            try {
+                final HttpURLConnection connection = client.head(targetUri, new Action<HttpURLConnection>() {
+                    @Override
+                    public void call(final HttpURLConnection conn) {
                         conn.setInstanceFollowRedirects(false);
                     }
                 });
@@ -192,9 +188,7 @@ public class AzureAuthority {
                         }
                     }
                 }
-            }
-            catch (final IOException e)
-            {
+            } catch (final IOException e) {
                 throw new Error(e);
             }
         }
