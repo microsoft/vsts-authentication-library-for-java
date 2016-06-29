@@ -9,6 +9,7 @@ import com.microsoft.alm.auth.oauth.helper.SwtJarLoader;
 import com.microsoft.alm.helpers.Action;
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
+import com.microsoft.alm.oauth2.useragent.Provider;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.storage.InsecureInMemoryStore;
 import com.microsoft.alm.storage.SecretStore;
@@ -32,6 +33,10 @@ public class OAuth2Authenticator extends BaseAuthenticator {
     public final static String MANAGEMENT_CORE_RESOURCE = "https://management.core.windows.net/";
 
     private final static String TYPE = "OAuth2";
+
+    // oauth2-useragent should expose this property as public property, it shouldn't be exposed from here,
+    // hence "private" modifier
+    private static final String USER_AGENT_PROVIDER_PROPERTY_NAME = "userAgentProvider";
 
     private final String resource;
     private final String clientId;
@@ -154,6 +159,19 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                 logger.debug("Ready to launch browser flow to retrieve oauth2 token.");
 
                 final AtomicReference<File> swtRuntime = new AtomicReference<File>();
+
+                final String defaultProviderName
+                        = System.getProperty(USER_AGENT_PROVIDER_PROPERTY_NAME, Provider.JAVA_FX.getClassName());
+                final boolean favorSwtBrowser
+                        = defaultProviderName.equals(Provider.STANDARD_WIDGET_TOOLKIT.getClassName());
+
+                if (favorSwtBrowser) {
+                    logger.debug("Prefer SWT Browser, download SWT Runtime if it is not available.");
+                    if (oAuth2UseragentValidator.isOnlyMissingRuntimeFromSwtProvider()) {
+                        SwtJarLoader.tryGetSwtJar(swtRuntime);
+                    }
+                }
+
                 if (oAuth2UseragentValidator.isOAuth2ProviderAvailable()
                         || (oAuth2UseragentValidator.isOnlyMissingRuntimeFromSwtProvider()
                             && SwtJarLoader.tryGetSwtJar(swtRuntime))) {

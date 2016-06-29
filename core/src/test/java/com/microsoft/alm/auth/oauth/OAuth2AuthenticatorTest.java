@@ -51,6 +51,8 @@ public class OAuth2AuthenticatorTest {
             }
         };
 
+        when(mockOAuth2UseragentValidator.isOnlyMissingRuntimeFromSwtProvider()).thenReturn(false);
+
         underTest = new OAuth2Authenticator(TEST_RESOURCE,
                 clientId.toString(),
                 TEST_REDIRECT_URI,
