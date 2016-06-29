@@ -8,6 +8,7 @@ The MIT license can be found in [LICENSE.txt](LICENSE.txt)
 What this library provides
 --------------------------
 This library provides:
+
 1. a set of `authenticators` in the `core` module that can be used to retrieve credentials in the form of OAuth2 Access Token or Personal Access Token against any Visual Studio Team Services account.  
 1. a set of secure `storage` providers that store retrieved secrets, as well as In memory and File system backed insecure storages.   
 1. a set of `providers` that hide the interaction between `storage` and `authenticator`, and returns authenticated `client` that can be used directly against Visual Studio Team Services REST APIs.
