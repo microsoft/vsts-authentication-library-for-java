@@ -31,6 +31,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
 
     public final static URI APP_VSSPS_VISUALSTUDIO = URI.create("https://app.vssps.visualstudio.com");
     public final static String MANAGEMENT_CORE_RESOURCE = "https://management.core.windows.net/";
+    public static final String VSTS_RESOURCE = "499b84ac-1321-427f-aa17-267ca6975798";
 
     private final static String TYPE = "OAuth2";
 
