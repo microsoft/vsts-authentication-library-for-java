@@ -52,7 +52,7 @@ public class SwtJarLoader {
          * org.eclipse.swt.win32.win32.x86_64-4.4.2.jar
          */
         jarName = "org.eclipse.swt." +
-                (isWindows ? "win32-win32" :
+                (isWindows ? "win32.win32" :
                         isMac ? "cocoa.macosx" :
                                 isLinux ? "linux" : "") +
                 (isx64 ? ".x86_64-" : ".x86-") +
