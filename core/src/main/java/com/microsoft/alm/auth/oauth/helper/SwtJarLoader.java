@@ -4,7 +4,7 @@
 package com.microsoft.alm.auth.oauth.helper;
 
 import com.microsoft.alm.helpers.IOHelper;
-import com.microsoft.alm.oauth2.useragent.Provider;
+import com.microsoft.alm.helpers.SystemHelper;
 import com.microsoft.alm.oauth2.useragent.StandardWidgetToolkitProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,38 +25,21 @@ public class SwtJarLoader {
 
     private static final String BASE_URL = "https://az771546.vo.msecnd.net/swt-binary-for-auth-library/";
 
-    private static final String OS_NAME = System.getProperty("os.name");
-
     private static String jarName;
     private static File targetSwtJar;
 
     private static String SWT_VERSION="4.4.2";
 
-    private static final Map<String, Long> CRC32_HASHES;
+    static final Map<String, Long> CRC32_HASHES;
 
     static {
-        boolean isWindows = Provider.isWindows(OS_NAME);
-        boolean isMac = Provider.isMac(OS_NAME);
-        boolean isLinux = Provider.isLinux(OS_NAME);
+        boolean isWindows = SystemHelper.isWindows();
+        boolean isMac = SystemHelper.isMac();
+        boolean isLinux = SystemHelper.isLinux();
 
         boolean isx64 = System.getProperty("os.arch").contains("64");
 
-        /**
-         *this name should finally look like one of those:
-         * org.eclipse.swt.cocoa.macosx.x86-4.4.2.jar
-         * org.eclipse.swt.cocoa.macosx.x86_64-4.4.2.jar
-         * org.eclipse.swt.gtk.linux.x86-4.4.2.jar
-         * org.eclipse.swt.gtk.linux.x86_64-4.4.2.jar
-         * org.eclipse.swt.win32.win32.x86-4.4.2.jar
-         * org.eclipse.swt.win32.win32.x86_64-4.4.2.jar
-         */
-        jarName = "org.eclipse.swt." +
-                (isWindows ? "win32.win32" :
-                        isMac ? "cocoa.macosx" :
-                                isLinux ? "linux" : "") +
-                (isx64 ? ".x86_64-" : ".x86-") +
-                 SWT_VERSION +
-                ".jar";
+        jarName = getJarName(isWindows, isLinux, isMac, isx64);
 
         targetSwtJar = new File(StandardWidgetToolkitProvider.getDefaultSwtJarPath());
 
@@ -71,6 +54,27 @@ public class SwtJarLoader {
         hashes.put("org.eclipse.swt.win32.win32.x86_64-4.4.2.jar", 3238843570L);
 
         CRC32_HASHES = Collections.unmodifiableMap(hashes);
+    }
+
+    static String getJarName(final boolean isWindows, final boolean isLinux, final boolean isMac, final boolean isx64) {
+        /**
+         *this name should finally look like one of those:
+         * org.eclipse.swt.cocoa.macosx.x86-4.4.2.jar
+         * org.eclipse.swt.cocoa.macosx.x86_64-4.4.2.jar
+         * org.eclipse.swt.gtk.linux.x86-4.4.2.jar
+         * org.eclipse.swt.gtk.linux.x86_64-4.4.2.jar
+         * org.eclipse.swt.win32.win32.x86-4.4.2.jar
+         * org.eclipse.swt.win32.win32.x86_64-4.4.2.jar
+         */
+        final String jarName = "org.eclipse.swt." +
+                (isWindows ? "win32.win32" :
+                        isMac ? "cocoa.macosx" :
+                                isLinux ? "gtk.linux" : "") +
+                (isx64 ? ".x86_64-" : ".x86-") +
+                SWT_VERSION +
+                ".jar";
+
+        return jarName;
     }
 
     public static boolean tryGetSwtJar(final AtomicReference<File> swtJarReference) {
