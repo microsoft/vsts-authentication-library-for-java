@@ -16,7 +16,7 @@ Licensed under the MIT license. See License.txt in the project root. -->
   <url>https://java.visualstudio.com/</url>
 
   <properties>
-    <jersey.version>2.6</jersey.version>
+    <jersey.version>2.17</jersey.version>
   </properties>
 
   <build>
