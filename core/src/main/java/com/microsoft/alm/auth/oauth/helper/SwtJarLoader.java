@@ -3,7 +3,6 @@
 
 package com.microsoft.alm.auth.oauth.helper;
 
-import com.google.common.io.ByteStreams;
 import com.microsoft.alm.helpers.IOHelper;
 import com.microsoft.alm.oauth2.useragent.Provider;
 import com.microsoft.alm.oauth2.useragent.StandardWidgetToolkitProvider;
@@ -91,7 +90,7 @@ public class SwtJarLoader {
             final FileOutputStream fos = new FileOutputStream(targetSwtJar);
             final InputStream is = cloudSwtUrlConn.getInputStream();
 
-            ByteStreams.copy(is, fos);
+            IOHelper.copyStream(is, fos);
 
             IOHelper.closeQuietly(is);
             IOHelper.closeQuietly(fos);
