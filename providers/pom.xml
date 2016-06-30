@@ -22,11 +22,20 @@ Licensed under the MIT license. See License.txt in the project root. -->
   <build>
     <resources>
       <resource>
-          <directory>${basedir}/..</directory>
+        <directory>${basedir}/../eula</directory>
         <targetPath>./</targetPath>
         <filtering>false</filtering>
         <includes>
-          <include>License.txt</include>
+          <include>ThirdPartyNotices.txt</include>
+          <include>EULA.doc</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>${basedir}/..</directory>
+        <targetPath>./</targetPath>
+        <filtering>false</filtering>
+        <includes>
+          <include>LICENSE.txt</include>
         </includes>
       </resource>
     </resources>
