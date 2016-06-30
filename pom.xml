@@ -43,8 +43,10 @@ Licensed under the MIT license. See License.txt in the project root. -->
   </developers>
 
   <scm>
-    <connection>scm:git:https://mseng.visualstudio.com/VSOnline/_git/Java.Auth</connection>
-    <developerConnection>scm:git:https://mseng.visualstudio.com/VSOnline/_git/Java.Auth</developerConnection>
+    <connection>scm:git:https://github.com/Microsoft/vsts-authentication-library-for-java.git</connection>
+    <developerConnection>scm:git:https://github.com/Microsoft/vsts-authentication-library-for-java.git</developerConnection>
+    <url>https://github.com/Microsoft/vsts-authentication-library-for-java</url>
+    <tag>HEAD</tag>
   </scm>
 
   <repositories>
@@ -66,12 +68,12 @@ Licensed under the MIT license. See License.txt in the project root. -->
 
   <distributionManagement>
     <snapshotRepository>
-      <id>teamNexus</id>
-      <url>http://artifacts.cloudapp.net:8081/nexus/content/repositories/snapshots</url>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
     <repository>
-      <id>teamNexus</id>
-      <url>http://artifacts.cloudapp.net:8081/nexus/content/repositories/releases</url>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
 
@@ -165,9 +167,24 @@ Licensed under the MIT license. See License.txt in the project root. -->
             </dependency>
           </dependencies>
         </plugin>
+        <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <version>1.6.5</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>nexus-staging-maven-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <serverId>ossrh</serverId>
+          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+          <autoReleaseAfterClose>false</autoReleaseAfterClose>
+        </configuration>
+      </plugin>
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
