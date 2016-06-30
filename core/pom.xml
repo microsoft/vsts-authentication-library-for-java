@@ -118,11 +118,6 @@ Licensed under the MIT license. See License.txt in the project root. -->
       <artifactId>guava</artifactId>
       <version>18.0</version>
     </dependency>
-    <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>2.3.1</version>
-    </dependency>
 
     <dependency>
       <groupId>org.slf4j</groupId>
