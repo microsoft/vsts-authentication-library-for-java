@@ -10,8 +10,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 
 public class IOHelper {
+
+    static final int BUFFER_SIZE = 4096;
+
     public static void closeQuietly(final Closeable closeable) {
         if (closeable != null) {
             try {
@@ -49,5 +53,14 @@ public class IOHelper {
             IOHelper.closeQuietly(reader);
             IOHelper.closeQuietly(isr);
         }
+    }
+
+    public static void copyStream(final InputStream is, final OutputStream os) throws IOException {
+        final byte[] buffer = new byte[BUFFER_SIZE];
+        int bytesRead;
+        while ((bytesRead = is.read(buffer, 0, BUFFER_SIZE)) != -1) {
+            os.write(buffer, 0, bytesRead);
+        }
+        os.flush();
     }
 }
