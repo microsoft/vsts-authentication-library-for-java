@@ -90,6 +90,12 @@ public class SwtJarLoader {
                         "%d", swtJarUrl, statusCode));
             }
 
+            // Make sure the parent folder exists
+            final File parent = targetSwtJar.getParentFile();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs();
+            }
+
             targetSwtJar.createNewFile();
             final FileOutputStream fos = new FileOutputStream(targetSwtJar);
             final InputStream is = cloudSwtUrlConn.getInputStream();
