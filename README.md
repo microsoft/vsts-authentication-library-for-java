@@ -31,7 +31,7 @@ Maven is the preferred way to referencing this library.
   <dependency>
     <groupId>com.microsoft.alm</groupId>
     <artifactId>auth-providers</artifactId>
-    <version>0.2.1</version>
+    <version>0.2.2</version>
   </dependency>
 ```
 
@@ -41,7 +41,7 @@ If only interested in specific modules:
   <dependency>
     <groupId>com.microsoft.alm</groupId>
     <artifactId>auth-secure-storage</artifactId>
-    <version>0.2.1</version>
+    <version>0.2.2</version>
   </dependency>
 ```
 
@@ -49,7 +49,7 @@ If only interested in specific modules:
   <dependency>
     <groupId>com.microsoft.alm</groupId>
     <artifactId>auth-core</artifactId>
-    <version>0.2.1</version>
+    <version>0.2.2</version>
   </dependency>
 ```
 
