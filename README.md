@@ -1,4 +1,4 @@
-# Visual Studio Team Services Authentication Library for Java (Preview)
+# Visual Studio Team Services Authentication Library for Java (Preview) 
 Retrieve OAuth2 Access Token or Personal Accesss Tokens for Visual Studio Team Services (visualstudio.com) accounts.  Also provides secure storage for those secrets on different platforms.
 
 License
@@ -24,7 +24,36 @@ This library provides:
 
 How to use this library
 -----------------------
-Please refer to the [Sample App](sample/src/main/java/com/microsoft/alm/auth/sample/App.java).
+
+Maven is the preferred way to referencing this library.  
+
+```xml
+  <dependency>
+    <groupId>com.microsoft.alm</groupId>
+    <artifactId>auth-providers</artifactId>
+    <version>0.2.1</version>
+  </dependency>
+```
+
+If only interested in specific modules:
+
+```xml
+  <dependency>
+    <groupId>com.microsoft.alm</groupId>
+    <artifactId>auth-secure-storage</artifactId>
+    <version>0.2.1</version>
+  </dependency>
+```
+
+```xml
+  <dependency>
+    <groupId>com.microsoft.alm</groupId>
+    <artifactId>auth-core</artifactId>
+    <version>0.2.1</version>
+  </dependency>
+```
+
+Here is a [Sample App](sample/src/main/java/com/microsoft/alm/auth/sample/App.java) that uses this library.
 
 
 How to build
@@ -36,7 +65,7 @@ How to build
 
 How can I contribute?
 ---------------------
-We welcome Pull Requests.
+This is a preview release, please open issues and give us feedback!  We also welcome Pull Requests.
 
 
 Code of Conduct
