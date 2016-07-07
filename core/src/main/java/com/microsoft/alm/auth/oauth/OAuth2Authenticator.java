@@ -163,8 +163,11 @@ public class OAuth2Authenticator extends BaseAuthenticator {
 
                 final String defaultProviderName
                         = System.getProperty(USER_AGENT_PROVIDER_PROPERTY_NAME, Provider.JAVA_FX.getClassName());
+
                 final boolean favorSwtBrowser
                         = defaultProviderName.equals(Provider.STANDARD_WIDGET_TOOLKIT.getClassName());
+
+                final boolean favorDeviceFlow = defaultProviderName.equalsIgnoreCase("none");
 
                 if (favorSwtBrowser) {
                     logger.debug("Prefer SWT Browser, download SWT Runtime if it is not available.");
@@ -173,7 +176,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                     }
                 }
 
-                if (oAuth2UseragentValidator.isOAuth2ProviderAvailable()
+                if (!favorDeviceFlow && oAuth2UseragentValidator.isOAuth2ProviderAvailable()
                         || (oAuth2UseragentValidator.isOnlyMissingRuntimeFromSwtProvider()
                             && SwtJarLoader.tryGetSwtJar(swtRuntime))) {
                     try {
