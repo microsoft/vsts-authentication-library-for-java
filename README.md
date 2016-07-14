@@ -1,9 +1,7 @@
 # Visual Studio Team Services Authentication Library for Java (Preview) [![Build Status](https://travis-ci.org/Microsoft/vsts-authentication-library-for-java.svg?branch=master)](https://travis-ci.org/Microsoft/vsts-authentication-library-for-java)
 Retrieve OAuth2 Access Token or Personal Accesss Tokens for Visual Studio Team Services (visualstudio.com) accounts.  Also provides secure storage for those secrets on different platforms.
 
-License
--------
-The MIT license can be found in [LICENSE.txt](LICENSE.txt)
+To learn more about Visual Studio Team Services and our Java specific tools, please visit https://java.visualstudio.com.
 
 What this library provides
 --------------------------
@@ -66,6 +64,11 @@ How to build
 How can I contribute?
 ---------------------
 This is a preview release, please open issues and give us feedback!  We also welcome Pull Requests.
+
+
+License
+-------
+The MIT license can be found in [LICENSE.txt](LICENSE.txt)
 
 
 Code of Conduct
