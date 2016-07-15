@@ -85,6 +85,10 @@ public class DeviceFlowImpl implements DeviceFlow {
         String responseText = null;
         final Calendar expiresAt = deviceFlowResponse.getExpiresAt();
         while (Calendar.getInstance().compareTo(expiresAt) <= 0) {
+            if (deviceFlowResponse.cancelRequestedByUser()) {
+                throw new AuthorizationException("request_cancelled", "Stop polling for Token.", null, null);
+            }
+
             try {
                 final HttpURLConnection response = client.post(tokenEndpoint, requestBody);
                 final int httpStatus = response.getResponseCode();
@@ -133,6 +137,8 @@ public class DeviceFlowImpl implements DeviceFlow {
             throw new AuthorizationException("code_expired", "The verification code expired.", null, null);
         }
         final TokenPair tokenPair = buildTokenPair(responseText);
+
+        deviceFlowResponse.setTokenAcquired();
         return tokenPair;
     }
 
