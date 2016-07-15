@@ -7,6 +7,7 @@ import com.microsoft.alm.helpers.PropertyBag;
 
 import java.net.URI;
 import java.util.Calendar;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Represents the result of requesting device flow authorization from a Device Endpoint.
@@ -14,6 +15,25 @@ import java.util.Calendar;
  * @see "Section 3.1 Client Requests Authorization"
  */
 public class DeviceFlowResponse {
+
+    /**
+     * WAITING_FOR_USER:
+     *      This library will continue issue server calls to poll for authentication result
+     *
+     * CANCEL_REQUESTED:
+     *      This library will stop making server calls and give up on creating a token with device flow
+     *
+     * TOKEN_ACQUIRED:
+     *      This library has received an OAuth2 Token based on Device Flow
+     */
+    enum RESPONSE_STATE {
+        WAITING_FOR_USER,
+        CANCEL_REQUESTED,
+        TOKEN_ACQUIRED
+    }
+
+    private final AtomicReference<RESPONSE_STATE> state = new AtomicReference<RESPONSE_STATE>();
+
     private final String deviceCode;
     private final String userCode;
     private final URI verificationUri;
@@ -29,6 +49,8 @@ public class DeviceFlowResponse {
         this.expiresAt = Calendar.getInstance();
         expiresAt.add(Calendar.SECOND, expiresIn);
         this.interval = interval;
+
+        this.state.set(RESPONSE_STATE.WAITING_FOR_USER);
     }
 
     public static DeviceFlowResponse fromJson(final String jsonText) {
@@ -118,5 +140,47 @@ public class DeviceFlowResponse {
      */
     public int getInterval() {
         return interval;
+    }
+
+    /**********************************************************************************************
+     * Callback flow controls
+     **********************************************************************************************/
+    /**
+     * The library will use this method to determine if it should give up polling for login result.
+     *
+     * @return true if user has requested to cancel this login session explicitly.
+     */
+    boolean cancelRequestedByUser() {
+        return this.state.get() == RESPONSE_STATE.CANCEL_REQUESTED;
+    }
+
+    /**
+     * The library will call this method after it successfully acquired the token.
+     */
+    void setTokenAcquired() {
+        this.state.set(RESPONSE_STATE.TOKEN_ACQUIRED);
+    }
+
+    /**
+     * Callback can monitor this value and react appropriately.  For example, a GUI callback dialog can dispose
+     * itself once it realizes the token has been acquired.
+     *
+     * WARNING: make sure the device flow callback does not block the thread this authentication library is running on.
+     * Otherwise the library will not start polling and this value will never be set.
+     *
+     * @return true if library has successfully acquired the token.
+     */
+    public boolean isTokenAcquired() {
+        return this.state.get() == RESPONSE_STATE.TOKEN_ACQUIRED;
+    }
+
+    /**
+     * This method is used by the callback to indicate user has given up, and we should
+     * stop polling for result.
+     *
+     * This is a best effort operation.  User may already logged in.
+     */
+    public void requestCancel() {
+        this.state.set(RESPONSE_STATE.CANCEL_REQUESTED);
     }
 }

@@ -51,6 +51,7 @@ public class AzureAuthorityTest {
                 requestTokenCalls.addAndGet(1);
                 Assert.assertEquals(TEST_CLIENT_ID, clientId);
                 Assert.assertEquals(azureDeviceFlowResponse, deviceFlowResponse);
+                deviceFlowResponse.setTokenAcquired();
                 return new TokenPair(TEST_ACCESS_TOKEN, TEST_REFRESH_TOKEN);
             }
         };
@@ -71,6 +72,7 @@ public class AzureAuthorityTest {
         Assert.assertEquals(1, requestAuthorizationCalls.get());
         Assert.assertEquals(1, requestTokenCalls.get());
         Assert.assertEquals(1, callbackCalls.get());
+        Assert.assertTrue(azureDeviceFlowResponse.isTokenAcquired());
     }
 
     @Test
@@ -115,6 +117,46 @@ public class AzureAuthorityTest {
         Assert.assertEquals(TEST_RESOURCE, testDeviceFlow.getResource());
         Assert.assertEquals(1, requestAuthorizationCalls.get());
         Assert.assertEquals(1, requestTokenCalls.get());
+        Assert.assertEquals(1, callbackCalls.get());
+    }
+
+    @Test
+    public void deviceFlow_cancelled() throws Exception {
+        final String authorityHostUrl = "https://authorization.example.com/common/";
+        final URI verificationUri = URI.create("https://authorization.example.com/oauth/device");
+        final AtomicInteger requestAuthorizationCalls = new AtomicInteger(0);
+        final AtomicInteger requestTokenCalls = new AtomicInteger(0);
+        final AtomicInteger callbackCalls = new AtomicInteger(0);
+        final AzureDeviceFlowResponse azureDeviceFlowResponse = new AzureDeviceFlowResponse(TEST_DEVICE_CODE, TEST_USER_CODE, verificationUri, TEST_EXPIRATION, TEST_INTERVAL, "message");
+        final AzureDeviceFlow testDeviceFlow = new AzureDeviceFlow() {
+            @Override
+            public DeviceFlowResponse requestAuthorization(final URI deviceEndpoint, final String clientId, final String scope) {
+                requestAuthorizationCalls.addAndGet(1);
+                Assert.assertEquals(TEST_CLIENT_ID, clientId);
+                return azureDeviceFlowResponse;
+            }
+        };
+        final Action<DeviceFlowResponse> callback = new Action<DeviceFlowResponse>() {
+            @Override
+            public void call(final DeviceFlowResponse deviceFlowResponse) {
+                callbackCalls.addAndGet(1);
+                Assert.assertEquals(azureDeviceFlowResponse, deviceFlowResponse);
+                deviceFlowResponse.requestCancel();
+            }
+        };
+        final AzureAuthority cut = new AzureAuthority(authorityHostUrl, null, testDeviceFlow);
+
+        try {
+            cut.acquireToken(TEST_CLIENT_ID, TEST_RESOURCE, TEST_REDIRECT_URI, callback);
+
+            Assert.fail("An exception should have been thrown before this line.");
+        } catch (final AuthorizationException e) {
+            Assert.assertEquals("request_cancelled", e.getCode());
+        }
+
+        Assert.assertEquals(TEST_RESOURCE, testDeviceFlow.getResource());
+        Assert.assertEquals(1, requestAuthorizationCalls.get());
+        Assert.assertEquals(0, requestTokenCalls.get());
         Assert.assertEquals(1, callbackCalls.get());
     }
 
