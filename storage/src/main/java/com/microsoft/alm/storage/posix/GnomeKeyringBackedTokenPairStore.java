@@ -28,25 +28,7 @@ public class GnomeKeyringBackedTokenPairStore extends GnomeKeyringBackedSecureSt
     protected String serialize(final TokenPair tokenPair) {
         Debug.Assert(tokenPair != null, "TokenPair cannot be null");
 
-        return toXmlString(tokenPair);
-    }
-
-    static String toXmlString(final TokenPair tokenPair) {
-        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        try {
-            final DocumentBuilder builder = dbf.newDocumentBuilder();
-            final Document document = builder.newDocument();
-
-            final Element element = tokenPair.toXml(document);
-            document.appendChild(element);
-
-            final String result = XmlHelper.toString(document);
-
-            return result;
-        }
-        catch (final Exception e) {
-            throw new Error(e);
-        }
+        return TokenPair.toXmlString(tokenPair);
     }
 
     @Override
@@ -54,32 +36,10 @@ public class GnomeKeyringBackedTokenPairStore extends GnomeKeyringBackedSecureSt
         Debug.Assert(secret != null, "secret cannot be null");
 
         try {
-            return fromXmlString(secret);
+            return TokenPair.fromXmlString(secret);
         } catch (final Exception e) {
             logError(logger, "Failed to deserialize the stored secret. Return null.", e);
             return null;
-        }
-    }
-
-    static TokenPair fromXmlString(final String xmlString) {
-        final byte[] bytes = StringHelper.UTF8GetBytes(xmlString);
-        final ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
-        return fromXmlStream(inputStream);
-    }
-
-    static TokenPair fromXmlStream(final InputStream source) {
-        final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        try {
-            final DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
-            final Document document = builder.parse(source);
-            final Element rootElement = document.getDocumentElement();
-
-            final TokenPair result = TokenPair.fromXml(rootElement);
-
-            return result;
-        }
-        catch (final Exception e) {
-            throw new Error(e);
         }
     }
 

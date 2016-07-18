@@ -13,6 +13,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -109,6 +113,46 @@ public class TokenPair extends Secret {
         valueNode.appendChild(refreshTokenNode);
 
         return valueNode;
+    }
+
+    public static String toXmlString(final TokenPair tokenPair) {
+        final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        try {
+            final DocumentBuilder builder = dbf.newDocumentBuilder();
+            final Document document = builder.newDocument();
+
+            final Element element = tokenPair.toXml(document);
+            document.appendChild(element);
+
+            final String result = XmlHelper.toString(document);
+
+            return result;
+        }
+        catch (final Exception e) {
+            throw new Error(e);
+        }
+    }
+
+    public static TokenPair fromXmlString(final String xmlString) {
+        final byte[] bytes = StringHelper.UTF8GetBytes(xmlString);
+        final ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
+        return fromXmlStream(inputStream);
+    }
+
+    static TokenPair fromXmlStream(final InputStream source) {
+        final DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        try {
+            final DocumentBuilder builder = documentBuilderFactory.newDocumentBuilder();
+            final Document document = builder.parse(source);
+            final Element rootElement = document.getDocumentElement();
+
+            final TokenPair result = TokenPair.fromXml(rootElement);
+
+            return result;
+        }
+        catch (final Exception e) {
+            throw new Error(e);
+        }
     }
 
     /**
