@@ -16,7 +16,7 @@ This library provides:
 | Secret Type | Windows (Credential Manager) | Linux (GNOME Keyring v2.22+)  | Mac OSX (Keychain)|
 |--------------------------|------------------------|-------------------------|-------------------------|
 | Username / Password Combo (`Credential`) | Yes | Yes | Yes |
-| OAuth2 Access/Refresh Token (`TokenPair`) | No | Yes | No | 
+| OAuth2 Access/Refresh Token (`TokenPair`) | Yes (On Windows 7, 8/8.1 and 10) | Yes | Yes | 
 | VSTS Personal Access Token (`Token`) | Yes | Yes | Yes |
 
 
@@ -29,7 +29,7 @@ Maven is the preferred way to referencing this library.
   <dependency>
     <groupId>com.microsoft.alm</groupId>
     <artifactId>auth-providers</artifactId>
-    <version>0.2.2</version>
+    <version>0.3.0</version>
   </dependency>
 ```
 
@@ -39,7 +39,7 @@ If only interested in specific modules:
   <dependency>
     <groupId>com.microsoft.alm</groupId>
     <artifactId>auth-secure-storage</artifactId>
-    <version>0.2.2</version>
+    <version>0.3.0</version>
   </dependency>
 ```
 
@@ -47,7 +47,7 @@ If only interested in specific modules:
   <dependency>
     <groupId>com.microsoft.alm</groupId>
     <artifactId>auth-core</artifactId>
-    <version>0.2.2</version>
+    <version>0.3.0</version>
   </dependency>
 ```
 
