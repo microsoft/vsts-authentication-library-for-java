@@ -25,7 +25,7 @@ public class GnomeKeyringBackedTokenPairStoreIT {
         underTest = new GnomeKeyringBackedTokenPairStore();
     }
 
-    private final String sampleAssessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik1uQ19WWmNBVGZNNXBPWW" +
+    private final String sampleAccessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik1uQ19WWmNBVGZNNXBPWW" +
             "lKSE1iYTlnb0VLWSIsImtpZCI6Ik1uQ19WWmNBVGZNNXBPWWlKSE1iYTlnb0VLWSJ9.eyJhdWQiOiJodHRwcz" +
             "ovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9" +
             "mOGNkZWYzMS1hMzFlLTRiNGEtOTNlNC01ZjU3MWU5MTI1NWEvIiwiaWF0IjoxNDU4NzUwOTc3LCJuYmYiOjE0NT" +
@@ -53,7 +53,7 @@ public class GnomeKeyringBackedTokenPairStoreIT {
     public void saveTokenPair() {
         final String testKey = "http://thisisatestkey";
 
-        final TokenPair tokenPair = new TokenPair(sampleAssessToken, sampleRefreshToken);
+        final TokenPair tokenPair = new TokenPair(sampleAccessToken, sampleRefreshToken);
         boolean added = underTest.add(testKey, tokenPair);
 
         assertTrue(added);

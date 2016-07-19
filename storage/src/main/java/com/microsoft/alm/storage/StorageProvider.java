@@ -10,12 +10,14 @@ import com.microsoft.alm.secret.Secret;
 import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.storage.macosx.KeychainSecurityBackedCredentialStore;
+import com.microsoft.alm.storage.macosx.KeychainSecurityBackedTokenPairStore;
 import com.microsoft.alm.storage.macosx.KeychainSecurityBackedTokenStore;
 import com.microsoft.alm.storage.posix.GnomeKeyringBackedCredentialStore;
 import com.microsoft.alm.storage.posix.GnomeKeyringBackedTokenPairStore;
 import com.microsoft.alm.storage.posix.GnomeKeyringBackedTokenStore;
 import com.microsoft.alm.storage.posix.internal.GnomeKeyringBackedSecureStore;
 import com.microsoft.alm.storage.windows.CredManagerBackedCredentialStore;
+import com.microsoft.alm.storage.windows.CredManagerBackedTokenPairStore;
 import com.microsoft.alm.storage.windows.CredManagerBackedTokenStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,11 +59,13 @@ public class StorageProvider {
         if (SystemHelper.isWindows()) {
             tokenStoreCandidates.add(new CredManagerBackedTokenStore());
             credentialStoreCandidates.add(new CredManagerBackedCredentialStore());
+            tokenPairStoreCandidates.add(new CredManagerBackedTokenPairStore());
         }
 
         if (SystemHelper.isMac()) {
             tokenStoreCandidates.add(new KeychainSecurityBackedTokenStore());
             credentialStoreCandidates.add(new KeychainSecurityBackedCredentialStore());
+            tokenPairStoreCandidates.add(new KeychainSecurityBackedTokenPairStore());
         }
 
         if (SystemHelper.isLinux() && GnomeKeyringBackedSecureStore.isGnomeKeyringSupported()) {

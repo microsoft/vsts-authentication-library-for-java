@@ -4,8 +4,6 @@
 package com.microsoft.alm.storage.macosx;
 
 
-import com.microsoft.alm.secret.Credential;
-import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.helpers.Func;
 import com.microsoft.alm.helpers.IOHelper;
 import com.microsoft.alm.helpers.StringHelper;
@@ -13,6 +11,9 @@ import com.microsoft.alm.oauth2.useragent.subprocess.DefaultProcessFactory;
 import com.microsoft.alm.oauth2.useragent.subprocess.ProcessCoordinator;
 import com.microsoft.alm.oauth2.useragent.subprocess.TestableProcess;
 import com.microsoft.alm.oauth2.useragent.subprocess.TestableProcessFactory;
+import com.microsoft.alm.secret.Credential;
+import com.microsoft.alm.secret.Token;
+import com.microsoft.alm.secret.TokenPair;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -71,7 +72,9 @@ class KeychainSecurityCliStore {
 
     enum SecretKind {
         Credential,
-        Token,;
+        Token,
+        TokenPair_Access_Token,
+        TokenPair_Refresh_Token;
     }
 
     private final TestableProcessFactory processFactory;
@@ -388,6 +391,34 @@ class KeychainSecurityCliStore {
         return result;
     }
 
+    public TokenPair readTokenPair(final String targetName) {
+        String accessToken, refreshToken;
+
+        final Map<String, Object> accessTokenMetaData = read(SecretKind.TokenPair_Access_Token, processFactory, targetName);
+
+        if (accessTokenMetaData.size() > 0) {
+            final String password = (String) accessTokenMetaData.get(PASSWORD);
+            accessToken = password;
+        } else {
+            accessToken = null;
+        }
+
+        final Map<String, Object> refreshTokenMetaData = read(SecretKind.TokenPair_Refresh_Token, processFactory, targetName);
+
+        if (refreshTokenMetaData.size() > 0) {
+            final String password = (String) refreshTokenMetaData.get(PASSWORD);
+            refreshToken = password;
+        } else {
+            refreshToken = null;
+        }
+
+        if (accessToken != null && refreshToken != null) {
+            return new TokenPair(accessToken, refreshToken);
+        }
+
+        return null;
+    }
+
     static void write(final SecretKind secretKind, final TestableProcessFactory processFactory, final String serviceName, final String accountName, final String password) {
         final String stdOut, stdErr;
         try {
@@ -422,9 +453,18 @@ class KeychainSecurityCliStore {
     }
 
     public void writeToken(final String targetName, final Token token) {
+        writeTokenKind(targetName, SecretKind.Token, token);
+    }
+
+    private void writeTokenKind(final String targetName, final SecretKind secretKind, final Token token) {
         final AtomicReference<String> accountNameReference = new AtomicReference<String>();
         Token.getFriendlyNameFromType(token.Type, accountNameReference);
         final String accountName = accountNameReference.get();
-        write(SecretKind.Token, processFactory, targetName, accountName, token.Value);
+        write(secretKind, processFactory, targetName, accountName, token.Value);
+    }
+
+    public void writeTokenPair(final String targetName, final TokenPair tokenPair) {
+        writeTokenKind(targetName, SecretKind.TokenPair_Access_Token, tokenPair.AccessToken);
+        writeTokenKind(targetName, SecretKind.TokenPair_Refresh_Token, tokenPair.RefreshToken);
     }
 }
