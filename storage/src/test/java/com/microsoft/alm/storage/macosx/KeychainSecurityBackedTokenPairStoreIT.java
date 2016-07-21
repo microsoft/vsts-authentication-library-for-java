@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeTrue;
 
 public class KeychainSecurityBackedTokenPairStoreIT {
@@ -39,7 +40,11 @@ public class KeychainSecurityBackedTokenPairStoreIT {
         assertEquals("Retrieved Access Token is different", sampleAccessToken, readToken.AccessToken.Value);
         assertEquals("Retrieved Refresh Token is different", sampleRefreshToken, readToken.RefreshToken.Value);
 
-        // The credential under the specified key should be deleted now, it's a good idea to manaully verify this now
+        // The credential under the specified key should be deleted now
         underTest.delete(key);
+
+        final TokenPair nonExistentToken = underTest.get(key);
+        assertNull(nonExistentToken);
+
     }
 }

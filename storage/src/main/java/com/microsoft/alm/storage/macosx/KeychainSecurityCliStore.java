@@ -42,12 +42,13 @@ class KeychainSecurityCliStore {
     private static final int USER_INTERACTION_NOT_ALLOWED_EXIT_CODE = 36;
     private static final String INTERACTIVE_MODE = "-i";
 
-    public boolean delete(final String targetName) {
+    protected boolean deleteByKind(final String targetName, final SecretKind kind) {
         try {
             final TestableProcess process = processFactory.create(
-                SECURITY,
-                DELETE_GENERIC_PASSWORD,
-                SERVICE_PARAMETER, targetName
+                    SECURITY,
+                    DELETE_GENERIC_PASSWORD,
+                    SERVICE_PARAMETER, targetName,
+                    KIND_PARAMETER, kind.name()
             );
             // we don't care about the exit code
             process.waitFor();

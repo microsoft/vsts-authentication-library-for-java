@@ -19,6 +19,11 @@ public class KeychainSecurityBackedTokenStore extends KeychainSecurityCliStore i
         return true;
     }
 
+    @Override
+    public boolean delete(final String targetName) {
+        return deleteByKind(targetName, SecretKind.Token);
+    }
+
     /**
      * Keychain Access is secure
      *
@@ -28,5 +33,4 @@ public class KeychainSecurityBackedTokenStore extends KeychainSecurityCliStore i
     public boolean isSecure() {
         return true;
     }
-
 }
