@@ -154,7 +154,8 @@ public class OAuth2Authenticator extends BaseAuthenticator {
 
         final String key = getKey(APP_VSSPS_VISUALSTUDIO);
 
-        SecretRetriever secretRetriever = new SecretRetriever() {
+        final SecretRetriever<TokenPair> secretRetriever = new SecretRetriever<TokenPair>() {
+
             @Override
             protected TokenPair doRetrieve() {
                 logger.debug("Ready to launch browser flow to retrieve oauth2 token.");

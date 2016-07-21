@@ -81,7 +81,7 @@ public class BasicAuthAuthenticator extends BaseAuthenticator {
 
         final String key = getKey(uri);
 
-        SecretRetriever secretRetriever = new SecretRetriever() {
+        final SecretRetriever<Credential> secretRetriever = new SecretRetriever<Credential>() {
             @Override
             protected Credential doRetrieve() {
                 logger.debug("Prompt user for credential for uri: {}", uri);

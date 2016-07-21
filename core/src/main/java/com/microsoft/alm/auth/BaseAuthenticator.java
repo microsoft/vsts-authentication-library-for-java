@@ -125,7 +125,7 @@ public abstract class BaseAuthenticator implements Authenticator {
      *
      * TODO: should we also add validation behavior extension point here?
      */
-    public static abstract class SecretRetriever {
+    public static abstract class SecretRetriever<E extends Secret> {
         /**
          * Standard synchronized access to store.  Extensibility point that
          * can be overridden
@@ -134,11 +134,10 @@ public abstract class BaseAuthenticator implements Authenticator {
          *      key for that credentials are saved under
          * @param store
          *      a secret store that holds credentials
-         * @param <E> a secret type
          *
          * @return stored secret based on key, nullable
          */
-        protected <E extends Secret> E readFromStore(final String key, final SecretStore<E> store) {
+        protected E readFromStore(final String key, final SecretStore<E> store) {
             synchronized (store) {
                 return store.get(key);
             }
@@ -146,11 +145,10 @@ public abstract class BaseAuthenticator implements Authenticator {
 
         /**
          * How the secret is generated / retrieved.  This is the real work
-         * @param <E> a secret type
          *
          * @return secret
          */
-        protected abstract <E extends Secret> E doRetrieve();
+        protected abstract E doRetrieve();
 
         /**
          * Standard storing the secret based on the key
@@ -161,12 +159,11 @@ public abstract class BaseAuthenticator implements Authenticator {
          *      key for that credentials are saved under
          * @param store
          *      a secret store that holds credentials
-         * @param <E> a secret type
          *
          * @param secret
          *      secret to be saved in the store
          */
-        protected <E extends Secret> void store(final String key, final SecretStore<E> store, E secret) {
+        protected void store(final String key, final SecretStore<E> store, E secret) {
             if (secret != null) {
                 logger.debug("Storing secret for key: {}.", key);
                 synchronized (store) {
@@ -187,12 +184,11 @@ public abstract class BaseAuthenticator implements Authenticator {
          *      a secret store that holds credentials
          * @param promptBehavior
          *      determines whether we should prompt or not if we don't have a credential for the specified key
-         * @param <E> a secret type
          *
          * @return secret
          *      secret to be saved in the store
          */
-        public <E extends Secret> E retrieve(final String key, final SecretStore<E> store,
+        public E retrieve(final String key, final SecretStore<E> store,
                                                 final PromptBehavior promptBehavior) {
             logger.debug("Retrieving secret with key: {}, and prompt behavior: {}.", key, promptBehavior.name());
 

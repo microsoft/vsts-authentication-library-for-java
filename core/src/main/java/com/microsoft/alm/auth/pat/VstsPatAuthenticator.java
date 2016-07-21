@@ -135,7 +135,7 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
         final String key = getKey(uri);
         Debug.Assert(key != null, "Failed to convert uri to key");
 
-        SecretRetriever secretRetriever = new SecretRetriever() {
+        final SecretRetriever<Token> secretRetriever = new SecretRetriever<Token>() {
             @Override
             protected Token doRetrieve() {
                 TokenPair oauthToken = vstsOauthAuthenticator.getOAuth2TokenPair(promptBehavior.AUTO);
