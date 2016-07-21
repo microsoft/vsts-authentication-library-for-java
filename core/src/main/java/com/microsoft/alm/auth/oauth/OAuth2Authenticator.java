@@ -8,8 +8,10 @@ import com.microsoft.alm.auth.PromptBehavior;
 import com.microsoft.alm.auth.oauth.helper.SwtJarLoader;
 import com.microsoft.alm.helpers.Action;
 import com.microsoft.alm.helpers.Debug;
+import com.microsoft.alm.helpers.HttpClient;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.oauth2.useragent.Provider;
+import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.storage.InsecureInMemoryStore;
 import com.microsoft.alm.storage.SecretStore;
@@ -17,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -31,6 +35,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
 
     public final static URI APP_VSSPS_VISUALSTUDIO = URI.create("https://app.vssps.visualstudio.com");
     public final static String MANAGEMENT_CORE_RESOURCE = "https://management.core.windows.net/";
+    public final static String VALIDATION_ENDPOINT = APP_VSSPS_VISUALSTUDIO + "/_apis/connectionData";
     public static final String VSTS_RESOURCE = "499b84ac-1321-427f-aa17-267ca6975798";
 
     private final static String TYPE = "OAuth2";
@@ -155,6 +160,57 @@ public class OAuth2Authenticator extends BaseAuthenticator {
         final String key = getKey(APP_VSSPS_VISUALSTUDIO);
 
         final SecretRetriever<TokenPair> secretRetriever = new SecretRetriever<TokenPair>() {
+
+            private boolean validateAccessToken(final Token accessToken, final URI validationEndpoint) {
+                final HttpClient client = new HttpClient(Global.getUserAgent());
+                accessToken.contributeHeader(client.Headers);
+                try {
+                    final HttpURLConnection response = client.get(validationEndpoint);
+
+                    return response.getResponseCode() == HttpURLConnection.HTTP_OK;
+                } catch (IOException e) {
+                    logger.debug("Validation failed with IOException.", e);
+                }
+
+                return false;
+            }
+
+            @Override
+            protected boolean tryGetValidated(final TokenPair tokenPair, final AtomicReference<TokenPair> holder) {
+                Debug.Assert(tokenPair != null, "TokenPair is null");
+                Debug.Assert(holder != null, "Holder is null");
+
+                final URI validationEndpoint = URI.create(VALIDATION_ENDPOINT);
+                boolean valid = false;
+
+                if (tokenPair.AccessToken != null) {
+                    logger.debug("Validating stored OAuth2 Access Token...");
+                    valid = validateAccessToken(tokenPair.AccessToken, validationEndpoint);
+                }
+
+                if (!valid && tokenPair.RefreshToken != null) {
+                    logger.debug("OAuth2 Access Token is not valid, and we have a refresh token, try refreshing...");
+
+                    final TokenPair renewedTokenPair =
+                            getAzureAuthority().acquireTokenByRefreshToken(clientId, resource, tokenPair.RefreshToken);
+
+                    // Today after we refresh oauth2 token with the refresh token, we are only getting back an
+                    // Access Token -- the refresh token is null.  Although we could use this Access Token for another
+                    // hour, this contradicts with the assumption of this library (Both AccessToken and
+                    // RefreshToken fields of the TokenPair class are non-null).
+                    // TODO: investigate next sprint, after 7/28
+                    if (renewedTokenPair != null
+                            && renewedTokenPair.AccessToken.Value != null
+                            && renewedTokenPair.RefreshToken.Value != null) {
+                        logger.debug("OAuth2 Access Token refreshed successfully.");
+                        valid = true;
+                        holder.set(renewedTokenPair);
+                    }
+                }
+
+                logger.debug("OAuth2 Access Token is {}.", valid ? "valid" : "invalid.");
+                return valid;
+            }
 
             @Override
             protected TokenPair doRetrieve() {

@@ -17,7 +17,9 @@ import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.oauth2.useragent.AuthorizationResponse;
 import com.microsoft.alm.oauth2.useragent.UserAgent;
 import com.microsoft.alm.oauth2.useragent.UserAgentImpl;
+import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenPair;
+import com.microsoft.alm.secret.TokenType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -159,6 +161,20 @@ public class AzureAuthority {
         return result;
     }
 
+    static StringContent createTokenRequestByRefreshToken(final String resource, final String clientId,
+                                                            final Token refreshToken) {
+
+        final QueryString qs = new QueryString();
+
+        qs.put(OAuthParameter.RESOURCE, resource);
+        qs.put(OAuthParameter.CLIENT_ID, clientId);
+        qs.put(OAuthParameter.GRANT_TYPE, OAuthParameter.REFRESH_TOKEN);
+        qs.put(OAuthParameter.REFRESH_TOKEN, refreshToken.Value);
+
+        final StringContent result = StringContent.createUrlEncoded(qs);
+        return result;
+    }
+
     /**
      * Determines if there's the targetUri represents a Visual Studio Team Services account
      * backed by Azure Active Directory (AAD).
@@ -195,6 +211,23 @@ public class AzureAuthority {
         return null;
     }
 
+    private TokenPair doAcquireToken(final URI tokenEndpoint, final StringContent requestContent) throws IOException {
+        final HttpClient client = new HttpClient(Global.getUserAgent());
+
+        final HttpURLConnection connection = client.post(tokenEndpoint, requestContent, new Action<HttpURLConnection>() {
+            @Override
+            public void call(final HttpURLConnection conn) {
+                conn.setUseCaches(false);
+            }
+        });
+        client.ensureOK(connection);
+
+        final String responseContent = HttpClient.readToString(connection);
+        final TokenPair tokenPair = new TokenPair(responseContent);
+
+        return tokenPair;
+    }
+
     /**
      * Acquires a {@link TokenPair} from the authority via an interactive user logon
      * prompt.
@@ -226,27 +259,50 @@ public class AzureAuthority {
             return tokens;
         }
 
-        final HttpClient client = new HttpClient(Global.getUserAgent());
         try {
             final URI tokenEndpoint = createTokenEndpointUri(authorityHostUrl);
             final StringContent requestContent = createTokenRequest(resource, clientId, authorizationCode, redirectUri, correlationId);
-            final HttpURLConnection connection = client.post(tokenEndpoint, requestContent, new Action<HttpURLConnection>() {
-                @Override
-                public void call(final HttpURLConnection conn) {
-                    conn.setUseCaches(false);
-                }
-            });
-            client.ensureOK(connection);
-            final String responseContent = HttpClient.readToString(connection);
-            tokens = new TokenPair(responseContent);
 
+            tokens = doAcquireToken(tokenEndpoint, requestContent);
             logger.debug("   token acquisition succeeded.");
+
         } catch (final IOException e) {
             // TODO: 449248: silently catching the exception here seems horribly wrong
             logger.debug("   token acquisition failed.");
             logger.debug("   IOException: {}", e);
         }
         return tokens;
+    }
+
+    /**
+     * Acquires an access token from the authority using a previously acquired refresh token.
+     *
+     * @param clientId     Identifier of the client requesting the token.
+     * @param resource     Identifier of the target resource that is the recipient of the requested token.
+     * @param refreshToken The {@link Token} of type {@link TokenType#Refresh}.
+     * @return If successful, a {@link TokenPair}; otherwise null.
+     */
+    public TokenPair acquireTokenByRefreshToken(final String clientId, final String resource,
+                                                final Token refreshToken) {
+        Debug.Assert(!StringHelper.isNullOrWhiteSpace(clientId), "The clientId parameter is null or empty");
+        Debug.Assert(!StringHelper.isNullOrWhiteSpace(resource), "The resource parameter is null or empty");
+        Debug.Assert(refreshToken != null, "The refreshToken parameter is null");
+
+        logger.debug("AzureAuthority::acquireTokenByRefreshToken");
+
+        final URI tokenEndpoint = createTokenEndpointUri(authorityHostUrl);
+        final StringContent requestContent = createTokenRequestByRefreshToken(resource, clientId, refreshToken);
+
+        try {
+            final TokenPair tokenPair = doAcquireToken(tokenEndpoint, requestContent);
+            return tokenPair;
+        } catch (IOException e) {
+            // TODO: 449248: silently catching the exception here seems horribly wrong - again
+            logger.debug("   token acquisition failed.");
+            logger.debug("   IOException: {}", e);
+        }
+
+        return null;
     }
 
     public TokenPair acquireToken(final String clientId, final String resource, final URI redirectUri,
