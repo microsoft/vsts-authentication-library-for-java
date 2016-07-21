@@ -3,13 +3,13 @@
 
 package com.microsoft.alm.storage.macosx
 
-import com.microsoft.alm.secret.Credential
-import com.microsoft.alm.secret.Token
-import com.microsoft.alm.secret.TokenType
 import com.microsoft.alm.helpers.Environment
 import com.microsoft.alm.helpers.StringHelper
 import com.microsoft.alm.oauth2.useragent.subprocess.DefaultProcessFactory
 import com.microsoft.alm.oauth2.useragent.subprocess.TestableProcessFactory
+import com.microsoft.alm.secret.Credential
+import com.microsoft.alm.secret.Token
+import com.microsoft.alm.secret.TokenType
 import groovy.transform.CompileStatic
 import org.junit.Ignore
 import org.junit.Test
@@ -202,12 +202,14 @@ attributes:
     @Test public void simulatedInteraction() {
         def deleteCredentialSuccess = new FifoProcess(SAMPLE_CREDENTIAL_METADATA, "password has been deleted.")
         deleteCredentialSuccess.with {
-            expectedCommand = ["/usr/bin/security", "delete-generic-password", "-s", TARGET_NAME]
+            expectedCommand = ["/usr/bin/security", "delete-generic-password", "-s", TARGET_NAME, "-D",
+                               KeychainSecurityCliStore.SecretKind.Credential.name()]
         }
 
         def deleteCredentialFailure = new FifoProcess(StringHelper.Empty, "security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain.")
         deleteCredentialFailure.with {
-            expectedCommand = ["/usr/bin/security", "delete-generic-password", "-s", TARGET_NAME]
+            expectedCommand = ["/usr/bin/security", "delete-generic-password", "-s", TARGET_NAME, "-D",
+                               KeychainSecurityCliStore.SecretKind.Credential.name()]
             expectedExitCode = 44
         }
 
@@ -248,12 +250,14 @@ attributes:
         
         def deleteTokenSuccess = new FifoProcess(SAMPLE_TOKEN_METADATA, "password has been deleted.")
         deleteTokenSuccess.with {
-            expectedCommand = ["/usr/bin/security", "delete-generic-password", "-s", TARGET_NAME]
+            expectedCommand = ["/usr/bin/security", "delete-generic-password", "-s", TARGET_NAME, "-D",
+                               KeychainSecurityCliStore.SecretKind.Token.name()]
         }
 
         def deleteTokenFailure = new FifoProcess(StringHelper.Empty, "security: SecKeychainSearchCopyNext: The specified item could not be found in the keychain.")
         deleteTokenFailure.with {
-            expectedCommand = ["/usr/bin/security", "delete-generic-password", "-s", TARGET_NAME]
+            expectedCommand = ["/usr/bin/security", "delete-generic-password", "-s", TARGET_NAME, "-D",
+                               KeychainSecurityCliStore.SecretKind.Token.name()]
             expectedExitCode = 44
         }
 
@@ -321,9 +325,9 @@ attributes:
         final def credential = new Credential(USER_NAME, PASSWORD)
 
         // potentially delete an old entry from a previous run of this test
-        store.delete(TARGET_NAME)
+        store.deleteByKind(TARGET_NAME, KeychainSecurityCliStore.SecretKind.Credential)
         // there should be nothing there, yet this call should not fail
-        store.delete(TARGET_NAME)
+        store.deleteByKind(TARGET_NAME, KeychainSecurityCliStore.SecretKind.Credential)
 
         final def nullCredential = store.readCredentials(TARGET_NAME)
 
@@ -347,9 +351,9 @@ attributes:
         final def token = new Token(PASSWORD, TokenType.Personal)
 
         // potentially delete an old entry from a previous run of this test
-        store.delete(TARGET_NAME)
+        store.deleteByKind(TARGET_NAME, KeychainSecurityCliStore.SecretKind.Token)
         // there should be nothing there, yet this call should not fail
-        store.delete(TARGET_NAME)
+        store.deleteByKind(TARGET_NAME, KeychainSecurityCliStore.SecretKind.Token)
 
         final def nullToken = store.readToken(TARGET_NAME)
 

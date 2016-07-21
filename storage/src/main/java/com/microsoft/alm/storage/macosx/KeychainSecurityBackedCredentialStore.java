@@ -20,6 +20,11 @@ public class KeychainSecurityBackedCredentialStore extends KeychainSecurityCliSt
         return true;
     }
 
+    @Override
+    public boolean delete(final String targetName) {
+        return deleteByKind(targetName, SecretKind.Credential);
+    }
+
     /**
      * Keychain Access is secure
      *

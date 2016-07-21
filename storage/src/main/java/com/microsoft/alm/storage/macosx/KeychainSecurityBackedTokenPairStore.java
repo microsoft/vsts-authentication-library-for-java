@@ -19,6 +19,12 @@ public class KeychainSecurityBackedTokenPairStore extends KeychainSecurityCliSto
         return true;
     }
 
+    @Override
+    public boolean delete(final String targetName) {
+        return deleteByKind(targetName, SecretKind.TokenPair_Access_Token)
+                && deleteByKind(targetName, SecretKind.TokenPair_Refresh_Token);
+    }
+
     /**
      * Keychain Access is secure
      *
