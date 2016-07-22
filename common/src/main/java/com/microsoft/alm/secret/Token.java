@@ -16,6 +16,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 
+import javax.xml.bind.DatatypeConverter;
 import java.nio.ByteBuffer;
 import java.util.EnumSet;
 import java.util.Map;
@@ -197,6 +198,11 @@ public class Token extends Secret {
             case Access:
                 final String prefix = "Bearer";
                 headers.put("Authorization", prefix + " " + Value);
+                break;
+            case Personal:
+                final byte[] authData = StringHelper.UTF8GetBytes("PersonalAccessToken:" + Value);
+                final String base64EncodedAuthData = DatatypeConverter.printBase64Binary(authData);
+                headers.put("Authorization", "Basic " + base64EncodedAuthData);
                 break;
             case Federated:
                 throw new NotImplementedException(449222);

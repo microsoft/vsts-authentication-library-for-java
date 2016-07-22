@@ -5,7 +5,9 @@ package com.microsoft.alm.auth.pat;
 
 import com.microsoft.alm.auth.BaseAuthenticator;
 import com.microsoft.alm.auth.PromptBehavior;
+import com.microsoft.alm.auth.oauth.Global;
 import com.microsoft.alm.auth.oauth.OAuth2Authenticator;
+import com.microsoft.alm.helpers.HttpClient;
 import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.secret.VsoTokenScope;
@@ -15,7 +17,10 @@ import com.microsoft.alm.storage.SecretStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Authenticator based on Personal Access Token
@@ -136,6 +141,31 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
         Debug.Assert(key != null, "Failed to convert uri to key");
 
         final SecretRetriever<Token> secretRetriever = new SecretRetriever<Token>() {
+            @Override
+            protected boolean tryGetValidated(final Token token, final AtomicReference<Token> holder) {
+                Debug.Assert(token != null, "Token is null");
+                Debug.Assert(holder != null, "Holder is null");
+
+                final URI validationEndpoint = URI.create(OAuth2Authenticator.VALIDATION_ENDPOINT);
+                boolean valid = false;
+
+                if (token.Value != null) {
+                    final HttpClient client = new HttpClient(Global.getUserAgent());
+                    token.contributeHeader(client.Headers);
+                    try {
+                        final HttpURLConnection response = client.get(validationEndpoint);
+
+                        valid = response.getResponseCode() == HttpURLConnection.HTTP_OK;
+                    } catch (IOException e) {
+                        logger.debug("Validation failed with IOException.", e);
+                    }
+
+                }
+
+                logger.debug("Personal Access Token is {}.", valid ? "valid" : "invalid.");
+                return valid;
+            }
+
             @Override
             protected Token doRetrieve() {
                 TokenPair oauthToken = vstsOauthAuthenticator.getOAuth2TokenPair(promptBehavior.AUTO);
