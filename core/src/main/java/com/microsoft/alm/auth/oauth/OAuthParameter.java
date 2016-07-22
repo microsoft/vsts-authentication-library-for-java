@@ -19,6 +19,7 @@ class OAuthParameter {
     static final String LOGIN_HINT = "login_hint";
     static final String STATE = "state";
     static final String INTERVAL = "interval";
+    static final String REFRESH_TOKEN= "refresh_token";
 
     static final String ERROR_CODE = "error";
     static final String ERROR_DESCRIPTION = "error_description";

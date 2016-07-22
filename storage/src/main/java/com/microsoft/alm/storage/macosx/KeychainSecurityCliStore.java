@@ -465,7 +465,12 @@ class KeychainSecurityCliStore {
     }
 
     public void writeTokenPair(final String targetName, final TokenPair tokenPair) {
-        writeTokenKind(targetName, SecretKind.TokenPair_Access_Token, tokenPair.AccessToken);
-        writeTokenKind(targetName, SecretKind.TokenPair_Refresh_Token, tokenPair.RefreshToken);
+        if (tokenPair.AccessToken.Value != null) {
+            writeTokenKind(targetName, SecretKind.TokenPair_Access_Token, tokenPair.AccessToken);
+        }
+
+        if (tokenPair.RefreshToken.Value != null) {
+            writeTokenKind(targetName, SecretKind.TokenPair_Refresh_Token, tokenPair.RefreshToken);
+        }
     }
 }

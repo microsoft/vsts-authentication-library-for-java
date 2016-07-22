@@ -10,6 +10,8 @@ import com.microsoft.alm.helpers.StringContent;
 import com.microsoft.alm.helpers.StringHelper;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.secret.TokenPair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -17,6 +19,8 @@ import java.net.URI;
 import java.util.Calendar;
 
 public class DeviceFlowImpl implements DeviceFlow {
+
+    private static final Logger logger = LoggerFactory.getLogger(DeviceFlowImpl.class);
 
     @Override
     public DeviceFlowResponse requestAuthorization(final URI deviceEndpoint, final String clientId, final String scope) {
@@ -84,7 +88,8 @@ public class DeviceFlowImpl implements DeviceFlow {
         final HttpClient client = new HttpClient(Global.getUserAgent());
         String responseText = null;
         final Calendar expiresAt = deviceFlowResponse.getExpiresAt();
-        while (Calendar.getInstance().compareTo(expiresAt) <= 0) {
+
+        do {
             if (deviceFlowResponse.cancelRequestedByUser()) {
                 throw new AuthorizationException("request_cancelled", "Stop polling for Token.", null, null);
             }
@@ -92,6 +97,7 @@ public class DeviceFlowImpl implements DeviceFlow {
             try {
                 final HttpURLConnection response = client.post(tokenEndpoint, requestBody);
                 final int httpStatus = response.getResponseCode();
+
                 if (httpStatus == HttpURLConnection.HTTP_OK) {
                     responseText = HttpClient.readToString(response);
                     break;
@@ -132,6 +138,7 @@ public class DeviceFlowImpl implements DeviceFlow {
                 throw new Error(e);
             }
         }
+        while (Calendar.getInstance().compareTo(expiresAt) <= 0);
 
         if (responseText == null) {
             throw new AuthorizationException("code_expired", "The verification code expired.", null, null);

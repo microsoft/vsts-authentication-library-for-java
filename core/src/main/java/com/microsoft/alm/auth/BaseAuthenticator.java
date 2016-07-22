@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Abstract authenticator with default implementations
@@ -122,10 +123,8 @@ public abstract class BaseAuthenticator implements Authenticator {
 
     /**
      * Common pattern to retrieve a secret from store based on supplied prompt behavior
-     *
-     * TODO: should we also add validation behavior extension point here?
      */
-    public static abstract class SecretRetriever {
+    public static abstract class SecretRetriever<E extends Secret> {
         /**
          * Standard synchronized access to store.  Extensibility point that
          * can be overridden
@@ -134,23 +133,40 @@ public abstract class BaseAuthenticator implements Authenticator {
          *      key for that credentials are saved under
          * @param store
          *      a secret store that holds credentials
-         * @param <E> a secret type
          *
          * @return stored secret based on key, nullable
          */
-        protected <E extends Secret> E readFromStore(final String key, final SecretStore<E> store) {
+        protected E readFromStore(final String key, final SecretStore<E> store) {
             synchronized (store) {
                 return store.get(key);
             }
         }
 
         /**
+         * Basic noop verification of the secret.  It is up to each authenticator to define proper
+         * verification process to assure the validity of the secret. It should return reference to a validated
+         * secret via the secretHolder parameter.
+         *
+         * This is an extensibility point.
+         *
+         * @param secret
+         *    The secret to validate
+         *
+         * @param secretHolder
+         *    This holder should contain a reference to a valid secret
+         *
+         * @return {@code true} if secret is validated; {@code false} otherwise.
+         */
+        protected boolean tryGetValidated(final E secret, AtomicReference<E> secretHolder) {
+            return true;
+        }
+
+        /**
          * How the secret is generated / retrieved.  This is the real work
-         * @param <E> a secret type
          *
          * @return secret
          */
-        protected abstract <E extends Secret> E doRetrieve();
+        protected abstract E doRetrieve();
 
         /**
          * Standard storing the secret based on the key
@@ -161,15 +177,16 @@ public abstract class BaseAuthenticator implements Authenticator {
          *      key for that credentials are saved under
          * @param store
          *      a secret store that holds credentials
-         * @param <E> a secret type
          *
          * @param secret
          *      secret to be saved in the store
          */
-        protected <E extends Secret> void store(final String key, final SecretStore<E> store, E secret) {
+        protected void store(final String key, final SecretStore<E> store, E secret) {
             if (secret != null) {
                 logger.debug("Storing secret for key: {}.", key);
                 synchronized (store) {
+                    // could be update
+                    store.delete(key);
                     store.add(key, secret);
                 }
             }
@@ -187,12 +204,11 @@ public abstract class BaseAuthenticator implements Authenticator {
          *      a secret store that holds credentials
          * @param promptBehavior
          *      determines whether we should prompt or not if we don't have a credential for the specified key
-         * @param <E> a secret type
          *
          * @return secret
          *      secret to be saved in the store
          */
-        public <E extends Secret> E retrieve(final String key, final SecretStore<E> store,
+        public E retrieve(final String key, final SecretStore<E> store,
                                                 final PromptBehavior promptBehavior) {
             logger.debug("Retrieving secret with key: {}, and prompt behavior: {}.", key, promptBehavior.name());
 
@@ -201,6 +217,29 @@ public abstract class BaseAuthenticator implements Authenticator {
                 // Not ALWAYS prompt, so let's read from the store for any cached secret
                 logger.debug("Reading secret from store for key: {}", key);
                 secret = readFromStore(key, store);
+
+                if (secret != null) {
+                    final AtomicReference<E> secretHolder = new AtomicReference<E>();
+                    secretHolder.set(secret);
+
+                    // Verify this secret is valid
+                    if (tryGetValidated(secret, secretHolder)) {
+                        final E validatedSecret = secretHolder.get();
+
+                        // The secret maybe different now, e.g. we could use the refresh token to generate
+                        // a new Access Token
+                        if (!validatedSecret.equals(secret)) {
+                            store.delete(key);
+                            store.add(key, validatedSecret);
+
+                            secret = validatedSecret;
+                        }
+                    } else {
+                        secret = null;
+                        // Remove the invalid secret from store
+                        store.delete(key);
+                    }
+                }
             }
 
             if (promptBehavior == PromptBehavior.NEVER) {
