@@ -91,6 +91,19 @@ public class OAuth2AuthenticatorTest {
     }
 
     @Test
+    public void getTokenByRefreshToken_if_existingAccessTokenNotValid()
+            throws URISyntaxException, InterruptedException, ExecutionException, IOException, AuthorizationException {
+        when(mockOAuth2UseragentValidator.isOAuth2ProviderAvailable()).thenReturn(false);
+        when(mockAzureAuthority.acquireToken(clientId.toString(), TEST_RESOURCE, TEST_REDIRECT_URI, testCallback))
+                .thenReturn(new TokenPair("access", "refresh"));
+
+        final TokenPair token = underTest.getOAuth2TokenPair();
+
+        assertEquals("access", token.AccessToken.Value);
+        assertEquals("refresh", token.RefreshToken.Value);
+    }
+
+    @Test
     public void getTokenByAcquireAuthenticationResult_if_nothing_is_available()
             throws URISyntaxException, InterruptedException, ExecutionException, IOException, AuthorizationException {
         when(mockOAuth2UseragentValidator.isOAuth2ProviderAvailable()).thenReturn(false);
