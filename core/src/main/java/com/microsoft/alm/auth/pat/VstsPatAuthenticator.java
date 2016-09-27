@@ -3,6 +3,9 @@
 
 package com.microsoft.alm.auth.pat;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.DeserializationConfig;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.alm.auth.BaseAuthenticator;
 import com.microsoft.alm.auth.PromptBehavior;
 import com.microsoft.alm.auth.oauth.Global;
@@ -20,7 +23,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Authenticator based on Personal Access Token
@@ -41,6 +48,8 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
     private final OAuth2Authenticator vstsOauthAuthenticator;
 
     private final SecretStore<Token> store;
+
+    private final ObjectMapper objectMapper;
 
     /**
      * Create a Personal Access Token Authenticator backed by the OAuth2 app with {@code oauthClientId} and
@@ -68,6 +77,7 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
                 oauthClientRedirectUrl, oauthTokenStore);
         this.vsoAzureAuthority = new VsoAzureAuthority();
         this.store = store;
+        this.objectMapper = new ObjectMapper();
     }
 
     /**
@@ -92,6 +102,7 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
         this.vsoAzureAuthority = vsoAzureAuthority;
         this.vstsOauthAuthenticator = oauth2Authenticator;
         this.store = store;
+        this.objectMapper = new ObjectMapper();
     }
 
     @Override
@@ -168,16 +179,17 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
 
             @Override
             protected Token doRetrieve() {
-                TokenPair oauthToken = vstsOauthAuthenticator.getOAuth2TokenPair(promptBehavior.AUTO);
+                final TokenPair oauthToken = vstsOauthAuthenticator.getOAuth2TokenPair(promptBehavior.AUTO);
 
                 if (oauthToken == null) {
                     // authentication failed, return null
                     logger.debug("Failed to get an OAuth2 token, cannot generate PersonalAccessToken.");
                     return null;
                 }
-
                 logger.debug("Got OAuth2 token, retrieving Personal Access Token with it.");
-                final Token token = vsoAzureAuthority.generatePersonalAccessToken(uri, oauthToken.AccessToken,
+
+                final URI accountSpecificUri = createAccountSpecificUri(uri, oauthToken);
+                final Token token = vsoAzureAuthority.generatePersonalAccessToken(accountSpecificUri, oauthToken.AccessToken,
                         tokenScope, true, isCreatingGlobalPat, patDisplayName);
 
                 return token;
@@ -185,6 +197,98 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
         };
 
         return secretRetriever.retrieve(key, getStore(), promptBehavior);
+    }
+
+    private URI createAccountSpecificUri(final URI uri, final TokenPair tokenPair) {
+        if (vstsOauthAuthenticator.APP_VSSPS_VISUALSTUDIO.equals(uri)) {
+            logger.debug("Find an account level target url to generate Personal Access Token.");
+            final HttpClient client = new HttpClient(Global.getUserAgent());
+            tokenPair.AccessToken.contributeHeader(client.Headers);
+
+            try {
+                final String profileId = getProfileId(client);
+                final String accountUri = getAccountUri(client, profileId);
+
+                logger.debug("Found account: {}", accountUri);
+                return URI.create(accountUri);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        // no need to translate any other uri
+        return uri;
+    }
+
+    private String getProfileId(final HttpClient authenticatedClient) throws IOException {
+        Debug.Assert(authenticatedClient != null, "authenticatedClient is null");
+
+        final URI profileUri = URI.create("https://app.vssps.visualstudio.com/_apis/profile/profiles/me?api-version=1.0");
+        final HttpURLConnection response;
+        logger.debug("Getting user profile...");
+        response = authenticatedClient.get(profileUri);
+        logger.debug("Response code: {}", response.getResponseCode());
+
+        if (response.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            final String responseText = HttpClient.readToString(response);
+
+            final String id = parseIdFromJson(responseText);
+            if (id != null) {
+                logger.debug("Profile id: {}", id);
+                return id;
+            }
+        }
+
+        throw new RuntimeException("Failed to get profile id.");
+    }
+
+    private static final Pattern ID_PATTERN = Pattern.compile(
+            "\"id\"\\s*:\\s*\"([^\"]+)\"",
+            Pattern.CASE_INSENSITIVE
+    );
+
+    static String parseIdFromJson(final String json) {
+        String result = null;
+
+        final Matcher matcher = ID_PATTERN.matcher(json);
+        if (matcher.find()) {
+            result = matcher.group(1);
+        }
+
+        return result;
+    }
+
+    private String getAccountUri(final HttpClient authenticatedClient, final String profileId) throws IOException {
+        Debug.Assert(authenticatedClient != null, "authenticatedClient is null");
+        Debug.Assert(profileId != null, "profileId is null");
+
+        final String accountApiUrlFormat = "https://app.vssps.visualstudio.com/_apis/Accounts?memberid=%s&api-version=1.0";
+        final URI accountApiUrl = URI.create(String.format(accountApiUrlFormat, profileId));
+
+        final String vstsAccountUrlFormat = "https://%s.visualstudio.com/";
+
+        logger.debug("Account API URL: {}", accountApiUrl);
+
+        final HttpURLConnection response = authenticatedClient.get(accountApiUrl);
+        if (response.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            final String content = HttpClient.readToString(response);
+
+            if (content != null) {
+                final AccountList accountList = this.objectMapper.readValue(content, AccountList.class);
+                if (accountList != null && accountList.value != null) {
+                    for (final Account account : accountList.value) {
+                        if (account.accountStatus != null
+                                && "enabled".equals(account.accountStatus.toLowerCase())
+                                && account.accountUri != null) {
+
+                            return String.format(vstsAccountUrlFormat, account.accountName);
+                        }
+                    }
+                }
+            }
+        }
+
+        throw new RuntimeException("Could not find any accounts.");
     }
 
     /**
@@ -243,5 +347,27 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
     private void assign(final URI uri, final Token token) {
         final String key = getKey(uri);
         getStore().add(key, token);
+    }
+
+    /**
+     * Simple data-binding classes for parsing VSTS Accounts from JSON
+     *
+     * This class is used in order to avoid a full dependency on VSTS REST Http client
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class AccountList {
+        public int count;
+        public List<Account> value;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Account {
+        public UUID accountId;
+        public URI accountUri;
+        public String accountName;
+        public String organizationName;
+        public String accountType;
+        public UUID accountOwner;
+        public String accountStatus;
     }
 }
