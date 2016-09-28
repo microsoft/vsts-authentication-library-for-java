@@ -81,7 +81,7 @@ Licensed under the MIT license. See License.txt in the project root. -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <slf4j.version>1.7.19</slf4j.version>
-    <oauth2.useragent.version>0.11.0</oauth2.useragent.version>
+    <oauth2.useragent.version>0.11.2</oauth2.useragent.version>
     <jackson.version>2.4.1</jackson.version>
   </properties>
 
