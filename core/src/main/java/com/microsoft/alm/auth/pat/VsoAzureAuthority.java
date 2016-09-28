@@ -48,9 +48,6 @@ class VsoAzureAuthority extends AzureAuthority {
     public Token generatePersonalAccessToken(final URI targetUri, final Token accessToken,
                                              final VsoTokenScope tokenScope, final boolean requireCompactToken,
                                              final boolean shouldCreateGlobalToken, final String displayName) {
-        final String TokenAuthHost = "app.vssps.visualstudio.com";
-        final String SessionTokenUrl = "https://" + TokenAuthHost + "/_apis/token/sessiontokens?api-version=1.0";
-        final String CompactTokenUrl = SessionTokenUrl + "&tokentype=compact";
 
         Debug.Assert(targetUri != null, "The targetUri parameter is null");
         Debug.Assert(accessToken != null && !StringHelper.isNullOrWhiteSpace(accessToken.Value) && (accessToken.Type == TokenType.Access || accessToken.Type == TokenType.Federated), "The accessToken parameter is null or invalid");
@@ -65,7 +62,7 @@ class VsoAzureAuthority extends AzureAuthority {
             accessToken.contributeHeader(client.Headers);
 
             if (shouldCreateGlobalToken || populateTokenTargetId(targetUri, accessToken)) {
-                final URI requestUrl = URI.create(requireCompactToken ? CompactTokenUrl : SessionTokenUrl);
+                final URI requestUrl = createPersonalAccessTokenRequestUri(client, targetUri, requireCompactToken);
 
                 final StringContent content = getAccessTokenRequestBody(accessToken, tokenScope,
                         shouldCreateGlobalToken, displayName);
@@ -85,6 +82,51 @@ class VsoAzureAuthority extends AzureAuthority {
             throw new Error(e);
         }
         return null;
+    }
+
+    private URI createPersonalAccessTokenRequestUri(final HttpClient client, final URI targetUri,
+                                                    final boolean requireCompactToken) throws IOException {
+        final String SessionTokenUrl = "_apis/token/sessiontokens?api-version=1.0";
+        final String CompactTokenUrl = SessionTokenUrl + "&tokentype=compact";
+
+        Debug.Assert(client != null, "The client is null");
+
+        final URI identityServiceUri = getIdentityServiceUri(client, targetUri);
+        if (identityServiceUri == null) {
+            throw new RuntimeException("Failed to find Identity Service for " + targetUri.toString());
+        }
+
+        String url = identityServiceUri.toString();
+
+        if (!url.endsWith("/")) {
+            url += "/";
+        }
+
+        url += requireCompactToken ? CompactTokenUrl : SessionTokenUrl;
+
+        return URI.create(url);
+    }
+
+    private URI getIdentityServiceUri(final HttpClient client, final URI targetUri) throws IOException {
+        final String locationServiceUrlFormat = "https://%1$s/_apis/ServiceDefinitions/LocationService2/951917AC-A960-4999-8464-E3F0AA25B381?api-version=1.0";
+
+        Debug.Assert(client != null, ("The client parameter is null."));
+        Debug.Assert(targetUri != null && targetUri.isAbsolute(), "The targetUri parameter is null or invalid");
+
+        final String locationServiceUrl = String.format(locationServiceUrlFormat, targetUri.getHost());
+        URI identityServiceUri = null;
+
+        final HttpURLConnection response = client.get(URI.create(locationServiceUrl));
+        if (response.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            final String responseText = HttpClient.readToString(response);
+
+            identityServiceUri = parseLocationFromJson(responseText);
+            if (identityServiceUri != null) {
+                logger.debug("   parsed identity service url: {}", identityServiceUri);
+            }
+        }
+
+        return identityServiceUri;
     }
 
     public boolean populateTokenTargetId(final URI targetUri, final Token accessToken) {
@@ -151,6 +193,24 @@ class VsoAzureAuthority extends AzureAuthority {
         }
 
         return result;
+    }
+
+    private static final Pattern LOCATION_PATTERN = Pattern.compile(
+            "\"location\"\\s*:\\s*\"([^\"]+)\"",
+            Pattern.CASE_INSENSITIVE
+    );
+
+    static URI parseLocationFromJson(final String json) {
+        URI locationServiceUri = null;
+        if (!StringHelper.isNullOrWhiteSpace(json)) {
+            // find the 'location : <value>' portion of the result content, if any
+            final Matcher matcher = LOCATION_PATTERN.matcher(json);
+            if (matcher.find()) {
+                final String location = matcher.group(1);
+                locationServiceUri = URI.create(location);
+            }
+        }
+        return locationServiceUri;
     }
 
     private StringContent getAccessTokenRequestBody(final Token accessToken, final VsoTokenScope tokenScope,

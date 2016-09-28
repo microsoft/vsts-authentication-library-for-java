@@ -82,6 +82,7 @@ Licensed under the MIT license. See License.txt in the project root. -->
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <slf4j.version>1.7.19</slf4j.version>
     <oauth2.useragent.version>0.11.0</oauth2.useragent.version>
+    <jackson.version>2.4.1</jackson.version>
   </properties>
 
   <build>
@@ -266,6 +267,12 @@ Licensed under the MIT license. See License.txt in the project root. -->
       </dependency>
 
       <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+
+      <dependency>
           <groupId>org.slf4j</groupId>
           <artifactId>slf4j-api</artifactId>
           <version>${slf4j.version}</version>
@@ -276,6 +283,7 @@ Licensed under the MIT license. See License.txt in the project root. -->
           <version>${slf4j.version}</version>
       </dependency>
 
+      <!-- TESTING DEPENDENCIES -->
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-nop</artifactId>
