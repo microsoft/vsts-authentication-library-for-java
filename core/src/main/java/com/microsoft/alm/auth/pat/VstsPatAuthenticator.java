@@ -4,18 +4,16 @@
 package com.microsoft.alm.auth.pat;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.alm.auth.BaseAuthenticator;
 import com.microsoft.alm.auth.PromptBehavior;
 import com.microsoft.alm.auth.oauth.Global;
 import com.microsoft.alm.auth.oauth.OAuth2Authenticator;
+import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.helpers.HttpClient;
 import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.secret.VsoTokenScope;
-import com.microsoft.alm.helpers.Debug;
-import com.microsoft.alm.helpers.StringHelper;
 import com.microsoft.alm.storage.SecretStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,10 +141,6 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
 
         logger.info("Retrieving PersonalAccessToken for uri:{} with name:{}, and with scope:{}, prompt behavior: {}",
                 uri, patDisplayName, tokenScope, promptBehavior.name());
-
-        if (!isHosted(uri)) {
-            throw new RuntimeException("Only works against VisualStudio Team Services");
-        }
 
         final String key = getKey(uri);
         Debug.Assert(key != null, "Failed to convert uri to key");
@@ -337,11 +331,6 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
         }
 
         return false;
-    }
-
-    private boolean isHosted(final URI targetUri) {
-        final String VsoBaseUrlHost = "visualstudio.com";
-        return StringHelper.endsWithIgnoreCase(targetUri.getHost(), VsoBaseUrlHost);
     }
 
     private void assign(final URI uri, final Token token) {
