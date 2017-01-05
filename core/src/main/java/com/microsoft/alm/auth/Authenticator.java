@@ -112,6 +112,21 @@ public interface Authenticator {
     TokenPair getOAuth2TokenPair(final PromptBehavior promptBehavior);
 
     /**
+     * Retrieve an OAuth2 {@link TokenPair} token pair (access token / refresh token) from the tenant that backs
+     * the target URI from Azure AD with specified {@link PromptBehavior}
+     *
+     * https://msdn.microsoft.com/en-us/library/azure/dn645545.aspx
+     *
+     * @param uri
+     *      a vsts account url, the retrieved OAuth2 token will be from the same tenant
+     * @param promptBehavior
+     *      dictates whether we should prompt the user for input or not
+     *
+     * @return an OAuth2 TokenPair from Azure AD
+     */
+    TokenPair getOAuth2TokenPair(final URI uri, final PromptBehavior promptBehavior);
+
+    /**
      * Checks to see if this authenticator supports get a Personal Access {@link Token} object from
      * Visual Studio Team Services
      *

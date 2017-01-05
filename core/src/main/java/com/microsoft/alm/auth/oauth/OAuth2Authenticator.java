@@ -5,6 +5,7 @@ package com.microsoft.alm.auth.oauth;
 
 import com.microsoft.alm.auth.BaseAuthenticator;
 import com.microsoft.alm.auth.PromptBehavior;
+import com.microsoft.alm.auth.oauth.helper.AzureAuthorityProvider;
 import com.microsoft.alm.auth.oauth.helper.SwtJarLoader;
 import com.microsoft.alm.helpers.Action;
 import com.microsoft.alm.helpers.Debug;
@@ -50,11 +51,11 @@ public class OAuth2Authenticator extends BaseAuthenticator {
 
     private final SecretStore<TokenPair> store;
 
-    private final AzureAuthority azureAuthority;
-
     private final OAuth2UseragentValidator oAuth2UseragentValidator;
 
     private final Action<DeviceFlowResponse> deviceFlowCallback;
+
+    private AzureAuthorityProvider azureAuthorityProvider = new AzureAuthorityProvider();
 
     /**
      * Get an OAuth2 authenticator
@@ -110,8 +111,8 @@ public class OAuth2Authenticator extends BaseAuthenticator {
     }
 
     /*default*/ OAuth2Authenticator(final String resource, final String clientId, final URI redirectUri,
-                        final SecretStore<TokenPair> store, final AzureAuthority azureAuthority,
-                        final OAuth2UseragentValidator oAuth2UseragentValidator, final Action<DeviceFlowResponse> deviceFlowCallback) {
+                        final SecretStore<TokenPair> store, final OAuth2UseragentValidator oAuth2UseragentValidator,
+                        final Action<DeviceFlowResponse> deviceFlowCallback) {
         Debug.Assert(resource != null, "resource cannot be null");
         Debug.Assert(clientId != null, "clientId cannot be null");
         Debug.Assert(redirectUri != null, "redirectUri cannot be null");
@@ -119,16 +120,11 @@ public class OAuth2Authenticator extends BaseAuthenticator {
         this.resource = resource;
         this.clientId = clientId;
         this.redirectUri = redirectUri;
-        this.azureAuthority = azureAuthority;
         this.oAuth2UseragentValidator = oAuth2UseragentValidator;
         this.deviceFlowCallback = deviceFlowCallback;
 
         logger.debug("Using default SecretStore? {}", store == null);
         this.store = store == null ? new InsecureInMemoryStore<TokenPair>() : store;
-    }
-
-    private AzureAuthority getAzureAuthority() {
-        return azureAuthority;
     }
 
     @Override
@@ -148,12 +144,18 @@ public class OAuth2Authenticator extends BaseAuthenticator {
 
     @Override
     public TokenPair getOAuth2TokenPair() {
-        return getOAuth2TokenPair(PromptBehavior.AUTO);
+        return getOAuth2TokenPair(APP_VSSPS_VISUALSTUDIO, PromptBehavior.AUTO);
     }
 
     @Override
     public TokenPair getOAuth2TokenPair(final PromptBehavior promptBehavior) {
+        return getOAuth2TokenPair(APP_VSSPS_VISUALSTUDIO, promptBehavior);
+    }
+
+    @Override
+    public TokenPair getOAuth2TokenPair(final URI uri, final PromptBehavior promptBehavior) {
         Debug.Assert(promptBehavior != null, "getOAuth2TokenPair promptBehavior cannot be null");
+        Debug.Assert(uri != null, "getOAuth2TokenPair uri cannot be null");
 
         logger.debug("Retrieving OAuth2 TokenPair with prompt behavior: {}", promptBehavior.name());
 
@@ -192,7 +194,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                     logger.debug("OAuth2 Access Token is not valid, and we have a refresh token, try refreshing...");
 
                     final TokenPair renewedTokenPair =
-                            getAzureAuthority().acquireTokenByRefreshToken(clientId, resource, tokenPair.RefreshToken);
+                            getAzureAuthority(uri).acquireTokenByRefreshToken(clientId, resource, tokenPair.RefreshToken);
 
                     // Today after we refresh oauth2 token with the refresh token, we are only getting back an
                     // Access Token -- the refresh token is null.  Although we could use this Access Token for another
@@ -238,7 +240,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                             && SwtJarLoader.tryGetSwtJar(swtRuntime))) {
                     try {
                         logger.info("Using oauth2-useragent providers to retrieve AAD token.");
-                        return getAzureAuthority().acquireToken(clientId, resource, redirectUri, POPUP_QUERY_PARAM);
+                        return getAzureAuthority(uri).acquireToken(clientId, resource, redirectUri, POPUP_QUERY_PARAM);
                     } catch (final AuthorizationException e) {
                         logError(logger, "Failed to launch oauth2-useragent.", e);
                         // unless we failed with unknown reasons (such as failed to load javafx) we probably should
@@ -255,7 +257,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                 if (deviceFlowCallback != null) {
                     logger.info("Fallback to Device Flow.");
                     try {
-                        return getAzureAuthority().acquireToken(clientId, resource, redirectUri, deviceFlowCallback);
+                        return getAzureAuthority(uri).acquireToken(clientId, resource, redirectUri, deviceFlowCallback);
                     } catch (final AuthorizationException e) {
                         logError(logger, "Failed to use the Device Flow authenticator.", e);
                     }
@@ -270,6 +272,15 @@ public class OAuth2Authenticator extends BaseAuthenticator {
 
     public boolean signOut() {
         return super.signOut(APP_VSSPS_VISUALSTUDIO);
+    }
+
+    // For unit test
+    /*default*/ void setAzureAuthorityProvider(final AzureAuthorityProvider azureAuthorityProvider) {
+        this.azureAuthorityProvider = azureAuthorityProvider;
+    }
+
+    private AzureAuthority getAzureAuthority(final URI uri) {
+        return this.azureAuthorityProvider.getAzureAuthority(uri);
     }
 
     public static class OAuth2AuthenticatorBuilder {
@@ -293,16 +304,6 @@ public class OAuth2Authenticator extends BaseAuthenticator {
         public OAuth2AuthenticatorBuilder withClientId(final String clientId) {
             Debug.Assert(clientId != null, "clientId cannot be null");
             this.clientId = clientId;
-            return this;
-        }
-
-        public OAuth2AuthenticatorBuilder withTenantId(final UUID tenantId) {
-            return this.withTenantId(tenantId.toString());
-        }
-
-        public OAuth2AuthenticatorBuilder withTenantId(final String tenantId) {
-            Debug.Assert(tenantId != null, "tenantId cannot be null");
-            this.tenantId = tenantId;
             return this;
         }
 
@@ -340,12 +341,10 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                 throw new IllegalStateException("redirectUri not set");
             }
 
-            final String authorityHostUrl = AzureAuthority.DefaultAuthorityHostUrl + "/" + this.tenantId;
-            final AzureAuthority azureAuthority = new AzureAuthority(authorityHostUrl);
-
             final OAuth2UseragentValidator oAuth2UseragentValidator = new OAuth2UseragentValidator();
 
-            return new OAuth2Authenticator(this.resource, this.clientId, this.redirectUri, this.store, azureAuthority, oAuth2UseragentValidator, this.deviceFlowCallback);
+            return new OAuth2Authenticator(this.resource, this.clientId, this.redirectUri, this.store,
+                    oAuth2UseragentValidator, this.deviceFlowCallback);
         }
     }
 }

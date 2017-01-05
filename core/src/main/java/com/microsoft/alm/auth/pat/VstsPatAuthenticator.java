@@ -173,7 +173,7 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
 
             @Override
             protected Token doRetrieve() {
-                final TokenPair oauthToken = vstsOauthAuthenticator.getOAuth2TokenPair(promptBehavior.AUTO);
+                final TokenPair oauthToken = vstsOauthAuthenticator.getOAuth2TokenPair(uri, promptBehavior.AUTO);
 
                 if (oauthToken == null) {
                     // authentication failed, return null

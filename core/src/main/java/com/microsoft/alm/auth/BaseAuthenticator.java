@@ -69,6 +69,11 @@ public abstract class BaseAuthenticator implements Authenticator {
     }
 
     @Override
+    public TokenPair getOAuth2TokenPair(final URI key, final PromptBehavior promptBehavior) {
+        return null;
+    }
+
+    @Override
     public boolean isPersonalAccessTokenSupported() {
         return false;
     }
