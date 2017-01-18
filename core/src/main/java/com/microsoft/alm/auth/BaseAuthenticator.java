@@ -91,6 +91,13 @@ public abstract class BaseAuthenticator implements Authenticator {
     }
 
     @Override
+    public Token getPersonalAccessToken(final URI key, final VsoTokenScope tokenScope,
+                                        final String patDisplayName, final PromptBehavior promptBehavior,
+                                        final TokenPair oauth2Token) {
+        return null;
+    }
+
+    @Override
     public boolean signOut() {
         return false;
     }

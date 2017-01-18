@@ -200,7 +200,6 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                     // Access Token -- the refresh token is null.  Although we could use this Access Token for another
                     // hour, this contradicts with the assumption of this library (Both AccessToken and
                     // RefreshToken fields of the TokenPair class are non-null).
-                    // TODO: investigate next sprint, after 7/28
                     if (renewedTokenPair != null
                             && renewedTokenPair.AccessToken.Value != null
                             && renewedTokenPair.RefreshToken.Value != null) {

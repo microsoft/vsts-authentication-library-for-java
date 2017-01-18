@@ -182,6 +182,31 @@ public interface Authenticator {
                                  final String patDisplayName, final PromptBehavior promptBehavior);
 
     /**
+     * Retrieve a Personal Access {@link Token} that works for the specified account URI.
+     * <p>
+     * Favor existing token available from the store unless override from the {@link PromptBehavior}.
+     * <p>
+     * If there are no existing PAT, and prompting is allowed, we will generate a PAT with the given
+     * {@link VsoTokenScope} and display name.
+     *
+     * @param key
+     *      The account URI we will be retrieve PAT for
+     * @param tokenScope
+     *      If we are generating token, the scope of the newly generated token
+     * @param patDisplayName
+     *      If we are generating token, the display name of the token
+     * @param promptBehavior
+     *      dictates whether we should prompt the user for input or not
+     * @param oauth2Token
+     *      if oauth2Token is not null, use it and do not prompt to login via browser
+     *
+     * @return a Personal Access Token scoped to the specified account URI
+     */
+    Token getPersonalAccessToken(final URI key, final VsoTokenScope tokenScope,
+                                 final String patDisplayName, final PromptBehavior promptBehavior,
+                                 final TokenPair oauth2Token);
+
+    /**
      * Sign out globally from this library only.  This function does not perform any server calls to sign the
      * user out.
      *

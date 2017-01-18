@@ -123,19 +123,27 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
                                         final PromptBehavior promptBehavior) {
         // Global PAT will be stored with URI key APP_VSSPS_VISUALSTUDIO as this key doesn't identify any account
         logger.debug("Retrieving global Personal Access Token.");
-        return getToken(vstsOauthAuthenticator.APP_VSSPS_VISUALSTUDIO, true, tokenScope, patDisplayName, promptBehavior);
+        return getToken(vstsOauthAuthenticator.APP_VSSPS_VISUALSTUDIO, true, tokenScope,
+                patDisplayName, promptBehavior, null);
     }
 
     @Override
     public Token getPersonalAccessToken(final URI uri, final VsoTokenScope tokenScope, final String patDisplayName,
                                         final PromptBehavior promptBehavior) {
         logger.debug("Retrieving Personal Access Token for uri: {}", uri);
-        return getToken(uri, false, tokenScope, patDisplayName, promptBehavior);
+        return getToken(uri, false, tokenScope, patDisplayName, promptBehavior, null);
+    }
+
+    @Override
+    public Token getPersonalAccessToken(final URI uri, final VsoTokenScope tokenScope, final String patDisplayName,
+                                        final PromptBehavior promptBehavior, final TokenPair oauth2Token) {
+        logger.debug("Retrieving Personal Access Token for uri: {}", uri);
+        return getToken(uri, false, tokenScope, patDisplayName, promptBehavior, oauth2Token);
     }
 
     private Token getToken(final URI uri, final boolean isCreatingGlobalPat,
                            final VsoTokenScope tokenScope, final String patDisplayName,
-                           final PromptBehavior promptBehavior) {
+                           final PromptBehavior promptBehavior, final TokenPair oauth2Token) {
         Debug.Assert(uri != null, "uri cannot be null");
         Debug.Assert(promptBehavior != null, "promptBehavior cannot be null");
 
@@ -173,20 +181,22 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
 
             @Override
             protected Token doRetrieve() {
-                final TokenPair oauthToken = vstsOauthAuthenticator.getOAuth2TokenPair(uri, promptBehavior.AUTO);
+                final TokenPair tokenPair = (oauth2Token == null)
+                        ? vstsOauthAuthenticator.getOAuth2TokenPair(uri, promptBehavior.AUTO)
+                        : oauth2Token;
 
-                if (oauthToken == null) {
+                if (tokenPair == null) {
                     // authentication failed, return null
                     logger.debug("Failed to get an OAuth2 token, cannot generate PersonalAccessToken.");
                     return null;
                 }
                 logger.debug("Got OAuth2 token, retrieving Personal Access Token with it.");
 
-                final URI accountSpecificUri = createAccountSpecificUri(uri, oauthToken);
-                final Token token = vsoAzureAuthority.generatePersonalAccessToken(accountSpecificUri, oauthToken.AccessToken,
+                final URI accountSpecificUri = createAccountSpecificUri(uri, tokenPair);
+                final Token pat = vsoAzureAuthority.generatePersonalAccessToken(accountSpecificUri, tokenPair.AccessToken,
                         tokenScope, true, isCreatingGlobalPat, patDisplayName);
 
-                return token;
+                return pat;
             }
         };
 
