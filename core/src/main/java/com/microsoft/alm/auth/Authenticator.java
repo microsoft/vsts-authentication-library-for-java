@@ -112,6 +112,21 @@ public interface Authenticator {
     TokenPair getOAuth2TokenPair(final PromptBehavior promptBehavior);
 
     /**
+     * Retrieve an OAuth2 {@link TokenPair} token pair (access token / refresh token) from the tenant that backs
+     * the target URI from Azure AD with specified {@link PromptBehavior}
+     *
+     * https://msdn.microsoft.com/en-us/library/azure/dn645545.aspx
+     *
+     * @param uri
+     *      a vsts account url, the retrieved OAuth2 token will be from the same tenant
+     * @param promptBehavior
+     *      dictates whether we should prompt the user for input or not
+     *
+     * @return an OAuth2 TokenPair from Azure AD
+     */
+    TokenPair getOAuth2TokenPair(final URI uri, final PromptBehavior promptBehavior);
+
+    /**
      * Checks to see if this authenticator supports get a Personal Access {@link Token} object from
      * Visual Studio Team Services
      *
@@ -165,6 +180,31 @@ public interface Authenticator {
      */
     Token getPersonalAccessToken(final URI key, final VsoTokenScope tokenScope,
                                  final String patDisplayName, final PromptBehavior promptBehavior);
+
+    /**
+     * Retrieve a Personal Access {@link Token} that works for the specified account URI.
+     * <p>
+     * Favor existing token available from the store unless override from the {@link PromptBehavior}.
+     * <p>
+     * If there are no existing PAT, and prompting is allowed, we will generate a PAT with the given
+     * {@link VsoTokenScope} and display name.
+     *
+     * @param key
+     *      The account URI we will be retrieve PAT for
+     * @param tokenScope
+     *      If we are generating token, the scope of the newly generated token
+     * @param patDisplayName
+     *      If we are generating token, the display name of the token
+     * @param promptBehavior
+     *      dictates whether we should prompt the user for input or not
+     * @param oauth2Token
+     *      if oauth2Token is not null, use it and do not prompt to login via browser
+     *
+     * @return a Personal Access Token scoped to the specified account URI
+     */
+    Token getPersonalAccessToken(final URI key, final VsoTokenScope tokenScope,
+                                 final String patDisplayName, final PromptBehavior promptBehavior,
+                                 final TokenPair oauth2Token);
 
     /**
      * Sign out globally from this library only.  This function does not perform any server calls to sign the

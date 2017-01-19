@@ -50,7 +50,13 @@ public class AzureAuthority {
     /**
      * The common Url for logon services in Azure.
      */
-    public static final String DefaultAuthorityHostUrl = AuthorityHostUrlBase;
+    public static final String DefaultAuthorityHostUrl = AuthorityHostUrlBase + "/" + CommonTenant;
+
+    /**
+     * AzureAuthority with common tenant
+     */
+    public static final AzureAuthority DefaultAzureAuthority = new AzureAuthority();
+
     private static final String VSTS_BASE_DOMAIN = "visualstudio.com";
     private static final String VSTS_RESOURCE_TENANT_HEADER = "X-VSS-ResourceTenant";
 
@@ -208,6 +214,7 @@ public class AzureAuthority {
                 throw new Error(e);
             }
         }
+
         return null;
     }
 

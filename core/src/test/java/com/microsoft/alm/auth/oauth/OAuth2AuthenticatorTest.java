@@ -3,6 +3,7 @@
 
 package com.microsoft.alm.auth.oauth;
 
+import com.microsoft.alm.auth.oauth.helper.AzureAuthorityProvider;
 import com.microsoft.alm.helpers.Action;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.secret.TokenPair;
@@ -19,6 +20,7 @@ import java.util.concurrent.ExecutionException;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +31,8 @@ public class OAuth2AuthenticatorTest {
     private SecretStore<TokenPair> mockStore;
 
     private AzureAuthority mockAzureAuthority;
+
+    private AzureAuthorityProvider mockAzureAuthorityProvider;
 
     private OAuth2UseragentValidator mockOAuth2UseragentValidator;
 
@@ -43,6 +47,7 @@ public class OAuth2AuthenticatorTest {
     public void setUp() throws Exception {
         mockStore = mock(SecretStore.class);
         mockAzureAuthority = mock(AzureAuthority.class);
+        mockAzureAuthorityProvider = mock(AzureAuthorityProvider.class);
         mockOAuth2UseragentValidator = mock(OAuth2UseragentValidator.class);
         testCallback = new Action<DeviceFlowResponse>() {
             @Override
@@ -52,14 +57,16 @@ public class OAuth2AuthenticatorTest {
         };
 
         when(mockOAuth2UseragentValidator.isOnlyMissingRuntimeFromSwtProvider()).thenReturn(false);
+        when(mockAzureAuthorityProvider.getAzureAuthority(any(URI.class))).thenReturn(mockAzureAuthority);
 
         underTest = new OAuth2Authenticator(TEST_RESOURCE,
                 clientId.toString(),
                 TEST_REDIRECT_URI,
                 mockStore,
-                mockAzureAuthority,
                 mockOAuth2UseragentValidator,
                 testCallback);
+
+        underTest.setAzureAuthorityProvider(mockAzureAuthorityProvider);
     }
 
     @Test
@@ -111,7 +118,6 @@ public class OAuth2AuthenticatorTest {
                 clientId.toString(),
                 TEST_REDIRECT_URI,
                 mockStore,
-                mockAzureAuthority,
                 mockOAuth2UseragentValidator,
                 null /* no callback specified */);
 
