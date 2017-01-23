@@ -223,6 +223,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
 
                 final String defaultProviderName
                         = System.getProperty(USER_AGENT_PROVIDER_PROPERTY_NAME, JAVAFX_PROVIDER_NAME);
+                logger.info("Attempt to use oauth2-useragent provider: {}", defaultProviderName);
 
                 final boolean favorSwtBrowser
                         = defaultProviderName.equals(SWT_PROIVDER_NAME);
@@ -236,19 +237,21 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                     }
                 }
 
-                if (!favorDeviceFlow && oAuth2UseragentValidator.isOAuth2ProviderAvailable()
-                        || (oAuth2UseragentValidator.isOnlyMissingRuntimeFromSwtProvider()
+                if (!favorDeviceFlow) {
+                    if (oAuth2UseragentValidator.isOAuth2ProviderAvailable()
+                            || (oAuth2UseragentValidator.isOnlyMissingRuntimeFromSwtProvider()
                             && SwtJarLoader.tryGetSwtJar(swtRuntime))) {
-                    try {
-                        logger.info("Using oauth2-useragent providers to retrieve AAD token.");
-                        return getAzureAuthority(uri).acquireToken(clientId, resource, redirectUri, POPUP_QUERY_PARAM);
-                    } catch (final AuthorizationException e) {
-                        logError(logger, "Failed to launch oauth2-useragent.", e);
-                        // unless we failed with unknown reasons (such as failed to load javafx) we probably should
-                        // just return null
-                        if (!"unknown_error".equalsIgnoreCase(e.getCode())) {
-                            // This error code isn't exposed as a value, so just hardcode this string
-                            return null;
+                        try {
+                            logger.info("Using oauth2-useragent providers to retrieve AAD token.");
+                            return getAzureAuthority(uri).acquireToken(clientId, resource, redirectUri, POPUP_QUERY_PARAM);
+                        } catch (final AuthorizationException e) {
+                            logError(logger, "Failed to launch oauth2-useragent.", e);
+                            // unless we failed with unknown reasons (such as failed to load javafx) we probably should
+                            // just return null
+                            if (!"unknown_error".equalsIgnoreCase(e.getCode())) {
+                                // This error code isn't exposed as a value, so just hardcode this string
+                                return null;
+                            }
                         }
                     }
                 }
