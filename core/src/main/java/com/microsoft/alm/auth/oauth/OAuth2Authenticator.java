@@ -11,7 +11,6 @@ import com.microsoft.alm.helpers.Action;
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.helpers.HttpClient;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
-import com.microsoft.alm.oauth2.useragent.Provider;
 import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.storage.InsecureInMemoryStore;
@@ -38,6 +37,9 @@ public class OAuth2Authenticator extends BaseAuthenticator {
     public final static String MANAGEMENT_CORE_RESOURCE = "https://management.core.windows.net/";
     public final static String VALIDATION_ENDPOINT = APP_VSSPS_VISUALSTUDIO + "/_apis/connectionData";
     public static final String VSTS_RESOURCE = "499b84ac-1321-427f-aa17-267ca6975798";
+
+    public static final String SWT_PROIVDER_NAME = "StandardWidgetToolkit";
+    public static final String JAVAFX_PROVIDER_NAME = "JavaFx";
 
     private final static String TYPE = "OAuth2";
 
@@ -220,10 +222,10 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                 final AtomicReference<File> swtRuntime = new AtomicReference<File>();
 
                 final String defaultProviderName
-                        = System.getProperty(USER_AGENT_PROVIDER_PROPERTY_NAME, Provider.JAVA_FX.getClassName());
+                        = System.getProperty(USER_AGENT_PROVIDER_PROPERTY_NAME, JAVAFX_PROVIDER_NAME);
 
                 final boolean favorSwtBrowser
-                        = defaultProviderName.equals(Provider.STANDARD_WIDGET_TOOLKIT.getClassName());
+                        = defaultProviderName.equals(SWT_PROIVDER_NAME);
 
                 final boolean favorDeviceFlow = defaultProviderName.equalsIgnoreCase("none");
 
