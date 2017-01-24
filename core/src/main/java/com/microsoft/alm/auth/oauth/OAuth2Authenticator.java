@@ -11,7 +11,6 @@ import com.microsoft.alm.helpers.Action;
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.helpers.HttpClient;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
-import com.microsoft.alm.oauth2.useragent.Provider;
 import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.storage.InsecureInMemoryStore;
@@ -38,6 +37,9 @@ public class OAuth2Authenticator extends BaseAuthenticator {
     public final static String MANAGEMENT_CORE_RESOURCE = "https://management.core.windows.net/";
     public final static String VALIDATION_ENDPOINT = APP_VSSPS_VISUALSTUDIO + "/_apis/connectionData";
     public static final String VSTS_RESOURCE = "499b84ac-1321-427f-aa17-267ca6975798";
+
+    public static final String SWT_PROIVDER_NAME = "StandardWidgetToolkit";
+    public static final String JAVAFX_PROVIDER_NAME = "JavaFx";
 
     private final static String TYPE = "OAuth2";
 
@@ -215,39 +217,53 @@ public class OAuth2Authenticator extends BaseAuthenticator {
 
             @Override
             protected TokenPair doRetrieve() {
-                logger.debug("Ready to launch browser flow to retrieve oauth2 token.");
+                logger.info("Ready to launch browser flow to retrieve oauth2 token.");
 
                 final AtomicReference<File> swtRuntime = new AtomicReference<File>();
 
                 final String defaultProviderName
-                        = System.getProperty(USER_AGENT_PROVIDER_PROPERTY_NAME, Provider.JAVA_FX.getClassName());
+                        = System.getProperty(USER_AGENT_PROVIDER_PROPERTY_NAME, JAVAFX_PROVIDER_NAME);
 
-                final boolean favorSwtBrowser
-                        = defaultProviderName.equals(Provider.STANDARD_WIDGET_TOOLKIT.getClassName());
+                logger.info("Attempt to use oauth2-useragent provider: {}", defaultProviderName);
 
+                final boolean favorSwtBrowser = defaultProviderName.equals(SWT_PROIVDER_NAME);
                 final boolean favorDeviceFlow = defaultProviderName.equalsIgnoreCase("none");
 
-                if (favorSwtBrowser) {
-                    logger.debug("Prefer SWT Browser, download SWT Runtime if it is not available.");
-                    if (oAuth2UseragentValidator.isOnlyMissingRuntimeFromSwtProvider()) {
-                        SwtJarLoader.tryGetSwtJar(swtRuntime);
-                    }
-                }
-
-                if (!favorDeviceFlow && oAuth2UseragentValidator.isOAuth2ProviderAvailable()
-                        || (oAuth2UseragentValidator.isOnlyMissingRuntimeFromSwtProvider()
-                            && SwtJarLoader.tryGetSwtJar(swtRuntime))) {
-                    try {
-                        logger.info("Using oauth2-useragent providers to retrieve AAD token.");
-                        return getAzureAuthority(uri).acquireToken(clientId, resource, redirectUri, POPUP_QUERY_PARAM);
-                    } catch (final AuthorizationException e) {
-                        logError(logger, "Failed to launch oauth2-useragent.", e);
-                        // unless we failed with unknown reasons (such as failed to load javafx) we probably should
-                        // just return null
-                        if (!"unknown_error".equalsIgnoreCase(e.getCode())) {
-                            // This error code isn't exposed as a value, so just hardcode this string
-                            return null;
+                try {
+                    if (favorSwtBrowser) {
+                        logger.debug("Prefer SWT Browser, download SWT Runtime if it is not available.");
+                        if (oAuth2UseragentValidator.isOnlyMissingRuntimeFromSwtProvider()) {
+                            SwtJarLoader.tryGetSwtJar(swtRuntime);
                         }
+                    }
+
+                    if (!favorDeviceFlow) {
+                        if (oAuth2UseragentValidator.isOAuth2ProviderAvailable()
+                                || (oAuth2UseragentValidator.isOnlyMissingRuntimeFromSwtProvider()
+                                && SwtJarLoader.tryGetSwtJar(swtRuntime))) {
+                            try {
+                                logger.info("Using oauth2-useragent providers to retrieve AAD token.");
+                                return getAzureAuthority(uri).acquireToken(clientId, resource, redirectUri, POPUP_QUERY_PARAM);
+                            } catch (final AuthorizationException e) {
+                                logError(logger, "Failed to launch oauth2-useragent.", e);
+                                // unless we failed with unknown reasons (such as failed to load javafx) we probably should
+                                // just return null
+                                if (!"unknown_error".equalsIgnoreCase(e.getCode())) {
+                                    // This error code isn't exposed as a value, so just hardcode this string
+                                    return null;
+                                }
+                            }
+                        }
+                    }
+                } catch (IllegalArgumentException iae) {
+                    if (iae.getMessage().startsWith("Unrecognized version string")) {
+                        // On IBM jvm, oauth2-useragent library is not able to parse the jvm version string
+                        // which is in the form of: "jvmwi3260sr9-20110218_76011".
+                        // This is an expected error on IBM jvm.
+                        logError(logger, "Could not parse JVM version, continue with device flow.", iae);
+                    } else {
+                        // This is not expected, throw it to fail fast.
+                        throw iae;
                     }
                 }
 
