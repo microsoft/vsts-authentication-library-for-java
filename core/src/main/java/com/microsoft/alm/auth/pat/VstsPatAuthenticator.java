@@ -159,7 +159,7 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
                 Debug.Assert(token != null, "Token is null");
                 Debug.Assert(holder != null, "Holder is null");
 
-                final URI validationEndpoint = URI.create(OAuth2Authenticator.VALIDATION_ENDPOINT);
+                final URI validationEndpoint = URI.create(uri + "/_apis/connectionData");
                 boolean valid = false;
 
                 if (token.Value != null) {
