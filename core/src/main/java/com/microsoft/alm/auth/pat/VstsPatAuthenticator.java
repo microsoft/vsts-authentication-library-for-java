@@ -11,6 +11,7 @@ import com.microsoft.alm.auth.oauth.Global;
 import com.microsoft.alm.auth.oauth.OAuth2Authenticator;
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.helpers.HttpClient;
+import com.microsoft.alm.helpers.HttpClientImpl;
 import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenPair;
 import com.microsoft.alm.secret.VsoTokenScope;
@@ -163,16 +164,14 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
                 boolean valid = false;
 
                 if (token.Value != null) {
-                    final HttpClient client = new HttpClient(Global.getUserAgent());
+                    final HttpClientImpl client = new HttpClientImpl(Global.getUserAgent());
                     token.contributeHeader(client.Headers);
                     try {
-                        final HttpURLConnection response = client.get(validationEndpoint);
-
-                        valid = response.getResponseCode() == HttpURLConnection.HTTP_OK;
+                        client.getGetResponseText(validationEndpoint);
+                        valid = true;
                     } catch (IOException e) {
                         logger.debug("Validation failed with IOException.", e);
                     }
-
                 }
 
                 logger.debug("Personal Access Token is {}.", valid ? "valid" : "invalid.");
@@ -206,7 +205,7 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
     private URI createAccountSpecificUri(final URI uri, final TokenPair tokenPair) {
         if (vstsOauthAuthenticator.APP_VSSPS_VISUALSTUDIO.equals(uri)) {
             logger.debug("Find an account level target url to generate Personal Access Token.");
-            final HttpClient client = new HttpClient(Global.getUserAgent());
+            final HttpClientImpl client = new HttpClientImpl(Global.getUserAgent());
             tokenPair.AccessToken.contributeHeader(client.Headers);
 
             try {
@@ -230,17 +229,12 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
         final URI profileUri = URI.create("https://app.vssps.visualstudio.com/_apis/profile/profiles/me?api-version=1.0");
         final HttpURLConnection response;
         logger.debug("Getting user profile...");
-        response = authenticatedClient.get(profileUri);
-        logger.debug("Response code: {}", response.getResponseCode());
+        final String responseText = authenticatedClient.getGetResponseText(profileUri);
 
-        if (response.getResponseCode() == HttpURLConnection.HTTP_OK) {
-            final String responseText = HttpClient.readToString(response);
-
-            final String id = parseIdFromJson(responseText);
-            if (id != null) {
-                logger.debug("Profile id: {}", id);
-                return id;
-            }
+        final String id = parseIdFromJson(responseText);
+        if (id != null) {
+            logger.debug("Profile id: {}", id);
+            return id;
         }
 
         throw new RuntimeException("Failed to get profile id.");
@@ -273,20 +267,14 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
 
         logger.debug("Account API URL: {}", accountApiUrl);
 
-        final HttpURLConnection response = authenticatedClient.get(accountApiUrl);
-        if (response.getResponseCode() == HttpURLConnection.HTTP_OK) {
-            final String content = HttpClient.readToString(response);
+        final String content = authenticatedClient.getGetResponseText(accountApiUrl);
 
-            if (content != null) {
-                final AccountList accountList = this.objectMapper.readValue(content, AccountList.class);
-                if (accountList != null && accountList.value != null) {
-                    for (final Account account : accountList.value) {
-                        if (account.accountStatus != null
-                                && "enabled".equals(account.accountStatus.toLowerCase())
-                                && account.accountUri != null) {
-
-                            return String.format(vstsAccountUrlFormat, account.accountName);
-                        }
+        if (content != null) {
+            final AccountList accountList = this.objectMapper.readValue(content, AccountList.class);
+            if (accountList != null && accountList.value != null) {
+                for (final Account account : accountList.value) {
+                    if (account.accountStatus != null && account.accountUri != null) {
+                        return String.format(vstsAccountUrlFormat, account.accountName);
                     }
                 }
             }

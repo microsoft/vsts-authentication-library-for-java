@@ -228,7 +228,7 @@ public class DeviceFlowImplTest {
         }
         catch (final Error e) {
             final def actual = e.message.trim()
-            assert "Device endpoint returned HTTP 500:\nInternal server error!" == actual;
+            assert "java.io.IOException: HTTP request failed with code 500: Internal server error!" == actual;
             return;
         }
         Assert.fail("An Error should have been thrown");

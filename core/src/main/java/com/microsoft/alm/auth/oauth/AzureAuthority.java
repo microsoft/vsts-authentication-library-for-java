@@ -4,15 +4,7 @@
 package com.microsoft.alm.auth.oauth;
 
 import com.microsoft.alm.auth.PromptBehavior;
-import com.microsoft.alm.helpers.Action;
-import com.microsoft.alm.helpers.Debug;
-import com.microsoft.alm.helpers.Guid;
-import com.microsoft.alm.helpers.HttpClient;
-import com.microsoft.alm.helpers.ObjectExtensions;
-import com.microsoft.alm.helpers.QueryString;
-import com.microsoft.alm.helpers.StringContent;
-import com.microsoft.alm.helpers.StringHelper;
-import com.microsoft.alm.helpers.UriHelper;
+import com.microsoft.alm.helpers.*;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.oauth2.useragent.AuthorizationResponse;
 import com.microsoft.alm.oauth2.useragent.UserAgent;
@@ -24,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
@@ -188,30 +179,19 @@ public class AzureAuthority {
      * @param targetUri the resource which the authority protects.
      * @return the AAD tenant ID if applicable; {@code null} otherwise.
      */
-    public static UUID detectTenantId(final URI targetUri) {
+    public static UUID detectTenantId(final URI targetUri) throws IOException {
         final AtomicReference<UUID> tenantId = new AtomicReference<UUID>(Guid.Empty);
 
         if (StringHelper.endsWithIgnoreCase(targetUri.getHost(), VSTS_BASE_DOMAIN)) {
-            final HttpClient client = new HttpClient(Global.getUserAgent());
-            try {
-                final HttpURLConnection connection = client.head(targetUri, new Action<HttpURLConnection>() {
-                    @Override
-                    public void call(final HttpURLConnection conn) {
-                        conn.setInstanceFollowRedirects(false);
-                    }
-                });
+            final HttpClient client = new HttpClientImpl(Global.getUserAgent());
+            final String tenant = client.getHeaderField(targetUri, VSTS_RESOURCE_TENANT_HEADER);
 
-                final String tenant = connection.getHeaderField(VSTS_RESOURCE_TENANT_HEADER);
-
-                if (!StringHelper.isNullOrWhiteSpace(tenant)) {
-                    if (Guid.tryParse(tenant, tenantId)) {
-                        if (!Guid.Empty.equals(tenantId.get())) {
-                            return tenantId.get();
-                        }
+            if (!StringHelper.isNullOrWhiteSpace(tenant)) {
+                if (Guid.tryParse(tenant, tenantId)) {
+                    if (!Guid.Empty.equals(tenantId.get())) {
+                        return tenantId.get();
                     }
                 }
-            } catch (final IOException e) {
-                throw new Error(e);
             }
         }
 
@@ -219,17 +199,9 @@ public class AzureAuthority {
     }
 
     private TokenPair doAcquireToken(final URI tokenEndpoint, final StringContent requestContent) throws IOException {
-        final HttpClient client = new HttpClient(Global.getUserAgent());
+        final HttpClient client = new HttpClientImpl(Global.getUserAgent());
 
-        final HttpURLConnection connection = client.post(tokenEndpoint, requestContent, new Action<HttpURLConnection>() {
-            @Override
-            public void call(final HttpURLConnection conn) {
-                conn.setUseCaches(false);
-            }
-        });
-        client.ensureOK(connection);
-
-        final String responseContent = HttpClient.readToString(connection);
+        final String responseContent = client.getPostResponseText(tokenEndpoint, requestContent);
         final TokenPair tokenPair = new TokenPair(responseContent);
 
         return tokenPair;
