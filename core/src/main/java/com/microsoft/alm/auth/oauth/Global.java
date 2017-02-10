@@ -3,8 +3,11 @@
 
 package com.microsoft.alm.auth.oauth;
 
+import com.microsoft.alm.auth.HttpClientFactory;
+
 public final class Global {
 
+    private static HttpClientFactory httpClientFactory = new HttpClientFactory();
     private static String userAgent = null;
 
     /**
@@ -30,5 +33,13 @@ public final class Global {
                     version);
         }
         return userAgent;
+    }
+
+    public static HttpClientFactory getHttpClientFactory() {
+        return httpClientFactory;
+    }
+
+    public static void setHttpClientFactory(final HttpClientFactory _httpClientFactory) {
+        httpClientFactory = _httpClientFactory;
     }
 }

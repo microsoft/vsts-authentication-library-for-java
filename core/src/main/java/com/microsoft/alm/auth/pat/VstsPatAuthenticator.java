@@ -164,8 +164,8 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
                 boolean valid = false;
 
                 if (token.Value != null) {
-                    final HttpClientImpl client = new HttpClientImpl(Global.getUserAgent());
-                    token.contributeHeader(client.Headers);
+                    final HttpClient client = Global.getHttpClientFactory().createHttpClient();
+                    token.contributeHeader(client.getHeaders());
                     try {
                         client.getGetResponseText(validationEndpoint);
                         valid = true;
@@ -205,8 +205,8 @@ public class VstsPatAuthenticator extends BaseAuthenticator {
     private URI createAccountSpecificUri(final URI uri, final TokenPair tokenPair) {
         if (vstsOauthAuthenticator.APP_VSSPS_VISUALSTUDIO.equals(uri)) {
             logger.debug("Find an account level target url to generate Personal Access Token.");
-            final HttpClientImpl client = new HttpClientImpl(Global.getUserAgent());
-            tokenPair.AccessToken.contributeHeader(client.Headers);
+            final HttpClient client = Global.getHttpClientFactory().createHttpClient();
+            tokenPair.AccessToken.contributeHeader(client.getHeaders());
 
             try {
                 final String profileId = getProfileId(client);

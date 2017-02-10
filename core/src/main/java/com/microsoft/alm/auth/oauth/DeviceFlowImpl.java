@@ -3,7 +3,13 @@
 
 package com.microsoft.alm.auth.oauth;
 
-import com.microsoft.alm.helpers.*;
+import com.microsoft.alm.helpers.HttpClient;
+import com.microsoft.alm.helpers.HttpResponse;
+import com.microsoft.alm.helpers.PropertyBag;
+import com.microsoft.alm.helpers.QueryString;
+import com.microsoft.alm.helpers.StringContent;
+import com.microsoft.alm.helpers.StringHelper;
+
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.secret.TokenPair;
 import org.slf4j.Logger;
@@ -29,7 +35,7 @@ public class DeviceFlowImpl implements DeviceFlow {
         contributeAuthorizationRequestParameters(bodyParameters);
         final StringContent requestBody = StringContent.createUrlEncoded(bodyParameters);
 
-        final HttpClient client = new HttpClientImpl(Global.getUserAgent());
+        final HttpClient client = Global.getHttpClientFactory().createHttpClient();
         final String responseText;
         try {
             responseText = client.getPostResponseText(deviceEndpoint, requestBody);
@@ -72,7 +78,7 @@ public class DeviceFlowImpl implements DeviceFlow {
 
         final int intervalSeconds = deviceFlowResponse.getInterval();
         int intervalMilliseconds = intervalSeconds * 1000;
-        final HttpClient client = new HttpClientImpl(Global.getUserAgent());
+        final HttpClient client = Global.getHttpClientFactory().createHttpClient();
         String responseText = null;
         final Calendar expiresAt = deviceFlowResponse.getExpiresAt();
 

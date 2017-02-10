@@ -5,7 +5,11 @@ package com.microsoft.alm.auth.pat;
 
 import com.microsoft.alm.auth.oauth.AzureAuthority;
 import com.microsoft.alm.auth.oauth.Global;
-import com.microsoft.alm.helpers.*;
+import com.microsoft.alm.helpers.Debug;
+import com.microsoft.alm.helpers.Guid;
+import com.microsoft.alm.helpers.HttpClient;
+import com.microsoft.alm.helpers.StringContent;
+import com.microsoft.alm.helpers.StringHelper;
 import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenType;
 import com.microsoft.alm.secret.VsoTokenScope;
@@ -13,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -52,9 +55,9 @@ class VsoAzureAuthority extends AzureAuthority {
 
         try {
             // TODO: 449524: create a `HttpClient` with a minimum number of redirects, default creds, and a reasonable timeout (access token generation seems to hang occasionally)
-            final HttpClientImpl client = new HttpClientImpl(Global.getUserAgent());
+            final HttpClient client = Global.getHttpClientFactory().createHttpClient();
             logger.debug("   using token to acquire personal access token");
-            accessToken.contributeHeader(client.Headers);
+            accessToken.contributeHeader(client.getHeaders());
 
             if (shouldCreateGlobalToken || populateTokenTargetId(targetUri, accessToken)) {
                 final URI requestUrl = createPersonalAccessTokenRequestUri(client, targetUri, requireCompactToken);
@@ -222,7 +225,7 @@ class VsoAzureAuthority extends AzureAuthority {
 
         logger.debug("VsoAzureAuthority::createConnectionDataRequest");
 
-        final HttpClientImpl client = new HttpClientImpl(Global.getUserAgent());
+        final HttpClient client = Global.getHttpClientFactory().createHttpClient();
 
         // create an request to the VSO deployment data end-point
         final URI requestUri = createConnectionDataUri(targetUri);

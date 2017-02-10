@@ -3,6 +3,7 @@
 
 package com.microsoft.alm.auth.oauth;
 
+import com.microsoft.alm.auth.HttpClientFactory;
 import com.microsoft.alm.auth.PromptBehavior;
 import com.microsoft.alm.helpers.*;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
@@ -183,7 +184,7 @@ public class AzureAuthority {
         final AtomicReference<UUID> tenantId = new AtomicReference<UUID>(Guid.Empty);
 
         if (StringHelper.endsWithIgnoreCase(targetUri.getHost(), VSTS_BASE_DOMAIN)) {
-            final HttpClient client = new HttpClientImpl(Global.getUserAgent());
+            final HttpClient client = Global.getHttpClientFactory().createHttpClient();
             final String tenant = client.getHeaderField(targetUri, VSTS_RESOURCE_TENANT_HEADER);
 
             if (!StringHelper.isNullOrWhiteSpace(tenant)) {
@@ -199,7 +200,7 @@ public class AzureAuthority {
     }
 
     private TokenPair doAcquireToken(final URI tokenEndpoint, final StringContent requestContent) throws IOException {
-        final HttpClient client = new HttpClientImpl(Global.getUserAgent());
+        final HttpClient client = Global.getHttpClientFactory().createHttpClient();
 
         final String responseContent = client.getPostResponseText(tokenEndpoint, requestContent);
         final TokenPair tokenPair = new TokenPair(responseContent);
@@ -324,4 +325,5 @@ public class AzureAuthority {
         }
         return authorizationCode;
     }
+
 }

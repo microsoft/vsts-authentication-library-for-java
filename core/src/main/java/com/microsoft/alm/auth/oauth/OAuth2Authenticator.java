@@ -166,7 +166,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
         final SecretRetriever<TokenPair> secretRetriever = new SecretRetriever<TokenPair>() {
 
             private boolean validateAccessToken(final Token accessToken, final URI validationEndpoint) {
-                final HttpClient client = new HttpClientImpl(Global.getUserAgent());
+                final HttpClient client = Global.getHttpClientFactory().createHttpClient();
                 accessToken.contributeHeader(client.getHeaders());
                 try {
                     final String response = client.getGetResponseText(validationEndpoint);
