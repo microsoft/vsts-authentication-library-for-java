@@ -10,6 +10,7 @@ import com.microsoft.alm.auth.oauth.helper.SwtJarLoader;
 import com.microsoft.alm.helpers.Action;
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.helpers.HttpClient;
+import com.microsoft.alm.helpers.HttpClientImpl;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenPair;
@@ -20,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -166,12 +166,12 @@ public class OAuth2Authenticator extends BaseAuthenticator {
         final SecretRetriever<TokenPair> secretRetriever = new SecretRetriever<TokenPair>() {
 
             private boolean validateAccessToken(final Token accessToken, final URI validationEndpoint) {
-                final HttpClient client = new HttpClient(Global.getUserAgent());
-                accessToken.contributeHeader(client.Headers);
+                final HttpClient client = Global.getHttpClientFactory().createHttpClient();
+                accessToken.contributeHeader(client.getHeaders());
                 try {
-                    final HttpURLConnection response = client.get(validationEndpoint);
+                    final String response = client.getGetResponseText(validationEndpoint);
 
-                    return response.getResponseCode() == HttpURLConnection.HTTP_OK;
+                    return true;
                 } catch (IOException e) {
                     logger.debug("Validation failed with IOException.", e);
                 }
@@ -295,7 +295,11 @@ public class OAuth2Authenticator extends BaseAuthenticator {
     }
 
     private AzureAuthority getAzureAuthority(final URI uri) {
-        return this.azureAuthorityProvider.getAzureAuthority(uri);
+        try {
+            return this.azureAuthorityProvider.getAzureAuthority(uri);
+        } catch (final IOException ioe) {
+            throw new Error(ioe);
+        }
     }
 
     public static class OAuth2AuthenticatorBuilder {

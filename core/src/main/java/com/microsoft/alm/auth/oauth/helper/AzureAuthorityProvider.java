@@ -8,6 +8,7 @@ import com.microsoft.alm.auth.oauth.OAuth2Authenticator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
 
@@ -17,7 +18,7 @@ import java.util.UUID;
 public class AzureAuthorityProvider {
     private static final Logger logger = LoggerFactory.getLogger(AzureAuthorityProvider.class);
 
-    public AzureAuthority getAzureAuthority(final URI uri) {
+    public AzureAuthority getAzureAuthority(final URI uri) throws IOException {
         if (uri == OAuth2Authenticator.APP_VSSPS_VISUALSTUDIO) {
             return AzureAuthority.DefaultAzureAuthority;
         }

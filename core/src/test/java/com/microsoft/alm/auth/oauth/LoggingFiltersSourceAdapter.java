@@ -25,8 +25,8 @@ public class LoggingFiltersSourceAdapter extends HttpFiltersSourceAdapter {
     https://github.com/adamfisk/LittleProxy
     """
     To enable aggregator and inflater you have to return a value greater than 0 in your
-    `HttpFiltersSource#get(Request/Response)BufferSizeInBytes()` methods.
-    This provides to you a `FullHttp(Request/Response)`
+    `HttpFiltersSource#get(Request/HttpResponse)BufferSizeInBytes()` methods.
+    This provides to you a `FullHttp(Request/HttpResponse)`
     with the complete content in your filter uncompressed.
     Otherwise you have to handle the chunks yourself.
     """

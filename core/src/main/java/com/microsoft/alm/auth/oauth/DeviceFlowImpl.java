@@ -4,10 +4,12 @@
 package com.microsoft.alm.auth.oauth;
 
 import com.microsoft.alm.helpers.HttpClient;
+import com.microsoft.alm.helpers.HttpResponse;
 import com.microsoft.alm.helpers.PropertyBag;
 import com.microsoft.alm.helpers.QueryString;
 import com.microsoft.alm.helpers.StringContent;
 import com.microsoft.alm.helpers.StringHelper;
+
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.secret.TokenPair;
 import org.slf4j.Logger;
@@ -33,20 +35,11 @@ public class DeviceFlowImpl implements DeviceFlow {
         contributeAuthorizationRequestParameters(bodyParameters);
         final StringContent requestBody = StringContent.createUrlEncoded(bodyParameters);
 
-        final HttpClient client = new HttpClient(Global.getUserAgent());
+        final HttpClient client = Global.getHttpClientFactory().createHttpClient();
         final String responseText;
         try {
-            final HttpURLConnection response = client.post(deviceEndpoint, requestBody);
-            final int httpStatus = response.getResponseCode();
-            if (httpStatus == HttpURLConnection.HTTP_OK) {
-                responseText = HttpClient.readToString(response);
-            }
-            else {
-                final String errorResponseText = HttpClient.readErrorToString(response);
-                throw new Error("Device endpoint returned HTTP " + httpStatus + ":\n" + errorResponseText);
-            }
-        }
-        catch (final IOException e) {
+            responseText = client.getPostResponseText(deviceEndpoint, requestBody);
+        } catch (final IOException e) {
             throw new Error(e);
         }
 
@@ -85,7 +78,7 @@ public class DeviceFlowImpl implements DeviceFlow {
 
         final int intervalSeconds = deviceFlowResponse.getInterval();
         int intervalMilliseconds = intervalSeconds * 1000;
-        final HttpClient client = new HttpClient(Global.getUserAgent());
+        final HttpClient client = Global.getHttpClientFactory().createHttpClient();
         String responseText = null;
         final Calendar expiresAt = deviceFlowResponse.getExpiresAt();
 
@@ -95,16 +88,15 @@ public class DeviceFlowImpl implements DeviceFlow {
             }
 
             try {
-                final HttpURLConnection response = client.post(tokenEndpoint, requestBody);
-                final int httpStatus = response.getResponseCode();
+                final HttpResponse response = client.getPostResponse(tokenEndpoint, requestBody);
 
-                if (httpStatus == HttpURLConnection.HTTP_OK) {
-                    responseText = HttpClient.readToString(response);
+                if (response.status == HttpURLConnection.HTTP_OK) {
+                    responseText = response.responseText;
                     break;
                 }
                 else {
-                    final String errorResponseText = HttpClient.readErrorToString(response);
-                    if (httpStatus == HttpURLConnection.HTTP_BAD_REQUEST) {
+                    final String errorResponseText = response.errorText;
+                    if (response.status == HttpURLConnection.HTTP_BAD_REQUEST) {
                         final PropertyBag bag = PropertyBag.fromJson(errorResponseText);
                         final String errorCode = bag.readOptionalString(OAuthParameter.ERROR_CODE, "unknown_error");
                         if (OAuthParameter.ERROR_AUTHORIZATION_PENDING.equals(errorCode)) {
@@ -130,7 +122,7 @@ public class DeviceFlowImpl implements DeviceFlow {
                         throw new AuthorizationException(errorCode, errorDescription, errorUri, null);
                     }
                     else {
-                        throw new Error("Token endpoint returned HTTP " + httpStatus + ":\n" + errorResponseText);
+                        throw new Error("Token endpoint returned HTTP " + response.status + ":\n" + errorResponseText);
                     }
                 }
             }

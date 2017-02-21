@@ -5,20 +5,18 @@ package com.microsoft.alm.auth.pat;
 
 import com.microsoft.alm.auth.oauth.AzureAuthority;
 import com.microsoft.alm.auth.oauth.Global;
-import com.microsoft.alm.secret.Token;
-import com.microsoft.alm.secret.TokenType;
-import com.microsoft.alm.secret.VsoTokenScope;
-import com.microsoft.alm.helpers.Action;
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.helpers.Guid;
 import com.microsoft.alm.helpers.HttpClient;
 import com.microsoft.alm.helpers.StringContent;
 import com.microsoft.alm.helpers.StringHelper;
+import com.microsoft.alm.secret.Token;
+import com.microsoft.alm.secret.TokenType;
+import com.microsoft.alm.secret.VsoTokenScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -57,9 +55,9 @@ class VsoAzureAuthority extends AzureAuthority {
 
         try {
             // TODO: 449524: create a `HttpClient` with a minimum number of redirects, default creds, and a reasonable timeout (access token generation seems to hang occasionally)
-            final HttpClient client = new HttpClient(Global.getUserAgent());
+            final HttpClient client = Global.getHttpClientFactory().createHttpClient();
             logger.debug("   using token to acquire personal access token");
-            accessToken.contributeHeader(client.Headers);
+            accessToken.contributeHeader(client.getHeaders());
 
             if (shouldCreateGlobalToken || populateTokenTargetId(targetUri, accessToken)) {
                 final URI requestUrl = createPersonalAccessTokenRequestUri(client, targetUri, requireCompactToken);
@@ -67,16 +65,14 @@ class VsoAzureAuthority extends AzureAuthority {
                 final StringContent content = getAccessTokenRequestBody(accessToken, tokenScope,
                         shouldCreateGlobalToken, displayName);
 
-                final HttpURLConnection response = client.post(requestUrl, content);
-                if (response.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                    final String responseText = HttpClient.readToString(response);
+                final String responseText = client.getPostResponseText(requestUrl, content);
 
-                    final Token token = parsePersonalAccessTokenFromJson(responseText);
-                    if (token != null) {
-                        logger.debug("   personal access token acquisition succeeded.");
-                    }
-                    return token;
+                final Token token = parsePersonalAccessTokenFromJson(responseText);
+                if (token != null) {
+                    logger.debug("   personal access token acquisition succeeded.");
                 }
+
+                return token;
             }
         } catch (IOException e) {
             throw new Error(e);
@@ -116,14 +112,10 @@ class VsoAzureAuthority extends AzureAuthority {
         final String locationServiceUrl = String.format(locationServiceUrlFormat, targetUri.getHost());
         URI identityServiceUri = null;
 
-        final HttpURLConnection response = client.get(URI.create(locationServiceUrl));
-        if (response.getResponseCode() == HttpURLConnection.HTTP_OK) {
-            final String responseText = HttpClient.readToString(response);
-
-            identityServiceUri = parseLocationFromJson(responseText);
-            if (identityServiceUri != null) {
-                logger.debug("   parsed identity service url: {}", identityServiceUri);
-            }
+        final String responseText = client.getGetResponseText(URI.create(locationServiceUrl));
+        identityServiceUri = parseLocationFromJson(responseText);
+        if (identityServiceUri != null) {
+            logger.debug("   parsed identity service url: {}", identityServiceUri);
         }
 
         return identityServiceUri;
@@ -139,11 +131,9 @@ class VsoAzureAuthority extends AzureAuthority {
 
         String resultId = null;
         try {
-            // create an request to the VSO deployment data end-point
-            final HttpURLConnection request = createConnectionDataRequest(targetUri, accessToken);
+            // request to the VSO deployment data end-point
+            final String content = readConnectionDataRequest(targetUri, accessToken);
 
-            // send the request and wait for the response
-            final String content = HttpClient.readToString(request);
 
             resultId = parseInstanceIdFromJson(content);
         } catch (final IOException e) {
@@ -229,27 +219,21 @@ class VsoAzureAuthority extends AzureAuthority {
     }
 
 
-    private HttpURLConnection createConnectionDataRequest(final URI targetUri, final Token token) throws IOException {
+    private String readConnectionDataRequest(final URI targetUri, final Token token) throws IOException {
         Debug.Assert(targetUri != null && targetUri.isAbsolute(), "The targetUri parameter is null or invalid");
         Debug.Assert(token != null && (token.Type == TokenType.Access || token.Type == TokenType.Federated), "The token parameter is null or invalid");
 
         logger.debug("VsoAzureAuthority::createConnectionDataRequest");
 
-        final HttpClient client = new HttpClient(Global.getUserAgent());
+        final HttpClient client = Global.getHttpClientFactory().createHttpClient();
 
         // create an request to the VSO deployment data end-point
         final URI requestUri = createConnectionDataUri(targetUri);
 
         logger.debug("   validating token");
-        token.contributeHeader(client.Headers);
+        token.contributeHeader(client.getHeaders());
 
-        final HttpURLConnection result = client.get(requestUri, new Action<HttpURLConnection>() {
-            @Override
-            public void call(final HttpURLConnection conn) {
-                conn.setConnectTimeout(RequestTimeout);
-            }
-        });
-        return result;
+        return client.getGetResponseText(requestUri, RequestTimeout);
     }
 
     private URI createConnectionDataUri(final URI targetUri) {
