@@ -11,7 +11,7 @@ public class CredManagerBackedTokenPairStore extends CredManagerBackedSecureStor
     public static final String TOKEN_PAIR_USERNAME = "Azure Active Directory Access and Refresh Token";
     @Override
     protected TokenPair create(final String username, final String secret) {
-        return TokenPair.fromXmlString(secret) ;
+        return new TokenPair("", secret);
     }
 
     @Override
@@ -21,6 +21,8 @@ public class CredManagerBackedTokenPairStore extends CredManagerBackedSecureStor
 
     @Override
     protected String getCredentialBlob(final TokenPair tokenPair) {
-        return TokenPair.toXmlString(tokenPair);
+        // Only save refresh token on Windows
+        // Cred Manager has a 4K size limit, need to make sure we stay under this limit
+        return tokenPair.RefreshToken.Value;
     }
 }

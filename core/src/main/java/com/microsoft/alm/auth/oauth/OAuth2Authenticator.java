@@ -11,6 +11,7 @@ import com.microsoft.alm.helpers.Action;
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.helpers.HttpClient;
 import com.microsoft.alm.helpers.HttpClientImpl;
+import com.microsoft.alm.helpers.StringHelper;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenPair;
@@ -187,21 +188,18 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                 final URI validationEndpoint = URI.create(VALIDATION_ENDPOINT);
                 boolean valid = false;
 
-                if (tokenPair.AccessToken != null) {
+                if (tokenPair.AccessToken != null && !StringHelper.isNullOrEmpty(tokenPair.AccessToken.Value)) {
                     logger.debug("Validating stored OAuth2 Access Token...");
                     valid = validateAccessToken(tokenPair.AccessToken, validationEndpoint);
                 }
 
-                if (!valid && tokenPair.RefreshToken != null) {
+                if (!valid && tokenPair.RefreshToken != null
+                        && !StringHelper.isNullOrEmpty(tokenPair.RefreshToken.Value)) {
                     logger.debug("OAuth2 Access Token is not valid, and we have a refresh token, try refreshing...");
 
                     final TokenPair renewedTokenPair =
                             getAzureAuthority(uri).acquireTokenByRefreshToken(clientId, resource, tokenPair.RefreshToken);
 
-                    // Today after we refresh oauth2 token with the refresh token, we are only getting back an
-                    // Access Token -- the refresh token is null.  Although we could use this Access Token for another
-                    // hour, this contradicts with the assumption of this library (Both AccessToken and
-                    // RefreshToken fields of the TokenPair class are non-null).
                     if (renewedTokenPair != null
                             && renewedTokenPair.AccessToken.Value != null
                             && renewedTokenPair.RefreshToken.Value != null) {
