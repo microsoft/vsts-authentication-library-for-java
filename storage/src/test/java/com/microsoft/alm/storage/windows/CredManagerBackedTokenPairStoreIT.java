@@ -37,8 +37,9 @@ public class CredManagerBackedTokenPairStoreIT {
 
         final TokenPair readValue = underTest.get(testKey);
 
-        assertEquals(tokenPair.AccessToken, readValue.AccessToken);
-        assertEquals(tokenPair.RefreshToken, readValue.RefreshToken);
+        // Only save refresh token
+        assertEquals("", readValue.AccessToken.Value);
+        assertEquals(tokenPair.RefreshToken.Value, readValue.RefreshToken.Value);
 
         boolean deleted = underTest.delete(testKey);
         assertTrue(deleted);

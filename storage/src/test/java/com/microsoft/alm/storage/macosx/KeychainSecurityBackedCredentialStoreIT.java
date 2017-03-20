@@ -31,7 +31,7 @@ public class KeychainSecurityBackedCredentialStoreIT {
         final String key = "KeychainTest:http://test.com:Credential";
 
         // this should have been saved to cred manager, it would be good if you can set a breakpoint
-        // and manaully verify this now
+        // and manually verify this now
         underTest.add(key, credential);
 
         final Credential readCred = underTest.get(key);
