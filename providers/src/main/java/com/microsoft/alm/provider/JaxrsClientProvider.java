@@ -163,24 +163,22 @@ public class JaxrsClientProvider {
         logger.info("Getting a jaxrs client for uri: {}.", uri);
 
         if (authenticator.isCredentialSupported()) {
+
             logger.debug("Getting a jaxrs client backed by basic auth.");
             final Credential credential = authenticator.getCredential(uri, promptBehavior);
             if (credential != null) {
                 client = getClientWithUsernamePassword(credential.Username, credential.Password);
             }
-        }
-        /*
-         * Although this function calls for a URI specific client, the client returned by the OAuth2 provider is still
-         * global as OAuth2 token is not scoped to one account
-         */
-        else if (authenticator.isOAuth2TokenSupported()) {
-            logger.debug("Getting a jaxrs client backed by OAuth2 token.");
-            final TokenPair tokenPair = authenticator.getOAuth2TokenPair(promptBehavior);
-            client = getClientWithOAuth2RequestFilter(tokenPair);
-        }
 
-        else if (authenticator.isPersonalAccessTokenSupported()) {
+        } else if (authenticator.isOAuth2TokenSupported()) {
+            logger.debug("Getting a jaxrs client backed by OAuth2 token.");
+
+            final TokenPair tokenPair = authenticator.getOAuth2TokenPair(uri, promptBehavior);
+            client = getClientWithOAuth2RequestFilter(tokenPair);
+
+        } else if (authenticator.isPersonalAccessTokenSupported()) {
             logger.debug("Getting a jaxrs client backed by PersonalAccessToken.");
+
             final Token token = authenticator.getPersonalAccessToken(
                     uri,
                     options.patGenerationOptions.tokenScope,
