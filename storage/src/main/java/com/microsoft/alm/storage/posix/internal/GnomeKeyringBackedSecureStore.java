@@ -126,16 +126,20 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
      * @return {@code true} if gnome-keyring library is available; {@code false} otherwise
      */
     public static boolean isGnomeKeyringSupported() {
-        if (INSTANCE != null && SCHEMA != null) {
-            // If we are here that means we have loaded gnome-keyring library
-            final GnomeKeyringLibrary.PointerToPointer keyring_info = getGnomeKeyringInfoStruct();
-            if (keyring_info != null) { 
-                try {
-                    return isSimplePasswordAPISupported() && isGnomeKeyringUnlocked(keyring_info);
-                } finally {
-                    INSTANCE.gnome_keyring_info_free(keyring_info.pointer);
+        try {
+            if (INSTANCE != null && SCHEMA != null) {
+                // If we are here that means we have loaded gnome-keyring library
+                final GnomeKeyringLibrary.PointerToPointer keyring_info = getGnomeKeyringInfoStruct();
+                if (keyring_info != null) {
+                    try {
+                        return isSimplePasswordAPISupported() && isGnomeKeyringUnlocked(keyring_info);
+                    } finally {
+                        INSTANCE.gnome_keyring_info_free(keyring_info.pointer);
+                    }
                 }
             }
+        } catch (final Throwable t) {
+            logger.warn("Gnome Keyring is not available.", t);
         }
 
         return false;
@@ -233,38 +237,48 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
     }
 
     private static GnomeKeyringLibrary.GnomeKeyringPasswordSchema getGnomeKeyringPasswordSchema() {
-        if (isGnomeKeyringLibraryAvailable()) {
-            logger.info("gnome-keyring library loaded, creating a password SCHEMA");
-            GnomeKeyringLibrary.GnomeKeyringPasswordSchema schema
-                    = new GnomeKeyringLibrary.GnomeKeyringPasswordSchema();
+        try {
+            if (isGnomeKeyringLibraryAvailable()) {
+                logger.info("gnome-keyring library loaded, creating a password SCHEMA");
+                GnomeKeyringLibrary.GnomeKeyringPasswordSchema schema
+                        = new GnomeKeyringLibrary.GnomeKeyringPasswordSchema();
 
-            schema.item_type = GnomeKeyringLibrary.GNOME_KEYRING_ITEM_GENERIC_SECRET;
-            //Type and Key, all fields are strings
-            schema.attributes = new GnomeKeyringLibrary.GnomeKeyringPasswordSchemaAttribute[3];
-            schema.attributes[0] = new GnomeKeyringLibrary.GnomeKeyringPasswordSchemaAttribute();
-            schema.attributes[0].name = "Type";
-            schema.attributes[0].type = GnomeKeyringLibrary.GNOME_KEYRING_ATTRIBUTE_TYPE_STRING;
+                schema.item_type = GnomeKeyringLibrary.GNOME_KEYRING_ITEM_GENERIC_SECRET;
+                //Type and Key, all fields are strings
+                schema.attributes = new GnomeKeyringLibrary.GnomeKeyringPasswordSchemaAttribute[3];
+                schema.attributes[0] = new GnomeKeyringLibrary.GnomeKeyringPasswordSchemaAttribute();
+                schema.attributes[0].name = "Type";
+                schema.attributes[0].type = GnomeKeyringLibrary.GNOME_KEYRING_ATTRIBUTE_TYPE_STRING;
 
-            schema.attributes[1] = new GnomeKeyringLibrary.GnomeKeyringPasswordSchemaAttribute();
-            schema.attributes[1].name = "Key";
-            schema.attributes[1].type = GnomeKeyringLibrary.GNOME_KEYRING_ATTRIBUTE_TYPE_STRING;
+                schema.attributes[1] = new GnomeKeyringLibrary.GnomeKeyringPasswordSchemaAttribute();
+                schema.attributes[1].name = "Key";
+                schema.attributes[1].type = GnomeKeyringLibrary.GNOME_KEYRING_ATTRIBUTE_TYPE_STRING;
 
-            // Terminating
-            schema.attributes[2] = new GnomeKeyringLibrary.GnomeKeyringPasswordSchemaAttribute();
-            schema.attributes[2].name = null;
-            schema.attributes[2].type = 0;
+                // Terminating
+                schema.attributes[2] = new GnomeKeyringLibrary.GnomeKeyringPasswordSchemaAttribute();
+                schema.attributes[2].name = null;
+                schema.attributes[2].type = 0;
 
-            return schema;
+                return schema;
+
+            } else {
+                logger.info("gnome-keyring library not loaded, return null for SCHEMA");
+            }
+        } catch (final Throwable t) {
+            logger.warn("creating SCHEMA failed, return null for SCHEMA.", t);
         }
 
-        logger.info("gnome-keyring library not loaded, return null for SCHEMA");
         return null;
     }
 
     private static boolean checkResult(final int retCode, final String message) {
         if (retCode != GnomeKeyringLibrary.GNOME_KEYRING_RESULT_OK) {
             logger.error(message);
-            logger.error("Return code: {} description: {}", retCode, INSTANCE.gnome_keyring_result_to_message(retCode));
+            try {
+                logger.error("Return code: {} description: {}", retCode, INSTANCE.gnome_keyring_result_to_message(retCode));
+            } catch (UnsatisfiedLinkError e) {
+                logger.error("Return code: {}", retCode);
+            }
 
             return false;
         }
