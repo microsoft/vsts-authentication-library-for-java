@@ -4,6 +4,7 @@
 package com.microsoft.alm.storage.posix.internal;
 
 import com.microsoft.alm.helpers.Debug;
+import com.microsoft.alm.helpers.SettingsHelper;
 import com.microsoft.alm.helpers.SystemHelper;
 import com.microsoft.alm.secret.Secret;
 import com.microsoft.alm.storage.SecretStore;
@@ -192,7 +193,7 @@ public abstract class GnomeKeyringBackedSecureStore<E extends Secret> implements
             logger.info("Keyring is locked, most likely due to UI is unavailable or user logged in " +
                     "automatically without supplying a password.");
 
-            final boolean allowUnlock = Boolean.valueOf(System.getProperty(ALLOW_UNLOCK_KEYRING));
+            final boolean allowUnlock = Boolean.valueOf(SettingsHelper.getInstance().getProperty(ALLOW_UNLOCK_KEYRING));
             if (allowUnlock) {
                 final int ret = INSTANCE.gnome_keyring_unlock_sync(GnomeKeyringLibrary.GNOME_KEYRING_DEFAULT, null);
                 return checkResult(ret, "Could not unlock keyring. GNOME Keyring is not available.");

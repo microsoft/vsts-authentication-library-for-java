@@ -5,6 +5,7 @@ package com.microsoft.alm.provider;
 
 import com.microsoft.alm.auth.Authenticator;
 import com.microsoft.alm.auth.PromptBehavior;
+import com.microsoft.alm.helpers.SettingsHelper;
 import com.microsoft.alm.secret.Credential;
 import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenPair;
@@ -249,8 +250,9 @@ public class JaxrsClientProvider {
 
     private void addProxySettings(final ClientConfig clientConfig) {
         // favor http proxyHost
-        final String proxyHost = System.getProperty("http.proxyHost");
-        final String proxyPort = ObjectExtensions.<String>coalesce(System.getProperty("http.proxyPort"), "8080");
+        final String proxyHost = SettingsHelper.getInstance().getProperty("http.proxyHost");
+        final String proxyPort = ObjectExtensions.<String>coalesce(
+                        SettingsHelper.getInstance().getProperty("http.proxyPort"), "8080");
 
         if (proxyHost != null) {
             final String proxyUrl = String.format("http://%s:%s", proxyHost, proxyPort);
@@ -267,8 +269,8 @@ public class JaxrsClientProvider {
     }
 
     private SslConfigurator getSslConfigurator() {
-        final String trustStore = System.getProperty("javax.net.ssl.trustStore");
-        final String trustStorePassword = System.getProperty("javax.net.ssl.trustStorePassword");
+        final String trustStore = SettingsHelper.getInstance().getProperty("javax.net.ssl.trustStore");
+        final String trustStorePassword = SettingsHelper.getInstance().getProperty("javax.net.ssl.trustStorePassword");
 
         final SslConfigurator sslConfigurator;
         if (trustStore != null && trustStorePassword != null) {

@@ -11,6 +11,7 @@ import com.microsoft.alm.helpers.Action;
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.helpers.HttpClient;
 import com.microsoft.alm.helpers.HttpClientImpl;
+import com.microsoft.alm.helpers.SettingsHelper;
 import com.microsoft.alm.helpers.StringHelper;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.secret.Token;
@@ -220,7 +221,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                 final AtomicReference<File> swtRuntime = new AtomicReference<File>();
 
                 final String defaultProviderName
-                        = System.getProperty(USER_AGENT_PROVIDER_PROPERTY_NAME, JAVAFX_PROVIDER_NAME);
+                        = SettingsHelper.getInstance().getProperty(USER_AGENT_PROVIDER_PROPERTY_NAME, JAVAFX_PROVIDER_NAME);
 
                 logger.info("Attempt to use oauth2-useragent provider: {}", defaultProviderName);
 
