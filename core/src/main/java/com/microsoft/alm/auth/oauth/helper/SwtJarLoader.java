@@ -80,7 +80,7 @@ public class SwtJarLoader {
     public static boolean tryGetSwtJar(final AtomicReference<File> swtJarReference) {
         //precondition: swt runtime jar is not present on the system
         final String swtJarUrl = BASE_URL + jarName;
-        logger.debug("Downloading {}", swtJarUrl);
+        logger.info("Downloading {}", swtJarUrl);
 
         try {
             final HttpURLConnection cloudSwtUrlConn = (HttpURLConnection) new URL(swtJarUrl).openConnection();
