@@ -6,6 +6,10 @@ package com.microsoft.alm.helpers;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 public class PathTest {
     @Test
     public void changeExtension_single() {
@@ -63,5 +67,38 @@ public class PathTest {
         final String actual = Path.changeExtension(goodFileName, StringHelper.Empty);
 
         Assert.assertEquals("C:\\mydir\\myfile.com.", actual);
+    }
+
+    @Test
+    public void construct_path() {
+        final String[] goodSegments = new String[]{"Library", "Application Support", "Microsoft"};
+
+        final String actual = Path.construct(goodSegments);
+
+        Assert.assertEquals("Library" + File.separator
+                + "Application Support" + File.separator + "Microsoft", actual);
+    }
+
+    @Test
+    public void construct_argspath() {
+        final String actual = Path.construct("Library", "Application Support", "Microsoft");
+
+        Assert.assertEquals("Library" + File.separator
+                + "Application Support" + File.separator + "Microsoft", actual);
+    }
+
+    @Test
+    public void construct_emptypath() {
+        final String[] emptySegments = new String[0];
+
+        String actual = Path.construct(emptySegments);
+
+        Assert.assertEquals("", actual);
+
+        final List<String> emptyLists = new ArrayList<String>();
+
+        actual = Path.construct(emptyLists.toArray(new String[0]));
+
+        Assert.assertEquals("", actual);
     }
 }

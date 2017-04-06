@@ -20,15 +20,8 @@ public class SettingsHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(SettingsHelper.class);
 
-    /**
-     * Searching for TeamServices/auth_settings.properties file in the following folders.
-     */
-    private static Environment.SpecialFolder[] PARENT_FOLDERS = new Environment.SpecialFolder[] {
-            Environment.SpecialFolder.LocalApplicationData,
-            Environment.SpecialFolder.ApplicationData,
-            Environment.SpecialFolder.UserProfile};
-
-    private static String PROGRAM_FOLDER = SystemHelper.isWindows() ? "VSTeamServicesAuthPlugin" : ".VSTeamServicesAuthPlugin";
+    private static String VENDOR_FOLDER = SystemHelper.isLinux() ? ".microsoft" : "Microsoft";
+    private static String PROGRAM_FOLDER = "VstsAuthLib4J";
     private static String FILE_NAME = "settings.properties";
 
     private final Properties properties = new Properties();
@@ -43,27 +36,44 @@ public class SettingsHelper {
         return instance;
     }
 
+    private static String getSettingsFolderName() {
+        final String folder;
+        if (SystemHelper.isWindows()) {
+            folder = Path.construct(Environment.getFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        VENDOR_FOLDER,
+                        PROGRAM_FOLDER);
+
+        } else if (SystemHelper.isMac()) {
+            folder = Path.construct(Environment.getFolderPath(Environment.SpecialFolder.UserProfile),
+                        "Library",
+                        "Application Support",
+                        VENDOR_FOLDER,
+                        PROGRAM_FOLDER);
+        } else {
+            folder = Path.construct(Environment.getFolderPath(Environment.SpecialFolder.UserProfile),
+                        VENDOR_FOLDER,
+                        PROGRAM_FOLDER);
+
+        }
+
+        return folder;
+    }
+
     private SettingsHelper() {
-        // Trying to locate the settings file one by one
-        for (final Environment.SpecialFolder candidate : PARENT_FOLDERS) {
-            final String path = Environment.getFolderPath(candidate);
-            final File folder = new File(path, PROGRAM_FOLDER);
-            logger.info("Searching for {}", Path.combine(folder.getAbsolutePath(), FILE_NAME));
-            if (folder.exists()) {
-                final File potential = new File(folder, FILE_NAME);
-                if (potential.exists() && potential.isFile() && potential.canRead()) {
-                    logger.info("Found setting file, trying to load properties from {}", potential.getAbsolutePath());
+        final String path = getSettingsFolderName();
+        final File folder = new File(path);
+        logger.info("Searching for {}", Path.combine(folder.getAbsolutePath(), FILE_NAME));
+        if (folder.exists()) {
+            final File potential = new File(folder, FILE_NAME);
+            if (potential.exists() && potential.isFile() && potential.canRead()) {
+                logger.info("Found setting file, trying to load properties from {}", potential.getAbsolutePath());
 
-                    try {
-                        properties.load(new FileReader(potential));
-                        logger.info("Properties loaded.");
-                    } catch (Throwable t) {
-                        logger.warn("Failed to load properties.", t);
-                        properties.clear();
-                    }
-
-                    // Do not look further when we found a potential file
-                    break;
+                try {
+                    properties.load(new FileReader(potential));
+                    logger.info("Properties loaded.");
+                } catch (Throwable t) {
+                    logger.warn("Failed to load properties.", t);
+                    properties.clear();
                 }
             }
         }

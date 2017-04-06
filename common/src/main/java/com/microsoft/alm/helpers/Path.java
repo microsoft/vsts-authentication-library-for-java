@@ -56,4 +56,18 @@ public class Path {
         final File file = new File(path);
         return file.isAbsolute();
     }
+
+    public static String construct(final String... segments) {
+        final StringBuilder builder = new StringBuilder();
+        for (final String segment : segments) {
+            builder.append(segment).append(File.separator);
+        }
+        // Remove last trailing File.separator
+        final int idx = builder.lastIndexOf(File.separator);
+        if (idx > -1) {
+            builder.deleteCharAt(builder.lastIndexOf(File.separator));
+        }
+
+        return builder.toString();
+    }
 }
