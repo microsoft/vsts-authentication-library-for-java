@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -20,11 +21,13 @@ public class SettingsHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(SettingsHelper.class);
 
-    private static String VENDOR_FOLDER = SystemHelper.isLinux() ? ".microsoft" : "Microsoft";
-    private static String PROGRAM_FOLDER = "VstsAuthLib4J";
-    private static String FILE_NAME = "settings.properties";
+    private static final String VENDOR_FOLDER = SystemHelper.isLinux() ? ".microsoft" : "Microsoft";
+    private static final String PROGRAM_FOLDER = "VstsAuthLib4J";
+    private static final String FILE_NAME = "settings.properties";
 
     private final Properties properties = new Properties();
+
+    private static final String DO_NOT_SET_SYSTEM_ENV = "doNotSetSystemEnv";
 
     private static SettingsHelper instance;
 
@@ -71,6 +74,17 @@ public class SettingsHelper {
                 try {
                     properties.load(new FileReader(potential));
                     logger.info("Properties loaded.");
+                    final boolean setSystemEnv = !(Boolean.valueOf(properties.getProperty(DO_NOT_SET_SYSTEM_ENV)));
+                    if (setSystemEnv) {
+                        // oauth2-useragent reads System properties.  If we want to propagate any values downstream,
+                        // we must load our properties into System.properties
+                        for (final Map.Entry<Object, Object> entry : properties.entrySet()) {
+                            if (entry.getKey() instanceof String && entry.getValue() instanceof String) {
+                                logger.info("Setting System property {} to {}", entry.getKey(), entry.getValue());
+                                System.setProperty(entry.getKey().toString(), entry.getValue().toString());
+                            }
+                        }
+                    }
                 } catch (Throwable t) {
                     logger.warn("Failed to load properties.", t);
                     properties.clear();
