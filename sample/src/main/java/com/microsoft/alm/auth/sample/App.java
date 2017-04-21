@@ -32,8 +32,8 @@ import java.util.UUID;
 
 public class App {
     //azure connection settings, please supply your own
-    private final static String CLIENT_ID = "97877f11-0fc6-4aee-b1ff-febb0519dd00"; //$NON-NLS-1$
-    private final static String REDIRECT_URL = "https://java.visualstudio.com"; //$NON-NLS-1$
+    private final static String CLIENT_ID = "YOUR_CLIENT_GUID"; //$NON-NLS-1$
+    private final static String REDIRECT_URL = "YOUR_REDIRECT_URL"; //$NON-NLS-1$
 
     public static void main(String args[]) {
         // Create the storage for OAuth token and token, if you already have an OAuth store that contains
