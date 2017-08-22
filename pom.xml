@@ -29,8 +29,8 @@ Licensed under the MIT license. See License.txt in the project root. -->
 
   <developers>
     <developer>
-      <name>Oli Dagenais</name>
-      <email>olivida@microsoft.com</email>
+      <name>David Staheli</name>
+      <email>dastahel@microsoft.com</email>
       <organization>Microsoft</organization>
       <organizationUrl>http://www.microsoft.com/</organizationUrl>
     </developer>
@@ -52,11 +52,11 @@ Licensed under the MIT license. See License.txt in the project root. -->
   <repositories>
     <repository>
       <id>teamNexus</id>
-      <url>http://artifacts.cloudapp.net:8081/nexus/content/repositories/releases</url>
+      <url>http://artifacts.eastus.cloudapp.azure.com:8081/nexus/content/repositories/releases</url>
     </repository>
     <repository>
       <id>teamNexus.snapshots</id>
-      <url>http://artifacts.cloudapp.net:8081/nexus/content/repositories/snapshots</url>
+      <url>http://artifacts.eastus.cloudapp.azure.com:8081/nexus/content/repositories/snapshots</url>
       <releases>
         <enabled>false</enabled>
       </releases>
