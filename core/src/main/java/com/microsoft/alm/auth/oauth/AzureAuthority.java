@@ -3,7 +3,6 @@
 
 package com.microsoft.alm.auth.oauth;
 
-import com.microsoft.alm.auth.HttpClientFactory;
 import com.microsoft.alm.auth.PromptBehavior;
 import com.microsoft.alm.helpers.*;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
@@ -183,7 +182,8 @@ public class AzureAuthority {
     public static UUID detectTenantId(final URI targetUri) throws IOException {
         final AtomicReference<UUID> tenantId = new AtomicReference<UUID>(Guid.Empty);
 
-        if (StringHelper.endsWithIgnoreCase(targetUri.getHost(), VSTS_BASE_DOMAIN)) {
+        if (StringHelper.endsWithIgnoreCase(targetUri.getHost(), VSTS_BASE_DOMAIN) ||
+                UriHelper.isAzureHost(targetUri)) {
             final HttpClient client = Global.getHttpClientFactory().createHttpClient();
             final String tenant = client.getHeaderField(targetUri, VSTS_RESOURCE_TENANT_HEADER);
 

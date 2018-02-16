@@ -6,6 +6,7 @@ package com.microsoft.alm.helpers;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.net.URI;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -133,4 +134,33 @@ public class UriHelperTest {
         Assert.assertEquals("resource=a8860e8f-ca7d-4efe-b80d-4affab13d4ba&client_id=f7e11bcd-b50b-4869-ad88-8bdd6cbc8473&response_type=code&redirect_uri=https%3A%2F%2Fexample.com&client-request-id=06ac412b-8cc0-4ca5-b943-d9dc218abee6&prompt=login", actual);
     }
 
+    @Test
+    public void getFullAccount_tests() throws Exception {
+        Assert.assertEquals("msft.azure.com/account1", UriHelper.getFullAccount(URI.create("https://msft.azure.com/account1/blah")));
+        Assert.assertEquals("azure.com/account1", UriHelper.getFullAccount(URI.create("https://azure.com/account1/blah")));
+        Assert.assertEquals("azure.com/account1", UriHelper.getFullAccount(URI.create("https://azure.com/account1/blah/")));
+        Assert.assertEquals("AZURE.COM/account1", UriHelper.getFullAccount(URI.create("https://AZURE.COM/account1/blah/")));
+        Assert.assertEquals("msft.azure.com", UriHelper.getFullAccount(URI.create("https://msft.azure.com/")));
+        Assert.assertEquals("visualstudio.com", UriHelper.getFullAccount(URI.create("https://visualstudio.com/defaultcollection/blah/")));
+        Assert.assertEquals("VISUALSTUDIO.COM", UriHelper.getFullAccount(URI.create("https://VISUALSTUDIO.COM/defaultcollection/blah/")));
+        Assert.assertEquals("azure.com/mseng", UriHelper.getFullAccount( URI.create("https://mseng@azure.com/mseng/VSOnline/_git/VSO")));
+        Assert.assertEquals("AZURE.COM/mseng", UriHelper.getFullAccount( URI.create("https://mseng@AZURE.COM/mseng/")));
+        Assert.assertEquals("azure.com/mseng", UriHelper.getFullAccount( URI.create("https://mseng@azure.com")));
+        Assert.assertEquals("google.com", UriHelper.getFullAccount( URI.create("https://mseng@google.com")));
+    }
+
+    @Test
+    public void IsOrganization_tests() {
+        Assert.assertEquals(true, UriHelper.isAzureHost( URI.create("https://msft.azure.com/account1/blah")));
+        Assert.assertEquals(true, UriHelper.isAzureHost( URI.create("https://azure.com/account1/blah/")));
+        Assert.assertEquals(true, UriHelper.isAzureHost( URI.create("https://azure.com/account1/blah")));
+        Assert.assertEquals(true, UriHelper.isAzureHost( URI.create("https://AZURE.COM/account1/blah/")));
+        Assert.assertEquals(true, UriHelper.isAzureHost( URI.create("https://msft.azure.com/")));
+        Assert.assertEquals(false, UriHelper.isAzureHost( URI.create("https://visualstudio.com/defaultcollection/blah/")));
+        Assert.assertEquals(false, UriHelper.isAzureHost( URI.create("https://VISUALSTUDIO.COM/defaultcollection/blah/")));
+        Assert.assertEquals(false, UriHelper.isAzureHost( URI.create("https://www.google.com")));
+        Assert.assertEquals(true, UriHelper.isAzureHost( URI.create("https://mseng@azure.com/mseng/VSOnline/_git/VSO")));
+        Assert.assertEquals(true, UriHelper.isAzureHost( URI.create("https://mseng@AZURE.COM/mseng/VSOnline/_git/VSO")));
+        Assert.assertEquals(false, UriHelper.isAzureHost( URI.create("https://mseng@google.com/mseng/VSOnline/_git/VSO")));
+    }
 }
