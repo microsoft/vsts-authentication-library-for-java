@@ -32,7 +32,10 @@ public class HttpClientImpl implements HttpClient {
             InputStream errorStream = null;
             try {
                 errorStream = connection.getErrorStream();
-                final String content = IOHelper.readToString(errorStream);
+                String content = "";
+                if (errorStream != null) {
+                    content = IOHelper.readToString(errorStream);
+                }
                 final String template = "HTTP request failed with code %1$d: %2$s";
                 final String message = String.format(template, statusCode, content);
                 throw new IOException(message);
