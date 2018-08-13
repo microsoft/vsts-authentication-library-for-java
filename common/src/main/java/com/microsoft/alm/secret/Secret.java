@@ -5,6 +5,7 @@ package com.microsoft.alm.secret;
 
 import com.microsoft.alm.helpers.Debug;
 import com.microsoft.alm.helpers.StringHelper;
+import com.microsoft.alm.helpers.UriHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,8 +25,7 @@ public abstract class Secret {
 
         String targetName = null;
         // trim any trailing slashes and/or whitespace for compat with git-credential-winstore
-        final String trimmedHostUrl = StringHelper.trimEnd(StringHelper.trimEnd(targetUri.getHost(), '/', '\\'));
-
+        String trimmedHostUrl = StringHelper.trimEnd(StringHelper.trimEnd(UriHelper.getFullAccount(targetUri), '/', '\\'));
 
         if (targetUri.getPort() == -1 /* isDefaultPort */) {
             targetName = String.format(TokenNameBaseFormat, namespace, targetUri.getScheme(), trimmedHostUrl);

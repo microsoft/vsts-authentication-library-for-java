@@ -10,6 +10,7 @@ import com.microsoft.alm.helpers.Guid;
 import com.microsoft.alm.helpers.HttpClient;
 import com.microsoft.alm.helpers.StringContent;
 import com.microsoft.alm.helpers.StringHelper;
+import com.microsoft.alm.helpers.UriHelper;
 import com.microsoft.alm.secret.Token;
 import com.microsoft.alm.secret.TokenType;
 import com.microsoft.alm.secret.VsoTokenScope;
@@ -109,7 +110,9 @@ class VsoAzureAuthority extends AzureAuthority {
         Debug.Assert(client != null, ("The client parameter is null."));
         Debug.Assert(targetUri != null && targetUri.isAbsolute(), "The targetUri parameter is null or invalid");
 
-        final String locationServiceUrl = String.format(locationServiceUrlFormat, targetUri.getHost());
+        String host =  UriHelper.getFullAccount(targetUri);
+
+        final String locationServiceUrl = String.format(locationServiceUrlFormat, host);
         URI identityServiceUri = null;
 
         final String responseText = client.getGetResponseText(URI.create(locationServiceUrl));
@@ -241,8 +244,9 @@ class VsoAzureAuthority extends AzureAuthority {
 
         Debug.Assert(targetUri != null & targetUri.isAbsolute(), "The targetUri parameter is null or invalid");
 
+        String host = UriHelper.getFullAccount(targetUri);
         // create a url to the connection data end-point, it's deployment level and "always on".
-        final String validationUrl = String.format(VsoValidationUrlFormat, targetUri.getHost());
+        final String validationUrl = String.format(VsoValidationUrlFormat, host);
 
         final URI result = URI.create(validationUrl);
         return result;

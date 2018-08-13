@@ -13,6 +13,9 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class UriHelper {
+    public static final String HOST_AZURE = "azure.com";
+    public static final String HOST_AZURE_ORG = ".azure.com";
+
     private static final Pattern PAIR_SEPARATOR = Pattern.compile("&");
     private static final Pattern NAME_VALUE_SEPARATOR = Pattern.compile("=");
 
@@ -94,5 +97,29 @@ public class UriHelper {
             throw new Error(e);
         }
 
+    }
+
+    public static boolean isAzureHost(final URI uri) {
+        if ((uri != null && uri.getHost() != null)
+                && (uri.getHost().equalsIgnoreCase(HOST_AZURE) || StringHelper.endsWithIgnoreCase(uri.getHost(), HOST_AZURE_ORG))) {
+            return true;
+        }
+        return false;
+    }
+
+    public static String getFullAccount(final URI uri) {
+        if (isAzureHost(uri)) {
+            // Get the account which will be in the form azure.com/account
+            // If we don't have a path with length > 0 check for the mseng@azure.com case
+            // If we don't match the if or else if, we likely have an issue
+            String[] paths = uri.getPath().split("/");
+            if (paths.length > 1) {
+                return uri.getHost() + "/" + paths[1];
+            }
+            else if (!StringHelper.isNullOrWhiteSpace(uri.getUserInfo())) {
+                return uri.getHost() + "/" + uri.getUserInfo();
+            }
+        }
+        return uri.getHost();
     }
 }
