@@ -64,7 +64,8 @@ public class OAuth2AuthenticatorTest {
                 TEST_REDIRECT_URI,
                 mockStore,
                 mockOAuth2UseragentValidator,
-                testCallback);
+                testCallback,
+                new AzureAuthorityProvider());
 
         underTest.setAzureAuthorityProvider(mockAzureAuthorityProvider);
     }
@@ -119,7 +120,8 @@ public class OAuth2AuthenticatorTest {
                 TEST_REDIRECT_URI,
                 mockStore,
                 mockOAuth2UseragentValidator,
-                null /* no callback specified */);
+                null, /* no callback specified */
+                new AzureAuthorityProvider());
 
         final TokenPair token = underTest.getOAuth2TokenPair();
 

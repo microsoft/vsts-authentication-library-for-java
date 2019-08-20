@@ -59,7 +59,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
 
     private final Action<DeviceFlowResponse> deviceFlowCallback;
 
-    private AzureAuthorityProvider azureAuthorityProvider = new AzureAuthorityProvider();
+    private AzureAuthorityProvider azureAuthorityProvider;
 
     /**
      * Get an OAuth2 authenticator
@@ -116,7 +116,8 @@ public class OAuth2Authenticator extends BaseAuthenticator {
 
     /*default*/ OAuth2Authenticator(final String resource, final String clientId, final URI redirectUri,
                         final SecretStore<TokenPair> store, final OAuth2UseragentValidator oAuth2UseragentValidator,
-                        final Action<DeviceFlowResponse> deviceFlowCallback) {
+                        final Action<DeviceFlowResponse> deviceFlowCallback,
+                        final AzureAuthorityProvider azureAuthorityProvider) {
         Debug.Assert(resource != null, "resource cannot be null");
         Debug.Assert(clientId != null, "clientId cannot be null");
         Debug.Assert(redirectUri != null, "redirectUri cannot be null");
@@ -126,6 +127,7 @@ public class OAuth2Authenticator extends BaseAuthenticator {
         this.redirectUri = redirectUri;
         this.oAuth2UseragentValidator = oAuth2UseragentValidator;
         this.deviceFlowCallback = deviceFlowCallback;
+        this.azureAuthorityProvider = azureAuthorityProvider;
 
         logger.debug("Using default SecretStore? {}", store == null);
         this.store = store == null ? new InsecureInMemoryStore<TokenPair>() : store;
@@ -308,6 +310,8 @@ public class OAuth2Authenticator extends BaseAuthenticator {
         private SecretStore store;
         private String tenantId = AzureAuthority.CommonTenant;
         private Action<DeviceFlowResponse> deviceFlowCallback;
+        private OAuth2UseragentValidator oAuth2UseragentValidator;
+        private AzureAuthorityProvider azureAuthorityProvider;
 
         public OAuth2AuthenticatorBuilder manage(final String resource) {
             Debug.Assert(resource != null, "resource cannot be null");
@@ -346,6 +350,16 @@ public class OAuth2Authenticator extends BaseAuthenticator {
             return this;
         }
 
+        public OAuth2AuthenticatorBuilder withOAuth2UseragentValidator(OAuth2UseragentValidator oAuth2UseragentValidator) {
+            this.oAuth2UseragentValidator = oAuth2UseragentValidator;
+            return this;
+        }
+
+        public OAuth2AuthenticatorBuilder withAzureAuthorityProvider(AzureAuthorityProvider azureAuthorityProvider) {
+            this.azureAuthorityProvider = azureAuthorityProvider;
+            return this;
+        }
+
         public OAuth2Authenticator build() {
             if (this.clientId == null) {
                 throw new IllegalStateException("ClientId not set");
@@ -359,10 +373,16 @@ public class OAuth2Authenticator extends BaseAuthenticator {
                 throw new IllegalStateException("redirectUri not set");
             }
 
-            final OAuth2UseragentValidator oAuth2UseragentValidator = new OAuth2UseragentValidator();
+            final OAuth2UseragentValidator oAuth2UseragentValidator = this.oAuth2UseragentValidator == null
+                    ? new OAuth2UseragentValidator()
+                    : this.oAuth2UseragentValidator;
+
+            final AzureAuthorityProvider azureAuthorityProvider = this.azureAuthorityProvider == null
+                    ? new AzureAuthorityProvider()
+                    : this.azureAuthorityProvider;
 
             return new OAuth2Authenticator(this.resource, this.clientId, this.redirectUri, this.store,
-                    oAuth2UseragentValidator, this.deviceFlowCallback);
+                    oAuth2UseragentValidator, this.deviceFlowCallback, azureAuthorityProvider);
         }
     }
 }
