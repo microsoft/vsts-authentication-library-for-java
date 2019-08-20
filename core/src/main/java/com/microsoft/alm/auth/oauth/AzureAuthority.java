@@ -69,7 +69,11 @@ public class AzureAuthority {
      * @param authorityHostUrl Non-default authority host url.
      */
     public AzureAuthority(final String authorityHostUrl) {
-        this(authorityHostUrl, new UserAgentImpl(), new AzureDeviceFlow());
+        this(authorityHostUrl, new UserAgentImpl());
+    }
+
+    public AzureAuthority(final String authorityHostUrl, final UserAgent userAgent) {
+        this(authorityHostUrl, userAgent, new AzureDeviceFlow());
     }
 
     AzureAuthority(final String authorityHostUrl, final UserAgent userAgent, final AzureDeviceFlow azureDeviceFlow) {
