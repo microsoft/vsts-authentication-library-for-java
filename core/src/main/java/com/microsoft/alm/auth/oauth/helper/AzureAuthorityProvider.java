@@ -18,9 +18,17 @@ import java.util.UUID;
 public class AzureAuthorityProvider {
     private static final Logger logger = LoggerFactory.getLogger(AzureAuthorityProvider.class);
 
+    protected AzureAuthority getDefaultAzureAuthority() {
+        return AzureAuthority.DefaultAzureAuthority;
+    }
+
+    protected AzureAuthority getAzureAuthorityForHostUrl(String hostUrl) {
+        return new AzureAuthority(hostUrl);
+    }
+
     public AzureAuthority getAzureAuthority(final URI uri) throws IOException {
         if (uri == OAuth2Authenticator.APP_VSSPS_VISUALSTUDIO) {
-            return AzureAuthority.DefaultAzureAuthority;
+            return getDefaultAzureAuthority();
         }
 
         logger.debug("Lookup tenant id for {}", uri);
@@ -28,10 +36,10 @@ public class AzureAuthorityProvider {
         logger.debug("tenant id for {} is {}", uri, tenantId);
         if (tenantId == null) {
             // backed by MSA account
-            return AzureAuthority.DefaultAzureAuthority;
+            return getDefaultAzureAuthority();
         }
 
-        return new AzureAuthority(AzureAuthority.AuthorityHostUrlBase + "/" + tenantId);
+        return getAzureAuthorityForHostUrl(AzureAuthority.AuthorityHostUrlBase + "/" + tenantId);
     }
 
 }
