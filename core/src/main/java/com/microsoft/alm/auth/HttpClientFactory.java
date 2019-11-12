@@ -4,8 +4,8 @@
 package com.microsoft.alm.auth;
 
 import com.microsoft.alm.auth.oauth.Global;
-import com.microsoft.alm.helpers.HttpClient;
-import com.microsoft.alm.helpers.HttpClientImpl;
+import com.microsoft.alm.common.helpers.HttpClient;
+import com.microsoft.alm.common.helpers.HttpClientImpl;
 
 public class HttpClientFactory {
 

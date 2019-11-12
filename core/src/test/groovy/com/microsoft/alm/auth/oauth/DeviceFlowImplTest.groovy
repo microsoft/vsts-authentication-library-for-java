@@ -9,7 +9,7 @@ import com.github.tomakehurst.wiremock.http.Response
 import com.github.tomakehurst.wiremock.junit.WireMockRule
 import com.github.tomakehurst.wiremock.stubbing.Scenario
 import com.microsoft.alm.oauth2.useragent.AuthorizationException
-import com.microsoft.alm.secret.TokenType
+import com.microsoft.alm.common.secret.TokenType
 import groovy.transform.CompileStatic
 import org.junit.After
 import org.junit.Assert

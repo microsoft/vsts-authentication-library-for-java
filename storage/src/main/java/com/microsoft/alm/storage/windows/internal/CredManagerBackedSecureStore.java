@@ -3,11 +3,10 @@
 
 package com.microsoft.alm.storage.windows.internal;
 
-import com.microsoft.alm.helpers.Debug;
-import com.microsoft.alm.helpers.StringHelper;
-import com.microsoft.alm.helpers.SystemHelper;
-import com.microsoft.alm.secret.Secret;
-import com.microsoft.alm.storage.SecretStore;
+
+import com.microsoft.alm.common.helpers.Debug;
+import com.microsoft.alm.common.secret.Secret;
+import com.microsoft.alm.common.storage.SecretStore;
 import com.sun.jna.LastErrorException;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
@@ -16,7 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 
-import static com.microsoft.alm.helpers.LoggingHelper.logError;
+import static com.microsoft.alm.common.helpers.LoggingHelper.logError;
+import com.microsoft.alm.common.helpers.StringHelper;
+import com.microsoft.alm.common.helpers.SystemHelper;
 
 /**
  * This class exposes functions to interact with Windows Credential Manager

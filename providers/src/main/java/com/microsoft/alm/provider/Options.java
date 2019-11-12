@@ -3,7 +3,7 @@
 
 package com.microsoft.alm.provider;
 
-import com.microsoft.alm.secret.VsoTokenScope;
+import com.microsoft.alm.common.secret.VsoTokenScope;
 
 public class Options {
 

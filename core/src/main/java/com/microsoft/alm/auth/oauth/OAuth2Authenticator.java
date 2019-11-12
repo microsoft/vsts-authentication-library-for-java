@@ -7,17 +7,17 @@ import com.microsoft.alm.auth.BaseAuthenticator;
 import com.microsoft.alm.auth.PromptBehavior;
 import com.microsoft.alm.auth.oauth.helper.AzureAuthorityProvider;
 import com.microsoft.alm.auth.oauth.helper.SwtJarLoader;
-import com.microsoft.alm.helpers.Action;
-import com.microsoft.alm.helpers.Debug;
-import com.microsoft.alm.helpers.HttpClient;
-import com.microsoft.alm.helpers.HttpClientImpl;
-import com.microsoft.alm.helpers.SettingsHelper;
-import com.microsoft.alm.helpers.StringHelper;
+import com.microsoft.alm.common.helpers.Action;
+import com.microsoft.alm.common.helpers.Debug;
+import com.microsoft.alm.common.helpers.HttpClient;
+import com.microsoft.alm.common.helpers.HttpClientImpl;
+import com.microsoft.alm.common.helpers.SettingsHelper;
+import com.microsoft.alm.common.helpers.StringHelper;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
-import com.microsoft.alm.secret.Token;
-import com.microsoft.alm.secret.TokenPair;
-import com.microsoft.alm.storage.InsecureInMemoryStore;
-import com.microsoft.alm.storage.SecretStore;
+import com.microsoft.alm.common.secret.Token;
+import com.microsoft.alm.common.secret.TokenPair;
+import com.microsoft.alm.common.storage.InsecureInMemoryStore;
+import com.microsoft.alm.common.storage.SecretStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +27,7 @@ import java.net.URI;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.microsoft.alm.helpers.LoggingHelper.logError;
+import static com.microsoft.alm.common.helpers.LoggingHelper.logError;
 
 public class OAuth2Authenticator extends BaseAuthenticator {
 

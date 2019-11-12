@@ -3,7 +3,7 @@
 
 package com.microsoft.alm.storage.posix;
 
-import com.microsoft.alm.secret.Credential;
+import com.microsoft.alm.common.secret.Credential;
 import com.microsoft.alm.storage.posix.internal.GnomeKeyringBackedSecureStore;
 import org.junit.Before;
 import org.junit.Test;

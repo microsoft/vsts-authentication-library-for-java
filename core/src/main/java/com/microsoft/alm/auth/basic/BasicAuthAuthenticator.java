@@ -5,10 +5,10 @@ package com.microsoft.alm.auth.basic;
 
 import com.microsoft.alm.auth.BaseAuthenticator;
 import com.microsoft.alm.auth.PromptBehavior;
-import com.microsoft.alm.secret.Credential;
-import com.microsoft.alm.helpers.Debug;
-import com.microsoft.alm.storage.InsecureInMemoryStore;
-import com.microsoft.alm.storage.SecretStore;
+import com.microsoft.alm.common.secret.Credential;
+import com.microsoft.alm.common.helpers.Debug;
+import com.microsoft.alm.common.storage.InsecureInMemoryStore;
+import com.microsoft.alm.common.storage.SecretStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

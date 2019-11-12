@@ -5,15 +5,15 @@ package com.microsoft.alm.auth.pat;
 
 import com.microsoft.alm.auth.oauth.AzureAuthority;
 import com.microsoft.alm.auth.oauth.Global;
-import com.microsoft.alm.helpers.Debug;
-import com.microsoft.alm.helpers.Guid;
-import com.microsoft.alm.helpers.HttpClient;
-import com.microsoft.alm.helpers.StringContent;
-import com.microsoft.alm.helpers.StringHelper;
-import com.microsoft.alm.helpers.UriHelper;
-import com.microsoft.alm.secret.Token;
-import com.microsoft.alm.secret.TokenType;
-import com.microsoft.alm.secret.VsoTokenScope;
+import com.microsoft.alm.common.helpers.Debug;
+import com.microsoft.alm.common.helpers.Guid;
+import com.microsoft.alm.common.helpers.HttpClient;
+import com.microsoft.alm.common.helpers.StringContent;
+import com.microsoft.alm.common.helpers.StringHelper;
+import com.microsoft.alm.common.helpers.UriHelper;
+import com.microsoft.alm.common.secret.Token;
+import com.microsoft.alm.common.secret.TokenType;
+import com.microsoft.alm.common.secret.VsoTokenScope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

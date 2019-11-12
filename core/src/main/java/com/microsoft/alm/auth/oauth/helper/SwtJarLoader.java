@@ -3,8 +3,8 @@
 
 package com.microsoft.alm.auth.oauth.helper;
 
-import com.microsoft.alm.helpers.IOHelper;
-import com.microsoft.alm.helpers.SystemHelper;
+import com.microsoft.alm.common.helpers.IOHelper;
+import com.microsoft.alm.common.helpers.SystemHelper;
 import com.microsoft.alm.oauth2.useragent.StandardWidgetToolkitProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -4,16 +4,16 @@
 package com.microsoft.alm.storage.macosx;
 
 
-import com.microsoft.alm.helpers.Func;
-import com.microsoft.alm.helpers.IOHelper;
-import com.microsoft.alm.helpers.StringHelper;
+import com.microsoft.alm.common.helpers.Func;
+import com.microsoft.alm.common.helpers.IOHelper;
+import com.microsoft.alm.common.helpers.StringHelper;
 import com.microsoft.alm.oauth2.useragent.subprocess.DefaultProcessFactory;
 import com.microsoft.alm.oauth2.useragent.subprocess.ProcessCoordinator;
 import com.microsoft.alm.oauth2.useragent.subprocess.TestableProcess;
 import com.microsoft.alm.oauth2.useragent.subprocess.TestableProcessFactory;
-import com.microsoft.alm.secret.Credential;
-import com.microsoft.alm.secret.Token;
-import com.microsoft.alm.secret.TokenPair;
+import com.microsoft.alm.common.secret.Credential;
+import com.microsoft.alm.common.secret.Token;
+import com.microsoft.alm.common.secret.TokenPair;
 
 import java.io.BufferedReader;
 import java.io.IOException;

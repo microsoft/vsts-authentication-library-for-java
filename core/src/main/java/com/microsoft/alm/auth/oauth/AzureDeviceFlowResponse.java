@@ -3,7 +3,7 @@
 
 package com.microsoft.alm.auth.oauth;
 
-import com.microsoft.alm.helpers.PropertyBag;
+import com.microsoft.alm.common.helpers.PropertyBag;
 
 import java.net.URI;
 

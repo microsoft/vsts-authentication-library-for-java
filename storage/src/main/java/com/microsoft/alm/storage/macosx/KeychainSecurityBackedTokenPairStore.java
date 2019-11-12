@@ -3,8 +3,8 @@
 
 package com.microsoft.alm.storage.macosx;
 
-import com.microsoft.alm.secret.TokenPair;
-import com.microsoft.alm.storage.SecretStore;
+import com.microsoft.alm.common.secret.TokenPair;
+import com.microsoft.alm.common.storage.SecretStore;
 
 public class KeychainSecurityBackedTokenPairStore extends KeychainSecurityCliStore implements SecretStore<TokenPair> {
 

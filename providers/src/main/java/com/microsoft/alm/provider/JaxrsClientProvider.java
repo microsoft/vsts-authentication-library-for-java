@@ -5,12 +5,12 @@ package com.microsoft.alm.provider;
 
 import com.microsoft.alm.auth.Authenticator;
 import com.microsoft.alm.auth.PromptBehavior;
-import com.microsoft.alm.helpers.SettingsHelper;
-import com.microsoft.alm.secret.Credential;
-import com.microsoft.alm.secret.Token;
-import com.microsoft.alm.secret.TokenPair;
-import com.microsoft.alm.helpers.Debug;
-import com.microsoft.alm.helpers.ObjectExtensions;
+import com.microsoft.alm.common.helpers.SettingsHelper;
+import com.microsoft.alm.common.secret.Credential;
+import com.microsoft.alm.common.secret.Token;
+import com.microsoft.alm.common.secret.TokenPair;
+import com.microsoft.alm.common.helpers.Debug;
+import com.microsoft.alm.common.helpers.ObjectExtensions;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;

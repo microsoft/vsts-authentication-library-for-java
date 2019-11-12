@@ -3,8 +3,8 @@
 
 package com.microsoft.alm.storage.macosx;
 
-import com.microsoft.alm.secret.Credential;
-import com.microsoft.alm.storage.SecretStore;
+import com.microsoft.alm.common.secret.Credential;
+import com.microsoft.alm.common.storage.SecretStore;
 
 public class KeychainSecurityBackedCredentialStore extends KeychainSecurityCliStore
         implements SecretStore<Credential> {

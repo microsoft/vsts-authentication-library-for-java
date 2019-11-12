@@ -3,12 +3,16 @@
 
 package com.microsoft.alm.storage;
 
-import com.microsoft.alm.helpers.Debug;
-import com.microsoft.alm.helpers.SystemHelper;
-import com.microsoft.alm.secret.Credential;
-import com.microsoft.alm.secret.Secret;
-import com.microsoft.alm.secret.Token;
-import com.microsoft.alm.secret.TokenPair;
+import com.microsoft.alm.common.helpers.Debug;
+import com.microsoft.alm.common.helpers.SystemHelper;
+import com.microsoft.alm.common.secret.Credential;
+import com.microsoft.alm.common.secret.Secret;
+import com.microsoft.alm.common.secret.Token;
+import com.microsoft.alm.common.secret.TokenPair;
+import com.microsoft.alm.common.storage.InsecureFileBackedCredentialStore;
+import com.microsoft.alm.common.storage.InsecureFileBackedTokenStore;
+import com.microsoft.alm.common.storage.InsecureInMemoryStore;
+import com.microsoft.alm.common.storage.SecretStore;
 import com.microsoft.alm.storage.macosx.KeychainSecurityBackedCredentialStore;
 import com.microsoft.alm.storage.macosx.KeychainSecurityBackedTokenPairStore;
 import com.microsoft.alm.storage.macosx.KeychainSecurityBackedTokenStore;

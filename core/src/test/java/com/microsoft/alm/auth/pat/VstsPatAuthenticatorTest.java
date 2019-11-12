@@ -5,11 +5,11 @@ package com.microsoft.alm.auth.pat;
 
 import com.microsoft.alm.auth.PromptBehavior;
 import com.microsoft.alm.auth.oauth.OAuth2Authenticator;
-import com.microsoft.alm.secret.Token;
-import com.microsoft.alm.secret.TokenPair;
-import com.microsoft.alm.secret.TokenType;
-import com.microsoft.alm.secret.VsoTokenScope;
-import com.microsoft.alm.storage.SecretStore;
+import com.microsoft.alm.common.secret.Token;
+import com.microsoft.alm.common.secret.TokenPair;
+import com.microsoft.alm.common.secret.TokenType;
+import com.microsoft.alm.common.secret.VsoTokenScope;
+import com.microsoft.alm.common.storage.SecretStore;
 import org.junit.Before;
 import org.junit.Test;
 

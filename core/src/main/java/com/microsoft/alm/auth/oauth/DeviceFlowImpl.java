@@ -3,15 +3,15 @@
 
 package com.microsoft.alm.auth.oauth;
 
-import com.microsoft.alm.helpers.HttpClient;
-import com.microsoft.alm.helpers.HttpResponse;
-import com.microsoft.alm.helpers.PropertyBag;
-import com.microsoft.alm.helpers.QueryString;
-import com.microsoft.alm.helpers.StringContent;
-import com.microsoft.alm.helpers.StringHelper;
+import com.microsoft.alm.common.helpers.HttpClient;
+import com.microsoft.alm.common.helpers.HttpResponse;
+import com.microsoft.alm.common.helpers.PropertyBag;
+import com.microsoft.alm.common.helpers.QueryString;
+import com.microsoft.alm.common.helpers.StringContent;
+import com.microsoft.alm.common.helpers.StringHelper;
 
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
-import com.microsoft.alm.secret.TokenPair;
+import com.microsoft.alm.common.secret.TokenPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

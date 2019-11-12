@@ -4,8 +4,8 @@
 package com.microsoft.alm.auth.basic;
 
 import com.microsoft.alm.auth.PromptBehavior;
-import com.microsoft.alm.secret.Credential;
-import com.microsoft.alm.storage.SecretStore;
+import com.microsoft.alm.common.secret.Credential;
+import com.microsoft.alm.common.storage.SecretStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;

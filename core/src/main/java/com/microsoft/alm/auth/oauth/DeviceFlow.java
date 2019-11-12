@@ -4,7 +4,7 @@
 package com.microsoft.alm.auth.oauth;
 
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
-import com.microsoft.alm.secret.TokenPair;
+import com.microsoft.alm.common.secret.TokenPair;
 
 import java.net.URI;
 

@@ -3,7 +3,7 @@
 
 package com.microsoft.alm.auth.oauth;
 
-import com.microsoft.alm.helpers.QueryString;
+import com.microsoft.alm.common.helpers.QueryString;
 
 public class AzureDeviceFlow extends DeviceFlowImpl {
     private String resource;

@@ -3,7 +3,7 @@
 
 package com.microsoft.alm.storage.windows;
 
-import com.microsoft.alm.secret.Credential;
+import com.microsoft.alm.common.secret.Credential;
 import com.microsoft.alm.storage.windows.internal.CredManagerBackedSecureStore;
 
 public class CredManagerBackedCredentialStore extends CredManagerBackedSecureStore<Credential> {

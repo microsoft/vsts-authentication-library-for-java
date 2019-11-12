@@ -4,10 +4,10 @@
 package com.microsoft.alm.auth.oauth;
 
 import com.microsoft.alm.auth.oauth.helper.AzureAuthorityProvider;
-import com.microsoft.alm.helpers.Action;
+import com.microsoft.alm.common.helpers.Action;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
-import com.microsoft.alm.secret.TokenPair;
-import com.microsoft.alm.storage.SecretStore;
+import com.microsoft.alm.common.secret.TokenPair;
+import com.microsoft.alm.common.storage.SecretStore;
 import org.junit.Before;
 import org.junit.Test;
 

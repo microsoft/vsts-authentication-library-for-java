@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See License.txt in the project root.
 
-package com.microsoft.alm.helpers
+package com.microsoft.alm.common.helpers
 
 import groovy.transform.CompileStatic
 import org.junit.Assert
