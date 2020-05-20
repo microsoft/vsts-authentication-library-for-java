@@ -3,9 +3,9 @@
 
 package com.microsoft.alm.storage.macosx;
 
-import com.microsoft.alm.helpers.SystemHelper;
-import com.microsoft.alm.secret.Token;
-import com.microsoft.alm.secret.TokenType;
+import com.microsoft.alm.common.helpers.SystemHelper;
+import com.microsoft.alm.common.secret.Token;
+import com.microsoft.alm.common.secret.TokenType;
 import org.junit.Before;
 import org.junit.Test;
 

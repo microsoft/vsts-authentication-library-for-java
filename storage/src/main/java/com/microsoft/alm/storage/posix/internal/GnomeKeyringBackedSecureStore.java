@@ -3,11 +3,11 @@
 
 package com.microsoft.alm.storage.posix.internal;
 
-import com.microsoft.alm.helpers.Debug;
-import com.microsoft.alm.helpers.SettingsHelper;
-import com.microsoft.alm.helpers.SystemHelper;
-import com.microsoft.alm.secret.Secret;
-import com.microsoft.alm.storage.SecretStore;
+import com.microsoft.alm.common.helpers.Debug;
+import com.microsoft.alm.common.helpers.SettingsHelper;
+import com.microsoft.alm.common.helpers.SystemHelper;
+import com.microsoft.alm.common.secret.Secret;
+import com.microsoft.alm.common.storage.SecretStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

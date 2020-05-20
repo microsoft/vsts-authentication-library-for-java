@@ -3,8 +3,8 @@
 
 package com.microsoft.alm.storage.windows;
 
-import com.microsoft.alm.secret.Token;
-import com.microsoft.alm.secret.TokenType;
+import com.microsoft.alm.common.secret.Token;
+import com.microsoft.alm.common.secret.TokenType;
 import com.microsoft.alm.storage.windows.internal.CredManagerBackedSecureStore;
 
 public class CredManagerBackedTokenStore extends CredManagerBackedSecureStore<Token> {

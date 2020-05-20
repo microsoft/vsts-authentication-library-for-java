@@ -3,7 +3,7 @@
 
 package com.microsoft.alm.auth.oauth.helper;
 
-import com.microsoft.alm.helpers.IOHelper;
+import com.microsoft.alm.common.helpers.IOHelper;
 
 import java.io.File;
 import java.io.FileInputStream;

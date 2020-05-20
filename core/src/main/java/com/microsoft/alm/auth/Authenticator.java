@@ -3,11 +3,11 @@
 
 package com.microsoft.alm.auth;
 
-import com.microsoft.alm.secret.Credential;
-import com.microsoft.alm.secret.Secret;
-import com.microsoft.alm.secret.Token;
-import com.microsoft.alm.secret.TokenPair;
-import com.microsoft.alm.secret.VsoTokenScope;
+import com.microsoft.alm.common.secret.Credential;
+import com.microsoft.alm.common.secret.Secret;
+import com.microsoft.alm.common.secret.Token;
+import com.microsoft.alm.common.secret.TokenPair;
+import com.microsoft.alm.common.secret.VsoTokenScope;
 
 import java.net.URI;
 
@@ -35,14 +35,14 @@ public interface Authenticator {
     /**
      * Get the converter that maps URIs to secret key names
      *
-     * @return an implementation of {@link com.microsoft.alm.secret.Secret.IUriNameConversion}
+     * @return an implementation of {@link com.microsoft.alm.common.secret.Secret.IUriNameConversion}
      */
     Secret.IUriNameConversion getUriToKeyConversion();
 
     /**
      * Set the converter that maps URIs to secret key names
      *
-     * @param conversion an implementation of {@link com.microsoft.alm.secret.Secret.IUriNameConversion}
+     * @param conversion an implementation of {@link com.microsoft.alm.common.secret.Secret.IUriNameConversion}
      */
     void setUriToKeyConversion(final Secret.IUriNameConversion conversion);
 

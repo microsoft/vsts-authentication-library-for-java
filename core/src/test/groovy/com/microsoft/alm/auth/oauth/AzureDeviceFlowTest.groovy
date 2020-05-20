@@ -3,8 +3,8 @@
 
 package com.microsoft.alm.auth.oauth
 
-import com.microsoft.alm.secret.TokenPair
-import com.microsoft.alm.secret.TokenType
+import com.microsoft.alm.common.secret.TokenPair
+import com.microsoft.alm.common.secret.TokenType
 import groovy.transform.CompileStatic
 import org.junit.Ignore
 import org.junit.Test

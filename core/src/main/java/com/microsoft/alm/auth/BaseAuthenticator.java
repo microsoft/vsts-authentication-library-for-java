@@ -3,13 +3,13 @@
 
 package com.microsoft.alm.auth;
 
-import com.microsoft.alm.secret.Credential;
-import com.microsoft.alm.secret.Secret;
-import com.microsoft.alm.secret.Token;
-import com.microsoft.alm.secret.TokenPair;
-import com.microsoft.alm.secret.VsoTokenScope;
-import com.microsoft.alm.helpers.Debug;
-import com.microsoft.alm.storage.SecretStore;
+import com.microsoft.alm.common.secret.Credential;
+import com.microsoft.alm.common.secret.Secret;
+import com.microsoft.alm.common.secret.Token;
+import com.microsoft.alm.common.secret.TokenPair;
+import com.microsoft.alm.common.secret.VsoTokenScope;
+import com.microsoft.alm.common.helpers.Debug;
+import com.microsoft.alm.common.storage.SecretStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

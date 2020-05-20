@@ -3,7 +3,8 @@
 
 package com.microsoft.alm.storage;
 
-import com.microsoft.alm.secret.Token;
+import com.microsoft.alm.common.secret.Token;
+import com.microsoft.alm.common.storage.SecretStore;
 import com.microsoft.alm.storage.StorageProvider.NonPersistentStoreGenerator;
 import org.junit.Test;
 

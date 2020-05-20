@@ -3,10 +3,10 @@
 
 package com.microsoft.alm.storage.posix;
 
-import com.microsoft.alm.helpers.Debug;
-import com.microsoft.alm.helpers.StringHelper;
-import com.microsoft.alm.helpers.XmlHelper;
-import com.microsoft.alm.secret.Credential;
+import com.microsoft.alm.common.helpers.Debug;
+import com.microsoft.alm.common.helpers.StringHelper;
+import com.microsoft.alm.common.helpers.XmlHelper;
+import com.microsoft.alm.common.secret.Credential;
 import com.microsoft.alm.storage.posix.internal.GnomeKeyringBackedSecureStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import static com.microsoft.alm.helpers.LoggingHelper.logError;
+import static com.microsoft.alm.common.helpers.LoggingHelper.logError;
 
 public class GnomeKeyringBackedCredentialStore extends GnomeKeyringBackedSecureStore<Credential> {
 

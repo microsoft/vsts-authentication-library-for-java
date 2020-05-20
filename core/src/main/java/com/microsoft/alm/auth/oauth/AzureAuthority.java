@@ -4,14 +4,14 @@
 package com.microsoft.alm.auth.oauth;
 
 import com.microsoft.alm.auth.PromptBehavior;
-import com.microsoft.alm.helpers.*;
+import com.microsoft.alm.common.helpers.*;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
 import com.microsoft.alm.oauth2.useragent.AuthorizationResponse;
 import com.microsoft.alm.oauth2.useragent.UserAgent;
 import com.microsoft.alm.oauth2.useragent.UserAgentImpl;
-import com.microsoft.alm.secret.Token;
-import com.microsoft.alm.secret.TokenPair;
-import com.microsoft.alm.secret.TokenType;
+import com.microsoft.alm.common.secret.Token;
+import com.microsoft.alm.common.secret.TokenPair;
+import com.microsoft.alm.common.secret.TokenType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

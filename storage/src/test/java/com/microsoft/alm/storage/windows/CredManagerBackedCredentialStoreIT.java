@@ -3,8 +3,8 @@
 
 package com.microsoft.alm.storage.windows;
 
-import com.microsoft.alm.helpers.SystemHelper;
-import com.microsoft.alm.secret.Credential;
+import com.microsoft.alm.common.helpers.SystemHelper;
+import com.microsoft.alm.common.secret.Credential;
 import org.junit.Before;
 import org.junit.Test;
 

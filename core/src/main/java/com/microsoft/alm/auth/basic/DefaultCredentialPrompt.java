@@ -3,7 +3,7 @@
 
 package com.microsoft.alm.auth.basic;
 
-import com.microsoft.alm.secret.Credential;
+import com.microsoft.alm.common.secret.Credential;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;

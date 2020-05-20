@@ -3,7 +3,7 @@
 
 package com.microsoft.alm.storage.windows.internal;
 
-import com.microsoft.alm.helpers.SystemHelper;
+import com.microsoft.alm.common.helpers.SystemHelper;
 import com.sun.jna.LastErrorException;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;

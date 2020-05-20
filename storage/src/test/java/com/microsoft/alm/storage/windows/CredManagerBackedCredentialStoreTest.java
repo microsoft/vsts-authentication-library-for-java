@@ -3,14 +3,11 @@
 
 package com.microsoft.alm.storage.windows;
 
-import com.microsoft.alm.secret.Credential;
+import com.microsoft.alm.common.secret.Credential;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 public class CredManagerBackedCredentialStoreTest {
 

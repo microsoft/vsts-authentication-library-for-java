@@ -4,10 +4,10 @@
 package com.microsoft.alm.auth.oauth;
 
 import com.microsoft.alm.auth.PromptBehavior;
-import com.microsoft.alm.helpers.Action;
-import com.microsoft.alm.helpers.StringContent;
+import com.microsoft.alm.common.helpers.Action;
+import com.microsoft.alm.common.helpers.StringContent;
 import com.microsoft.alm.oauth2.useragent.AuthorizationException;
-import com.microsoft.alm.secret.TokenPair;
+import com.microsoft.alm.common.secret.TokenPair;
 import org.junit.Assert;
 import org.junit.Test;
 

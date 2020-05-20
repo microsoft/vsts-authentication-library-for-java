@@ -3,7 +3,7 @@
 
 package com.microsoft.alm.auth.oauth;
 
-import com.microsoft.alm.helpers.StringHelper;
+import com.microsoft.alm.common.helpers.StringHelper;
 
 /**
  * Contains identifier for a user.
