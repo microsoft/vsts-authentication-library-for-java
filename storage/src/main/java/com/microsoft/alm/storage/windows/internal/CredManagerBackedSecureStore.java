@@ -87,7 +87,7 @@ public abstract class CredManagerBackedSecureStore<E extends Secret> implements 
                 final CredAdvapi32.CREDENTIAL credential = new CredAdvapi32.CREDENTIAL(pcredential.credential);
 
                 byte[] secretBytes = credential.CredentialBlob.getByteArray(0, credential.CredentialBlobSize);
-                final String secret = StringHelper.UTF8GetString(secretBytes);
+                final String secret = StringHelper.UTF16LEGetString(secretBytes);
                 final String username = credential.UserName;
 
                 cred = create(username, secret);
@@ -159,7 +159,7 @@ public abstract class CredManagerBackedSecureStore<E extends Secret> implements 
 
         final String username = getUsername(secret);
         final String credentialBlob = getCredentialBlob(secret);
-        byte[] credBlob = StringHelper.UTF8GetBytes(credentialBlob);
+        byte[] credBlob = StringHelper.UTF16LEGetBytes(credentialBlob);
 
         final CredAdvapi32.CREDENTIAL cred = buildCred(key, username, credBlob);
 
